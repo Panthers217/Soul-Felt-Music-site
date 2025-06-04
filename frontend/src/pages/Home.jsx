@@ -9,14 +9,52 @@ import Footer from '../components/Footer';
 
 const Home = () => {
   return (
-    <section>
-      <h2>Home Page</h2>
-        <p>Welcome to Soul Felt Music!</p>
-      <NewArrivals />
-      <Feature />
-      <Artist />
-      <Videos />
-      <Community />
+    <section className="bg-gray-100 text-gray-800">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white py-16 px-6 text-center">
+        <h2 className="text-4xl font-bold mb-4">Home Page</h2>
+        <p className="text-lg">Welcome to Soul Felt Music!</p>
+      </div>
+
+      {/* New Arrivals Section */}
+      <div className="container mx-auto px-4 py-8">
+        <h3 className="text-2xl font-semibold mb-6 text-center">New Arrivals</h3>
+        <NewArrivals />
+      </div>
+
+      {/* Feature Section */}
+      <div className="bg-white py-8">
+        <div className="container mx-auto px-4">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Features</h3>
+          <Feature />
+        </div>
+      </div>
+
+      {/* Artist Section */}
+      <div className="bg-gray-200 py-8">
+        <div className="container mx-auto px-4">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Artists</h3>
+          <Artist />
+        </div>
+      </div>
+
+      {/* Videos Section */}
+      <div className="bg-white py-8">
+        <div className="container mx-auto px-4">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Videos</h3>
+          <Videos />
+        </div>
+      </div>
+
+      {/* Community Section */}
+      <div className="bg-gray-200 py-8">
+        <div className="container mx-auto px-4">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Community</h3>
+          <Community />
+        </div>
+      </div>
+
+      {/* Footer Section */}
       <Footer />
     </section>
   );

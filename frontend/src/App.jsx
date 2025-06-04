@@ -13,12 +13,13 @@ import Store from './components/Store';
 import About from './components/About';
 import News from './components/News';
 import Home from './pages/Home';
+import ArtistPage from './pages/ArtistPage';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        <NavBar />
+        {/* <NavBar /> */}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home/>} />
@@ -30,6 +31,8 @@ function App() {
             <Route path="/contact" element={<Contact/>} />
             <Route path="/about" element={<About/>} />
             <Route path="/community" element={<Community/>} />
+            <Route path="/artist/:id" element={<ArtistPage />} />
+            {/* Add more routes as needed */}
             
           </Routes>
         </main>
