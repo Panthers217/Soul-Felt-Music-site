@@ -14,12 +14,13 @@ import About from './components/About';
 import News from './components/News';
 import Home from './pages/Home';
 import ArtistPage from './pages/ArtistPage';
+import ArtistPage2 from './pages/ArtistPage2'; // Assuming you have this page
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        {/* <NavBar /> */}
+        <NavBar />
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home/>} />
@@ -31,7 +32,7 @@ function App() {
             <Route path="/contact" element={<Contact/>} />
             <Route path="/about" element={<About/>} />
             <Route path="/community" element={<Community/>} />
-            <Route path="/artist/:id" element={<ArtistPage />} />
+            <Route path="/artist/:id" element={<ArtistPage2 />} />
             {/* Add more routes as needed */}
             
           </Routes>

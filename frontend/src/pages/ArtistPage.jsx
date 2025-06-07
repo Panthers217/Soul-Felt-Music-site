@@ -165,7 +165,7 @@ function TopTracks({ tracks, textColor = "text-white", bgColor = "bg-zinc-900" }
 // Banner Component
 // This component displays a banner with an image and title
 const Banner = ({ image, title = "Artists" }) => (
-  <div className="abolute w-full h- sm:h-64 md:h-72 lg:h-80 flex items-center justify-center mb-8 overflow-hidden rounded-b-lg">
+  <div className="abolute w-full h-full sm:h-64 md:h-72 lg:h-80 flex items-center justify-center mb-8 overflow-hidden rounded-b-lg">
     <img
       src={image}
       alt={title}
@@ -193,7 +193,7 @@ const ArtistPage = () => {
         </div>
       </div>*}
       {/* Main Content */}
-      <div className="absolute w-full max-w-7xl px-4 mb-8">
+      <div className="absolute object-cover w-full h-full sm:h-80 md:h-96 lg:h-112 xl:h-128">
         <Banner image={bannerImage} title="Artists" />
 </div>
       <div className="w-full max-w-7xl px-4 flex flex-col lg:flex-row gap-8">
