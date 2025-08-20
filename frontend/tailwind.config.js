@@ -14,6 +14,17 @@ export default {
       backgroundImage: {
         // You can keep or add gradients here if needed
       },
+      screens: {
+
+      
+      // Custom breakpoints
+      'minMobile': { 'max': '320px', 'min': '0px' },
+      'sm': { 'max': '425px', 'min': '0px' },
+      'md': { 'max': '1023px', 'min': '426px' },
+      'lg': { 'max': '1439px', 'min': '1024px' },
+      'xl': { 'min': '1440px' },
+      
+    },
     },
   },
   plugins: [],

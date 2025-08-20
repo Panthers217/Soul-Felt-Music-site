@@ -34,7 +34,7 @@ const ImageCarousel = ({ visibleImages = 1 }) => {
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="max-w-xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       {/* Image Section */}
       <div className="relative flex space-x-4">
         {displayedImages.map((image) => (
