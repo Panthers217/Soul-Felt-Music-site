@@ -17,7 +17,8 @@ import ArtistPage from "./pages/ArtistPage"; // Assuming you have this page
 import ResponsiveNavbar from "./components/ResponsiveNavbar";
 import ArtistOverview from "./components/ArtistOverview";
 import ArtistStore from "./components/ArtistStore";
-
+import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
+import Login from "./components/Login"; // Assuming you have a Login component
 function App() {
   return (
     <Router>
@@ -37,6 +38,8 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
             <Route path="/artist/:id" element={<ArtistOverview />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
             {/* Add more routes as needed */}
           </Routes>
         </main>

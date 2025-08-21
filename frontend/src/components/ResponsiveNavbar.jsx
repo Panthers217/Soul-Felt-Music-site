@@ -36,9 +36,9 @@ export default function ResponsiveNavbar() {
               <Link to="/store">Store</Link>
               <Link to="/music">Music</Link>
               <Link to="/artists">Artists</Link>
-              <Link to="/news">News</Link>
+              {/* <Link to="/news">News</Link> */}
               <Link to="/videos">Videos</Link>
-              <Link to="/community">Community</Link>
+              <Link to="/community">Community/News</Link>
               <Link to="/contact">Contact</Link>
             </ul>
             <div className="px-4 pb-4">
@@ -84,15 +84,15 @@ export default function ResponsiveNavbar() {
           <Link to="/store">Store</Link>
           <Link to="/music">Music</Link>
           <Link to="/artists">Artists</Link>
-          <Link to="/news">News</Link>
+          {/* <Link to="/news">News</Link> */}
           <Link to="/videos">Videos</Link>
-          <Link to="/community">Community</Link>
+          <Link to="/community">Community/News</Link>
           <Link to="/contact">Contact</Link>
         </ul>
         {/* Auth/Search Section */}
         <div className="flex items-center gap-6 px-6 py-2 bg-[#1a0b0d]" style={{ minWidth: 220 }}>
-          <a href="#" className="text-[#1976d2] text-lg font-medium">Sign Up</a>
-          <a href="#" className="text-[#1976d2] text-lg font-medium">Login</a>
+          <Link to="/sign-up" className="text-[#1976d2] text-lg font-medium">Sign Up</Link>
+          <Link to="/login" className="text-[#1976d2] text-lg font-medium">Login</Link>
           <div className="relative">
             <input
               type="text"

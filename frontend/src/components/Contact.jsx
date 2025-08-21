@@ -406,18 +406,18 @@ function ContactTablet() {
 
 function ContactDesktop() {
     return (
-        <div className="w-full min-h-screen bg-white flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full min-h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
             <div className="w-full bg-white flex flex-col items-center justify-center gap-6 overflow-hidden">
-                <div className="w-full py-[12vw] bg-[#1a1b22] flex flex-col items-center justify-start gap-2.5">
+                <div className="w-full  bg-[#1a1b22] flex flex-col items-center justify-start gap-2.5">
                     <div className="w-[80vw] max-w-[1440px] px-[7vw] py-[3.5vw] bg-[#21212b] flex flex-col items-start justify-start gap-2.5">
                         <div className="relative w-full min-h-[80vh]">
                             {/* Header Section */}
-                            <div className="absolute left-0 top-0 w-[85vw] max-w-[1232px] h-[13vw] max-h-[192px] flex flex-col justify-center items-start gap-6 pl-1 pr-[40vw] pb-1">
+                            <div className="relative left-0 top-0 w-[85vw] max-w-[1232px] h-[13vw] max-h-[192px] flex flex-col justify-center items-start gap-6 pl-1 pr-[40vw] pb-1">
                                 <h1 className="text-white font-bold text-[5.5vw] text-nowrap leading-[6vw] font-['Roboto']">Contact Us</h1>
                                 <p className="w-[44vw] max-w-[633px] text-white/80 text-xl font-normal font-['Roboto'] leading-loose">Get in touch with the Soul Felt Music team. We're here to help with any questions about our artists, music, or community.</p>
                             </div>
                             {/* Main Content Section */}
-                            <div className="absolute left-0 top-[18vw] flex flex-row justify-end items-start gap-[5vw] w-full">
+                            <div className="relative left-0 top-[3vw] flex flex-row justify-end items-start gap-[5vw] w-full">
                                 {/* Contact Form */}
                                 <div className="bg-[#1d1e26] rounded-lg shadow-lg p-[2.5vw] flex flex-col gap-8 min-w-[32vw] max-w-[40vw]">
                                     {/* Tabs */}
