@@ -1,16 +1,10 @@
 import React, { useState, useRef } from 'react';
 
-const menuTabs = [
-  { key: 'all', label: 'All' },
-  { key: 'featured', label: 'Featured' },
+const sections = [
+  { key: 'featured', label: 'Featured Tracks' },
   { key: 'new', label: 'New Releases' },
   { key: 'popular', label: 'Popular' },
-  { key: 'recommended', label: 'Recommended' },
-  { key: 'pop', label: 'Pop' },
-  { key: 'jazz', label: 'Jazz' },
-  { key: 'soul', label: 'Soul' },
-  { key: 'rnb', label: 'RnB' },
-  { key: 'easylistening', label: 'Easy Listening' },
+  { key: 'recommended', label: 'Recommended For You' },
 ];
 
 const tracks = [
@@ -144,79 +138,22 @@ function TrackCard({ track }) {
   );
 }
 
-const Music = () => {
-  const [activeTabs, setActiveTabs] = useState(['all']);
-
-  // Toggle tab selection
-  const handleTabClick = (key) => {
-    if (key === 'all') {
-      setActiveTabs(['all']);
-    } else {
-      setActiveTabs((prev) => {
-        const isActive = prev.includes(key);
-        let next;
-        if (isActive) {
-          next = prev.filter(tab => tab !== key);
-        } else {
-          next = prev.filter(tab => tab !== 'all').concat(key);
-        }
-        return next.length === 0 ? ['all'] : next;
-      });
-    }
-  };
-
-  // Section definitions
-  const allSections = [
-    { key: 'featured', label: 'Featured Tracks' },
-    { key: 'new', label: 'New Releases' },
-    { key: 'popular', label: 'Popular' },
-    { key: 'recommended', label: 'Recommended For You' },
-    { key: 'pop', label: 'Pop' },
-    { key: 'jazz', label: 'Jazz' },
-    { key: 'soul', label: 'Soul' },
-    { key: 'rnb', label: 'RnB' },
-    { key: 'easylistening', label: 'Easy Listening' },
-  ];
-
-  // Get sections to display
-  const sectionsToShow = activeTabs.includes('all') ? allSections.map(s => s.key) : activeTabs;
-
+const MusicLanding = () => {
   return (
     <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
       <div className="w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
         <h1 className="text-[#fffced] text-5xl md:text-6xl font-extrabold font-['Roboto'] mb-4 text-center drop-shadow-lg">Stream & Discover Soul Felt Music</h1>
         <p className="text-[#fffced] text-lg md:text-xl font-semibold text-center mb-8">Play samples, discover new artists, and purchase your favorite tracks and albums.</p>
-        {/* Menu Tabs */}
-        <div className="flex flex-wrap gap-4 mb-8 justify-center">
-          {menuTabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => handleTabClick(tab.key)}
-              className={`px-5 py-2 rounded-full font-bold text-lg transition-colors border-2 border-[#aa2a46] focus:outline-none ${activeTabs.includes(tab.key) ? 'bg-[#aa2a46] text-[#fffced]' : 'bg-[#1d1e26] text-[#aa2a46] hover:bg-[#aa2a46] hover:text-[#fffced]'}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        {/* Display selected sections */}
-        {allSections.filter(section => sectionsToShow.includes(section.key)).map(section => {
-          let sectionTracks;
-          if (["featured", "new", "popular", "recommended"].includes(section.key)) {
-            sectionTracks = tracks.filter(track => track[section.key] || track.section === section.key);
-          } else {
-            sectionTracks = tracks.filter(track => track.artist.toLowerCase().includes(section.key) || track.section === section.key || track.album.toLowerCase().includes(section.key));
-          }
-          return sectionTracks.length > 0 ? (
-            <div key={section.key} className="mb-8">
-              <h2 className="text-[#aa2a46] text-3xl font-bold mb-6 font-['Public_Sans'] text-center">{section.label}</h2>
-              <div className="flex flex-wrap gap-8 justify-center">
-                {sectionTracks.map(track => (
-                  <TrackCard key={track.id} track={track} />
-                ))}
-              </div>
+        {sections.map(section => (
+          <div key={section.key} className="mb-8">
+            <h2 className="text-[#aa2a46] text-3xl font-bold mb-6 font-['Public_Sans'] text-center">{section.label}</h2>
+            <div className="flex flex-wrap gap-8 justify-center">
+              {tracks.filter(track => track[section.key] || track.section === section.key).map(track => (
+                <TrackCard key={track.id} track={track} />
+              ))}
             </div>
-          ) : null;
-        })}
+          </div>
+        ))}
         <div className="w-full flex flex-col items-center mt-8">
           <h2 className="text-[#aa2a46] text-2xl font-bold mb-2 font-['Public_Sans'] text-center">Why Buy Soul Felt Music?</h2>
           <ul className="text-[#fffced] text-base md:text-lg font-medium text-center list-disc list-inside">
@@ -229,7 +166,6 @@ const Music = () => {
       </div>
     </section>
   );
+};
 
-
-}
-export default Music;
+export default MusicLanding;

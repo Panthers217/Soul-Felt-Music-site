@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import heroPic1 from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroPic1.png";
 import heroWelcomePic from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroWelcomePic.svg";
+import FadeCarousel, { FadeCarouselImages } from "./FadeCarousel";
 
 
 
@@ -9,12 +10,20 @@ import heroWelcomePic from "/workspaces/Soul-Felt-Music-site/frontend/src/assets
 const DemoBannerMobile = () => {
   return (
     <div data-layer="Frame 32" className="Frame32  w-[425px] h-auto aspect-[425/630] minMobile:aspect-[320/475]  relative bg-[#101516]">
+       {/* welcome logo */}
+
       <div data-layer="WelcomeSvg" className="Welcomesvg z-10 w-full h-48 left-0 top-[0%] minMobile:ml-[11%]  absolute">
           <img data-layer="envato-labs-image-edit 4" className="EnvatoLabsImageEdit4 w-full  pl-[15%] left-0 top-0 minMobile:pt-[10%]  minMobile:pl-[0%] absolute" src={heroWelcomePic} />
+      
       </div>
-    <div data-layer="Frame 30" className="Frame30 w-full aspect-{423.68/423.68} left-0 top-[166.82px] absolute">
-        <img data-layer="envato-labs-ai-3b01044f-1de4-4452-9c34-535e87650b3f 2" className="EnvatoLabsAi3b01044f1de444529c34535e87650b3f2  left-0 top-0 absolute" src={heroPic1} />
-        <div data-layer="ButtonGroup" className="Buttongroup w-full left-0 top-0 absolute flex flex-col items-center pt-[11%]">
+
+      {/* Image carousel */}
+      <div data-layer="Frame 30" className="Frame30 w-full aspect-{423.68/423.68} left-0 top-[166.82px] absolute">
+        {/* <img data-layer="envato-labs-ai-3b01044f-1de4-4452-9c34-535e87650b3f 2" className="EnvatoLabsAi3b01044f1de444529c34535e87650b3f2  left-0 top-0 absolute" src={heroPic1} /> */}
+       <div className="flex z-0 w-full h-full left-0 top-0 absolute">
+        <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`}  />
+        </div>
+        <div data-layer="ButtonGroup" className="Buttongroup w-full left-0 top-0 absolute flex flex-col items-center pt-[11%] z-10">
           <div data-layer="Title" className="Title mt-8 mb-6 text-center text-[#fffced] text-[6vw] sm:text-[5vw] font-bold font-['Roboto'] leading-tight">Experience the Soul of Music</div>
           <div data-layer="ButtonFrames" className="Buttonframes w-full flex justify-center items-center gap-4 mt-4">
             <div data-layer="Frame 29" className="Frame29 w-full flex justify-center items-center gap-4 pt-[15%] text-nowrap">
@@ -28,7 +37,7 @@ const DemoBannerMobile = () => {
           </div>
         </div>
     </div>
-
+    {/* Page Indicator */}
     <div className="MainPageIndicatorContainer flex absolute w-full bottom-[10%] minMobile:bottom-[6%] justify-center">
     <div data-layer="pageIndicator" className=" flex absolute w-[80.10px] h-[15.89px]   ">
           <div data-layer="Rectangle" className="Rectangle size-[15.89px] left-[0.66px] top-0 absolute bg-[#fffced]/30 rounded-full" />
@@ -49,7 +58,8 @@ const DemoBannerTablet = () => {
       <div className="absolute inset-0 w-full h-full bg-white rounded-[2vw] z-0" />
       {/* Inner dark frame */}
       <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[2vw] z-0" />
-      {/* Welcome SVG */}
+     
+      {/* Welcome logo */}
       <div className="absolute  left-[5%] top-0 w-[40vw] max-w-[443px] h-[60%] z-10 pointer-events-none">
         <img
           className="w-full h-full object-contain"
@@ -57,6 +67,8 @@ const DemoBannerTablet = () => {
           alt="Welcome"
         />
       </div>
+
+
       {/* Hero Image */}
       <div className="absolute left-none top-[22%] w-[59%] max-w-[530px] h-[63%] max-h-[442px] z-0">
         <img
