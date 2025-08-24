@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 
 
 // FadeCarouselImages: handles fade animation and image rendering
-export const FadeCarouselImages = ({ images, current, ImageDivName }) => {
-   console.log("fade images"+ images);
-  const fadeBase = `transition-opacity duration-700 ease-in-out ${ImageDivName}`;
+export const FadeCarouselImages = ({ images, current, ImageDivName, isVisible=true }) => {
+
+  const fadeBase = `${isVisible ? "block" : "hidden"} transition-opacity duration-700 ease-in-out ${ImageDivName}`;
   return (
     <>
       {images.map((img, idx) => (
@@ -26,8 +26,8 @@ export const FadeCarouselImages = ({ images, current, ImageDivName }) => {
 };
 
 // FadeCarouselIndicator: handles page indicator and click
-export const FadeCarouselIndicator = ({ images, current, goTo }) => (
-  <div className="flex absolute w-[80.10px] h-[15.89px] bottom-[10%] minMobile:bottom-[6%] left-1/2 -translate-x-1/2 justify-center gap-[16px] z-20">
+export const FadeCarouselIndicator = ({ images, current, goTo, isVisible=true, indicatorDivName }) => (
+  <div className={`${isVisible ? "block" : "hidden"} flex absolute w-[80.10px] h-[15.89px] bottom-[10%] minMobile:bottom-[6%] left-1/2 -translate-x-1/2 justify-center gap-[16px] z-20`}>
     {images.map((_, idx) => (
       <div
         key={idx}
@@ -45,8 +45,9 @@ export const FadeCarouselIndicator = ({ images, current, goTo }) => (
 );
 
 // Main FadeCarousel: manages state and composes the above
-const FadeCarousel = ({ images, interval = 3500, ImageDivName }) => {
-  const ImageDivClass =ImageDivName
+const FadeCarousel = ({ images, interval = 3500, ImageDivName, indicatorDivName, imageVisibility, indicatorVisibility }) => {
+  const ImageDivClass = ImageDivName;
+  const indicatorDivClass = indicatorDivName;
   const [current, setCurrent] = useState(0);
   const timeoutRef = useRef(null);
 
@@ -64,8 +65,8 @@ const FadeCarousel = ({ images, interval = 3500, ImageDivName }) => {
 
   return (
     <div className="relative w-full h-full">
-      <FadeCarouselImages images={images} current={current} ImageDivName={ImageDivClass} />
-      {/* <FadeCarouselIndicator images={images} current={current} goTo={goTo} /> */}
+      <FadeCarouselImages images={images} current={current} ImageDivName={ImageDivClass} isVisible={imageVisibility}  />
+      <FadeCarouselIndicator images={images} current={current} goTo={goTo} isVisible={indicatorVisibility} indicatorDivName={indicatorDivClass} />
     </div>
   );
 };
