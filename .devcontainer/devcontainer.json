@@ -1,12 +1,11 @@
 {
   "name": "MySQL + MCP",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
   "forwardPorts": [3306],
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "workspace",
+  "dockerComposeFile": ["docker-compose.yml"],
+  
   "containerEnv": {
     "MYSQLHOST": "mysql",
     "MYSQLPORT": "3306",
