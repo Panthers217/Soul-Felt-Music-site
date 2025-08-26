@@ -1,0 +1,42 @@
+{
+  "name": "MySQL + MCP",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "forwardPorts": [3306],
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "containerEnv": {
+    "MYSQLHOST": "mysql",
+    "MYSQLPORT": "3306",
+    "MYSQLDB": "app",
+    "MYSQLUSER": "app",
+    "MYSQLPASSWORD": "dev"
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y mysql-client && npm i -g @executeautomation/database-server",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "chat.mcp.enabled": true
+      },
+      "mcp": {
+        "servers": {
+          "mysql-mcp": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@executeautomation/database-server",
+              "--mysql",
+              "--host", "${containerEnv:MYSQLHOST}",
+              "--port", "${containerEnv:MYSQLPORT}",
+              "--database", "${containerEnv:MYSQLDB}",
+              "--user", "${containerEnv:MYSQLUSER}",
+              "--password", "${containerEnv:MYSQLPASSWORD}"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
