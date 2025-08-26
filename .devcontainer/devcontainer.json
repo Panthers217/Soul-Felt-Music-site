@@ -1,11 +1,14 @@
 {
   "name": "MySQL + MCP",
+  // Add your main service name here, e.g., "app"
+  "workspaceFolder": "/workspaces/Soul-Felt-Music-site", // Set to your workspace folder path
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
   "forwardPorts": [3306],
   "dockerComposeFile": ["docker-compose.yml"],
-  
+  "service": "workspace",
+
   "containerEnv": {
     "MYSQLHOST": "mysql",
     "MYSQLPORT": "3306",
