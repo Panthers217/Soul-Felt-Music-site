@@ -4,7 +4,13 @@ async function getAllArtists() {
   try {
     const [rows] = await connection.query("SELECT * FROM artists");
     console.log('Artists table data:');
-    console.log(rows);
+    rows.forEach((artist, idx) => {
+      console.log(`Artist #${idx + 1}:`);
+      Object.entries(artist).forEach(([key, value]) => {
+        console.log(`  ${key}: ${value}`);
+      });
+      console.log('---');
+    });
   } catch (err) {
     console.error('Error retrieving artists:', err.message);
   }
@@ -47,8 +53,8 @@ async function importArtists() {
   const data = JSON.parse(fs.readFileSync('./artistSqldemo.json', 'utf8'));
   const connection = await mysql.createConnection(dbConfig);
   for (const artist of data) {
-    const query = `INSERT INTO artist (name, artist_country, image_url, track, demo) VALUES (?, ?, ?, ?, ?)`;
-    const values = [artist.name, artist.artist_country, artist.img, artist.track, artist.demo];
+    const query = `INSERT INTO artists (name, artist_country, image_url, demos, bio, career_highlights, influences, featured_tracks) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [artist.name, artist.artist_country, artist.img, artist.demo, "Artist biography placeholder", "artist.career_highlights", "artist.influences", "artist.featured_tracks"];
     try {
       await connection.execute(query, values);
       console.log(`Inserted: ${artist.name}`);
