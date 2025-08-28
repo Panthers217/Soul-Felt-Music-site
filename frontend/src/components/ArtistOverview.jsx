@@ -1,4 +1,16 @@
 // Dynamic GetMusic component
+
+import React,{useState} from "react";
+import { useParams, useLocation} from "react-router-dom";
+
+/**
+ * ArtistOverview.jsx
+ *
+ * Responsive breakpoints
+ * - Mobile: default styles (320px–767px)
+ * - Tablet: md: (768px–1023px)
+ * - Desktop: lg: (1024px+)
+ */
 function GetMusic({ artistName, musicText, buttonText, supportText }) {
   return (
     <section className="mx-auto mt-6 md:mt-10 lg:mt-12 mb-16 w-[92%] md:w-[90%] lg:w-[86%]">
@@ -98,17 +110,6 @@ function CareerHighlights({ highlights }) {
     </ul>
   );
 }
-import React,{useState} from "react";
-import { useParams, useLocation} from "react-router-dom";
-
-/**
- * ArtistOverview.jsx
- *
- * Responsive breakpoints
- * - Mobile: default styles (320px–767px)
- * - Tablet: md: (768px–1023px)
- * - Desktop: lg: (1024px+)
- */
 
 const Pill = ({ children }) => (
   <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-3 py-1 text-xs md:text-[13px] font-medium text-white/80">
@@ -116,12 +117,12 @@ const Pill = ({ children }) => (
   </span>
 );
 
-const Stat = ({ icon, children }) => (
-  <div className="flex items-center gap-2 text-white/80 text-sm md:text-[15px]">
-    <span className="i-lucide-star text-white/70" aria-hidden />
-    {children}
-  </div>
-);
+// const Stat = ({ icon, children }) => (
+//   <div className="flex items-center gap-2 text-white/80 text-sm md:text-[15px]">
+//     <span className="i-lucide-star text-white/70" aria-hidden />
+//     {children}
+//   </div>
+// );
 
 function ArtistOverview() {
   const { id } = useParams();
@@ -129,7 +130,7 @@ function ArtistOverview() {
   const album = state?.art ?? JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //This keeps the page working on reloads (until the session ends).
   const artistPics = state?.albumImage ?? JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //This keeps the page working on reloads (until the session ends).
 
-  const [artistPICS,setArtistPICS] = useState(artistPics.cover_photo.urls.regular);
+  const [artistPICS] = useState(artistPics.cover_photo.urls.regular);
   
   // If user refreshed, state is gone. Fallback: fetch by ID / read from store.
   // const album = state?.album ?? albumsStore.get(id);
@@ -137,7 +138,10 @@ function ArtistOverview() {
 
   // TODO: Replace with real artist data lookup
   const artistName = album.name ?? "Unknown Artist";
-  const artistImage = album.img ?? "default_artist_image.jpg";
+
+
+
+  
   return (
     <div className="flex flex-col min-h-screen w-full bg-[#0f1116] text-white">
      
