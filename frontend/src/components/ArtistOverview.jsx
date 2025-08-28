@@ -1,3 +1,103 @@
+// Dynamic GetMusic component
+function GetMusic({ artistName, musicText, buttonText, supportText }) {
+  return (
+    <section className="mx-auto mt-6 md:mt-10 lg:mt-12 mb-16 w-[92%] md:w-[90%] lg:w-[86%]">
+      <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
+        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Get {artistName}&apos;s Music</h2>
+        <p className="mt-3 text-sm md:text-[15px] text-white/80 xl:text-lg">
+          {musicText || `Stream or purchase ${artistName}'s music on your favorite platform`}
+        </p>
+
+        <div className="mt-5 md:mt-6">
+          <button className="w-full md:w-[320px] rounded-md border border-white/10 bg-white/[0.03] px-4 py-4 text-sm md:text-[15px] font-medium text-white/90 hover:bg-white/[0.06]">
+            {buttonText || 'Stream & Purchase'}
+          </button>
+        </div>
+
+        <div className="mt-6 rounded-md border border-white/10 bg-white/[0.02] p-4 md:p-5 flex items-start gap-3">
+          <span className="i-lucide-flame mt-0.5" aria-hidden />
+          <div>
+            <p className="text-sm md:text-[15px] font-semibold text-white">Support Independent Music</p>
+            <p className="mt-1 text-xs md:text-sm text-white/70 xl:text-lg">
+              {supportText || 'When you purchase directly from artists, more of your money goes to supporting their creative work and future projects.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+// Dynamic FeaturedTracks component
+function FeaturedTracks({ tracks }) {
+  return (
+    <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%]">
+      <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Featured Tracks</h2>
+          <span className="text-xs md:text-sm text-white/60">Click any track to preview</span>
+        </div>
+        <div className="mt-4 md:mt-6 rounded-lg bg-[#11131a] ring-1 ring-white/10 p-4 md:p-5">
+          {(tracks && tracks.length > 0 ? tracks : [
+            { title: "Track 1", artist: "Artist 1" },
+            { title: "Track 2", artist: "Artist 2" }
+          ]).map((track, idx) => (
+            <div key={idx} className="relative h-20 md:h-24 w-full rounded-md bg-white/[0.03] ring-1 ring-white/10 mb-2 flex items-center justify-between px-4">
+              <div>
+                <div className="font-semibold text-white text-base md:text-lg">{track.title}</div>
+                <div className="text-white/70 text-xs md:text-sm">{track.artist}</div>
+              </div>
+              <div className="absolute right-4 bottom-4 h-6 w-6 md:h-8 md:w-8 rounded-full bg-[#d63c65]" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+// Dynamic Influences component
+function Influences({ influences }) {
+  return (
+    <ul className="mt-3 space-y-2 md:text-[15px] text-white/85 list-disc list-inside marker:text-white/40 text-xl">
+      {(influences && influences.length > 0 ? influences : [
+        "Vangelis",
+        "Jean-Michel Jarre",
+        "Boards of Canada",
+        "Aphex Twin"
+      ]).map((item, idx) => (
+        <li key={idx}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+// Dynamic ArtistBio component
+function ArtistBio({ bio, artistName }) {
+  return (
+    <div className="mt-4 space-y-4 text-[13.5px] leading-6 md:text-lg md:leading-7 text-white/85 xl:text-xl ">
+      {(bio && Array.isArray(bio) ? bio : [
+        `${artistName} is a visionary electronic music producer and composer who has been pushing the boundaries of synthwave and ambient music for over a decade. Born in the neon-lit streets of Tokyo and raised between Los Angeles and Berlin, ${artistName}'s multicultural background deeply influences their ethereal soundscapes.`,
+        `Their music combines nostalgic 80s synthesizers with modern production techniques, creating immersive sonic journeys that transport listeners to otherworldly dimensions. ${artistName}'s breakthrough album "Echoes of Tomorrow" garnered critical acclaim and established them as a leading voice in the neo-synthwave movement.`,
+        `With over 2.3 million monthly listeners across streaming platforms and collaborations with renowned artists like Midnight Collective and Neon Dreams, ${artistName} continues to evolve their sound while staying true to their cosmic aesthetic. Their live performances are legendary, featuring stunning visual displays that complement their atmospheric compositions.`
+      ]).map((paragraph, idx) => (
+        <p key={idx}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+// Dynamic CareerHighlights component
+function CareerHighlights({ highlights }) {
+  return (
+    <ul className="mt-3 space-y-2 text-sm md:text-[15px] text-white/85 list-disc list-inside marker:text-white/40 xl:text-xl">
+      {(highlights && highlights.length > 0 ? highlights : [
+        "Grammy nomination for Best Electronic Album (2023)",
+        "Headlined Synthwave Festival 2022",
+        "Featured in Cyberpunk 2077 soundtrack",
+        "Over 100M streams worldwide"
+      ]).map((item, idx) => (
+        <li key={idx}>{item}</li>
+      ))}
+    </ul>
+  );
+}
 import React,{useState} from "react";
 import { useParams, useLocation} from "react-router-dom";
 
@@ -130,83 +230,25 @@ function ArtistOverview() {
       <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%] ">
         <div className="rounded-xl md:rounded-2xl bg-white/[0.035] p-4 md:p-6 lg:p-8 ring-1 ring-white/10">
           <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">About {artistName}</h2>
-          <div className="mt-4 space-y-4 text-[13.5px] leading-6 md:text-lg md:leading-7 text-white/85 xl:text-xl ">
-            {/* TODO: Replace with dynamic artist bio */}
-            <p>
-              {artistName} is a visionary electronic music producer and composer who has been pushing the boundaries of synthwave and ambient music for over a decade. Born in the neon-lit streets of Tokyo and raised between Los Angeles and Berlin, {artistName}&apos;s multicultural background deeply influences their ethereal soundscapes.
-            </p>
-            <p>
-              Their music combines nostalgic 80s synthesizers with modern production techniques, creating immersive sonic journeys that transport listeners to otherworldly dimensions. {artistName}&apos;s breakthrough album "Echoes of Tomorrow" garnered critical acclaim and established them as a leading voice in the neo-synthwave movement.
-            </p>
-            <p>
-              With over 2.3 million monthly listeners across streaming platforms and collaborations with renowned artists like Midnight Collective and Neon Dreams, {artistName} continues to evolve their sound while staying true to their cosmic aesthetic. Their live performances are legendary, featuring stunning visual displays that complement their atmospheric compositions.
-            </p>
-          </div>
+          <ArtistBio bio={album.bio} artistName={artistName} />
 
           {/* Two info cards (static for now, replace with dynamic if available) */}
           <div className="mt-5 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="rounded-lg bg-white/[0.03] p-4 md:p-5 ring-1 ring-white/10">
               <h3 className="font-semibold text-white">Career Highlights</h3>
-              <ul className="mt-3 space-y-2 text-sm md:text-[15px] text-white/85 list-disc list-inside marker:text-white/40 xl:text-xl">
-                <li>Grammy nomination for Best Electronic Album (2023)</li>
-                <li>Headlined Synthwave Festival 2022</li>
-                <li>Featured in Cyberpunk 2077 soundtrack</li>
-                <li>Over 100M streams worldwide</li>
-              </ul>
+              <CareerHighlights highlights={album.career_highlights} />
             </div>
             <div className="rounded-lg bg-white/[0.03] p-4 md:p-5 ring-1 ring-white/10">
               <h3 className="font-semibold text-white">Influences</h3>
-              <ul className="mt-3 space-y-2 md:text-[15px] text-white/85 list-disc list-inside marker:text-white/40 text-xl">
-                <li>Vangelis</li>
-                <li>Jean-Michel Jarre</li>
-                <li>Boards of Canada</li>
-                <li>Aphex Twin</li>
-              </ul>
+              <Influences influences={album.influences} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Tracks (static for now, replace with dynamic if available) */}
-      <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%]">
-        <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Featured Tracks</h2>
-            <span className="text-xs md:text-sm text-white/60">Click any track to preview</span>
-          </div>
-          <div className="mt-4 md:mt-6 rounded-lg bg-[#11131a] ring-1 ring-white/10 p-4 md:p-5">
-            <div className="relative h-20 md:h-24 w-full rounded-md bg-white/[0.03] ring-1 ring-white/10">
-              <div className="absolute right-4 bottom-4 h-6 w-6 md:h-8 md:w-8 rounded-full bg-[#d63c65]" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <FeaturedTracks tracks={album.featured_tracks} />
 
-      {/* Get Music (static for now, replace with dynamic if available) */}
-      <section className="mx-auto mt-6 md:mt-10 lg:mt-12 mb-16 w-[92%] md:w-[90%] lg:w-[86%]">
-        <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Get {artistName}&apos;s Music</h2>
-          <p className="mt-3 text-sm md:text-[15px] text-white/80 xl:text-lg">
-            Stream or purchase {artistName}&apos;s music on your favorite platform
-          </p>
-
-          <div className="mt-5 md:mt-6">
-            <button className="w-full md:w-[320px] rounded-md border border-white/10 bg-white/[0.03] px-4 py-4 text-sm md:text-[15px] font-medium text-white/90 hover:bg-white/[0.06]">
-              Stream &amp; Purchase
-            </button>
-          </div>
-
-          <div className="mt-6 rounded-md border border-white/10 bg-white/[0.02] p-4 md:p-5 flex items-start gap-3">
-            <span className="i-lucide-flame mt-0.5" aria-hidden />
-            <div>
-              <p className="text-sm md:text-[15px] font-semibold text-white">Support Independent Music</p>
-              <p className="mt-1 text-xs md:text-sm text-white/70 xl:text-lg">
-                When you purchase directly from artists, more of your money goes to supporting their creative work and future projects.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <GetMusic artistName={artistName} musicText={album.music_text} buttonText={album.button_text} supportText={album.support_text} />
     </div>
   );
 }
