@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const ApiDataContext = createContext();
 
@@ -9,17 +10,37 @@ export const ApiDataProvider = ({ children }) => {
   const [albums, setAlbums] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Example fetches
-    fetch('/api/artists').then(res => res.json()).then(setArtists);
-    fetch('/api/albums').then(res => res.json()).then(setAlbums);
-    fetch('/api/tracks').then(res => res.json()).then(setTracks);
-    fetch('/api/users').then(res => res.json()).then(setUsers);
+    axios.get('/api/artists')
+      .then(res => setArtists(res.data))
+      .catch(err => {
+        setError(err);
+        console.error('Error fetching artists:', err);
+      });
+    axios.get('/api/albums')
+      .then(res => setAlbums(res.data))
+      .catch(err => {
+        setError(err);
+        console.error('Error fetching albums:', err);
+      });
+    axios.get('/api/tracks')
+      .then(res => setTracks(res.data))
+      .catch(err => {
+        setError(err);
+        console.error('Error fetching tracks:', err);
+      });
+    axios.get('/api/users')
+      .then(res => setUsers(res.data))
+      .catch(err => {
+        setError(err);
+        console.error('Error fetching users:', err);
+      });
   }, []);
 
   return (
-    <ApiDataContext.Provider value={{ artists, albums, tracks, users }}>
+    <ApiDataContext.Provider value={{ artists, albums, tracks, users, error }}>
       {children}
     </ApiDataContext.Provider>
   );
