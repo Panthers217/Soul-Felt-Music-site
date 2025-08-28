@@ -37,6 +37,16 @@ const topTracks = [
   { title: "In My Mind", artist: "Dynoro & Gigi D’Agostino", img: topTrackcardImage[5] },
 ];
 
+const artistSqldemo = artistNames.map((name, idx) => ({
+  name,
+  artist_country: countries[idx % countries.length],
+  img: trackcardImage[idx],
+  track: topTracks[idx % topTracks.length]?.title || "",
+  demo: true
+}));
+
+console.log(artistSqldemo);
+
 // --- POSITION DATA ---
 const artistTabletPositions = [
   { left: 0, top: 0 }, { left: 188, top: 0 }, { left: 376, top: 0 }, { left: 564, top: 0 },

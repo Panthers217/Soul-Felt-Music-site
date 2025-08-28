@@ -9,10 +9,10 @@
             "server": "mysql-3d3ba41f-soulfeltmusic-a017.j.aivencloud.com",
             "port": 15211,
             "driver": "MySQL",
-            "name": "Aiven Mysql",
             "database": "defaultdb",
             "username": "avnadmin",
-            "password": "AVNS_VlgvIp7f7BYsRHjxRP4"
+            "password": "AVNS_VlgvIp7f7BYsRHjxRP4",
+            "name": "Aiven "
         }
     ]
 }
