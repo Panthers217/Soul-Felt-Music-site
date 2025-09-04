@@ -1,9 +1,12 @@
-CREATE TABLE newsletter (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  is_active BOOLEAN DEFAULT TRUE
-);
+
+SHOW CREATE TABLE artists;
+
+-- CREATE TABLE newsletter (
+--   id SERIAL PRIMARY KEY,
+--   email VARCHAR(100) UNIQUE NOT NULL,
+--   subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   is_active BOOLEAN DEFAULT TRUE
+-- );
 
 
 -- -- Soul Felt Music PostgreSQL Schema

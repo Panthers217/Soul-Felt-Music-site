@@ -1,3 +1,5 @@
+import AdminDashboard from './components/AdminDashboard';
+import AdminLogin from './components/AdminLogin'; // Import AdminLogin component
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
@@ -40,6 +42,8 @@ function App() {
             <Route path="/artist/:id" element={<ArtistOverview />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* Admin dashboard route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>
