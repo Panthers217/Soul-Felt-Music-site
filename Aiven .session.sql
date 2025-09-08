@@ -41,10 +41,12 @@
 
 -- -- Add more tables for news, videos, community, etc. as needed
 
-CREATE TABLE newsletter (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  phone_number VARCHAR(20),
-  subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  is_active BOOLEAN DEFAULT TRUE
-);
+-- CREATE TABLE newsletter (
+--   id SERIAL PRIMARY KEY,
+--   email VARCHAR(100) UNIQUE NOT NULL,
+--   phone_number VARCHAR(20),
+--   subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   is_active BOOLEAN DEFAULT TRUE
+-- );
+
+ALTER TABLE tracks ADD COLUMN promo_track VARCHAR(255);
