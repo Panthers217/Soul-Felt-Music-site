@@ -1,5 +1,6 @@
 import AdminDashboard from './components/AdminDashboard';
 import AdminLogin from './components/AdminLogin'; // Import AdminLogin component
+import AdminSqlViewer from './components/AdminSqlViewer';
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
@@ -44,6 +45,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* Admin dashboard route */}
+            <Route path="/admin/sql-viewer" element={<AdminSqlViewer />} /> {/* Admin SQL Viewer route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>
