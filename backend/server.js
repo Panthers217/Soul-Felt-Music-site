@@ -1,30 +1,33 @@
-const express = require('express');
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import artistRouter from './routes/artist.js';
+// import userRouter from './routes/user.js';
+import albumRouter from './routes/album.js';
+import trackRouter from './routes/track.js';
+import adminRouter from './routes/admin.js';
+import { getTables } from './controllers/admin/adminController.js';
+
 const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const db = require('./models');
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // Routers
-const artistRouter = require('./routes/artist');
-const userRouter = require('./routes/user');
-const albumRouter = require('./routes/album');
-const trackRouter = require('./routes/track');
-
 app.use('/api/artists', artistRouter);
-app.use('/api/users', userRouter);
+// app.use('/api/users', userRouter);
 app.use('/api/albums', albumRouter);
 app.use('/api/tracks', trackRouter);
-
+app.use('/api/admin', adminRouter);
+// app.use('/api/admin', getTables);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });
 
+
+
+
 const PORT = process.env.PORT || 3001;
-db.sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
