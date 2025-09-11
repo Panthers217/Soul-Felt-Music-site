@@ -1,97 +1,5 @@
-
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Disc3, Mic } from "lucide-react";
-
-const tables = {
-  artists: {
-    icon: Mic,
-    fields: [
-      "id",
-      "name",
-      "bio",
-      "image_url",
-      "demos",
-      "artist_country",
-      "Career_Highlights",
-      "Influences",
-      "Featured_Tracks",
-    ],
-    data: [
-      {
-        id: 1,
-        name: "Luna Rivers",
-        bio: "Indie pop sensation with ethereal vocals and dreamy soundscapes",
-        image_url:
-          "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=150",
-        demos: "luna_demo_2024.mp3",
-        artist_country: "USA",
-        Career_Highlights:
-          "Grammy nomination 2023, Coachella headliner",
-        Influences: "Lana Del Rey, Beach House, Mazzy Star",
-        Featured_Tracks:
-          "Midnight Dreams, Ocean Waves, Starlight",
-      },
-      {
-        id: 2,
-        name: "The Neon Collective",
-        bio: "Electronic duo pushing boundaries of synthwave and ambient music",
-        image_url:
-          "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=150",
-        demos: "neon_synth_demo.wav",
-        artist_country: "UK",
-        Career_Highlights:
-          "Glastonbury 2024, Pitchfork 8.5 rating",
-        Influences: "Boards of Canada, Aphex Twin, Burial",
-        Featured_Tracks:
-          "Neon Nights, Digital Rain, Cyber Dreams",
-      },
-      {
-        id: 3,
-        name: "Marcus Stone",
-        bio: "Soulful blues guitarist with roots in Delta traditions",
-        image_url:
-          "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=150",
-        demos: "blues_guitar_sessions.mp3",
-        artist_country: "USA",
-        Career_Highlights:
-          "Blues Music Award 2023, Austin City Limits",
-        Influences: "B.B. King, Muddy Waters, John Lee Hooker",
-        Featured_Tracks:
-          "Mississippi Blues, Crossroads, Midnight Train",
-      },
-    ],
-  },
-  albums: {
-    icon: Disc3,
-    fields: [
-      "id",
-      "artist_id",
-      "title",
-      "release_date",
-      "cover_url",
-    ],
-    data: [
-      {
-        id: 1,
-        artist_id: 1,
-        title: "Ethereal Nights",
-        release_date: "2024-03-15",
-        cover_url:
-          "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300",
-      },
-      {
-        id: 2,
-        artist_id: 1,
-        title: "Dreamscapes",
-        release_date: "2025-01-10",
-        cover_url:
-          "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300",
-      },
-    ],
-  },
-};
 
 const user = {
   name: "Alex Thompson",
@@ -99,13 +7,83 @@ const user = {
   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
 };
 
-export default function AdminSqlViewer() {
-  const [selectedTable, setSelectedTable] = useState("artists");
+function AdminSqlViewer({ dbSnapshot }) {
+  // Always declare hooks at the top level
+  const tableKeys = dbSnapshot && Object.keys(dbSnapshot);
+  // If only artists table is present, default to it
+  const defaultTable = tableKeys && (tableKeys.includes("artists") ? "artists" : tableKeys[0]);
+  const [selectedTable, setSelectedTable] = useState(defaultTable);
   const [selectedFields, setSelectedFields] = useState(
-    tables[selectedTable].fields.slice(0, 3)
+    dbSnapshot && dbSnapshot[defaultTable]?.fields?.slice(0, 3) || []
   );
 
-  const table = tables[selectedTable];
+  // Search state
+  const [searchType, setSearchType] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+
+  // Modal state and handlers (must be at top level)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalField, setModalField] = useState("");
+  const [modalRecord, setModalRecord] = useState(null);
+
+  // Declare table, fields, records before using them in getFilteredRecords
+  const table = dbSnapshot && selectedTable ? dbSnapshot[selectedTable] : null;
+  const fields = table?.fields || [];
+  const records = table?.records || [];
+
+  // Update selectedFields when selectedTable or dbSnapshot changes
+  useEffect(() => {
+    if (dbSnapshot && selectedTable && dbSnapshot[selectedTable]) {
+      setSelectedFields(dbSnapshot[selectedTable].fields?.slice(0, 3) || []);
+    }
+  }, [selectedTable, dbSnapshot]);
+
+  // If only artists table is present, force selection
+  useEffect(() => {
+    if (dbSnapshot && Object.keys(dbSnapshot).length === 1 && dbSnapshot.artists) {
+      setSelectedTable("artists");
+    }
+  }, [dbSnapshot]);
+
+  // Search function for albums and artists
+  const getFilteredRecords = () => {
+    if (!searchType || (searchType !== "all" && !searchValue)) return records;
+    if (searchType === "all") {
+      return records;
+    }
+    // If searchType matches a field in the table, filter by that field
+    if (fields.includes(searchType)) {
+      return records.filter((r) => {
+        const value = r[searchType];
+        if (value == null) return false;
+        // Numeric search: exact match
+        if (typeof value === "number" || searchType === "id") {
+          return String(value) === String(searchValue);
+        }
+        // String search: case-insensitive substring
+        return String(value).toLowerCase().includes(String(searchValue).toLowerCase());
+      });
+    }
+    return records;
+  };
+
+  const filteredRecords = getFilteredRecords();
+
+  // Render loading UI if dbSnapshot is not ready
+  if (!dbSnapshot || !tableKeys || tableKeys.length === 0) {
+    return (
+      <div className="min-h-fit bg-white flex flex-col items-center py-8">
+        <div className="w-full max-w-3xl flex justify-between items-center mb-6">
+          <h1 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <span>Music Database Viewer</span>
+          </h1>
+        </div>
+        <div className="w-full max-w-3xl bg-white rounded-lg shadow p-6 flex gap-6 mb-6">
+          <div className="w-full text-center text-gray-500">Loading database snapshot...</div>
+        </div>
+      </div>
+    );
+  }
 
   const handleFieldToggle = (field) => {
     setSelectedFields((fields) =>
@@ -115,8 +93,29 @@ export default function AdminSqlViewer() {
     );
   };
 
+  // Modal handlers
+  const handleCellDoubleClick = (record, field) => {
+    setModalRecord(record);
+    setModalField(field);
+    setModalOpen(true);
+  };
+
+  const handleModalAction = (action) => {
+    // Here you would trigger the actual delete/update/insert logic
+    // For now, just close the modal
+    setModalOpen(false);
+    setModalRecord(null);
+    setModalField("");
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setModalRecord(null);
+    setModalField("");
+  };
+
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center py-8">
+    <div className="min-h-fit bg-white flex flex-col items-center py-8">
       {/* Header */}
       <div className="w-full max-w-3xl flex justify-between items-center mb-6">
         <div>
@@ -141,13 +140,13 @@ export default function AdminSqlViewer() {
           <label className="block text-sm font-medium text-gray-700 mb-2">Select Table</label>
           <select
             className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none"
-            value={selectedTable}
-            onChange={(e) => {
-              setSelectedTable(e.target.value);
-              setSelectedFields(tables[e.target.value].fields.slice(0, 3));
-            }}
+            value={selectedTable || ""}
+            onChange={(e) => setSelectedTable(e.target.value)}
           >
-            {Object.keys(tables).map((tableKey) => (
+            <option value="" disabled>
+              Choose a table
+            </option>
+            {tableKeys.map((tableKey) => (
               <option key={tableKey} value={tableKey}>
                 {tableKey}
               </option>
@@ -160,7 +159,7 @@ export default function AdminSqlViewer() {
           <label className="block text-sm font-medium text-gray-700 mb-2">Select Fields</label>
           <p className="text-xs text-gray-500 mb-2">Choose which columns to display from the {selectedTable} table</p>
           <div className="flex flex-wrap gap-2">
-            {table.fields.map((field) => (
+            {fields.map((field) => (
               <button
                 key={field}
                 className={`px-2 py-1 rounded text-xs border ${
@@ -174,15 +173,49 @@ export default function AdminSqlViewer() {
               </button>
             ))}
           </div>
-          <p className="mt-2 text-xs text-gray-400">{selectedFields.length} of {table.fields.length} fields selected</p>
+          <p className="mt-2 text-xs text-gray-400">{selectedFields.length} of {fields.length} fields selected</p>
         </div>
       </div>
 
-      {/* Data Table */}
+      {/* Search Bar & Data Table */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow p-6">
+        <div className="mb-4 flex gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search Type</label>
+            <select
+              className="border rounded px-2 py-1 text-sm"
+              value={searchType}
+              onChange={e => setSearchType(e.target.value)}
+              disabled={!selectedTable}
+            >
+              <option value="">Select</option>
+              <option value="all">All</option>
+              {/* Dynamically list all field names for the selected table */}
+              {fields.map((field) => (
+                <option key={field} value={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search Value</label>
+            <input
+              className="border rounded px-2 py-1 text-sm"
+              type="text"
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              disabled={!searchType}
+              placeholder={searchType ? `Enter ${searchType}` : "Select search type"}
+            />
+          </div>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
+            onClick={() => setSearchValue("")}
+            disabled={!searchValue}
+          >Clear</button>
+        </div>
         <div className="mb-2 flex items-center gap-2">
           <span className="font-medium text-gray-700">{selectedTable}</span>
-          <span className="text-xs text-gray-500">({table.data.length} rows)</span>
+          <span className="text-xs text-gray-500">({filteredRecords.length} rows)</span>
         </div>
         <p className="text-xs text-gray-500 mb-2">
           Displaying {selectedFields.length} columns from the {selectedTable} table
@@ -199,19 +232,60 @@ export default function AdminSqlViewer() {
               </tr>
             </thead>
             <tbody>
-              {table.data.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50">
-                  {selectedFields.map((field) => (
-                    <td key={field} className="px-4 py-2 text-sm text-gray-700 border-b">
-                      {row[field] ? row[field] : ""}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {filteredRecords.length > 0 ? (
+                filteredRecords.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    {selectedFields.map((field) => (
+                      <td
+                        key={field}
+                        className="px-4 py-2 text-sm text-gray-700 border-b cursor-pointer hover:bg-blue-50"
+                        onDoubleClick={() => handleCellDoubleClick(row, field)}
+                        title="Double click to manage record"
+                      >
+                        {row[field] ? row[field] : ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan={selectedFields.length || 1} className="text-center">No records</td></tr>
+              )}
             </tbody>
           </table>
         </div>
+        {/* Modal for record actions */}
+        {modalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 min-w-[320px] max-w-[90vw]">
+              <h2 className="text-lg font-semibold mb-2">Manage Record</h2>
+              <p className="mb-4 text-sm text-gray-600">
+                What would you like to do with <span className="font-bold">{modalField}</span> of this record?
+              </p>
+              <div className="flex gap-4 mb-4">
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  onClick={() => handleModalAction("delete")}
+                >Delete</button>
+                <button
+                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                  onClick={() => handleModalAction("update")}
+                >Update</button>
+                <button
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  onClick={() => handleModalAction("insert")}
+                >Insert</button>
+              </div>
+              <button
+                className="text-gray-500 hover:text-gray-700 text-sm"
+                onClick={handleModalClose}
+              >Cancel</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+export default AdminSqlViewer;
+// End of AdminSqlViewer component
