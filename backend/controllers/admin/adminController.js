@@ -1,3 +1,44 @@
+// Delete a record by id
+export async function deleteRecord(req, res) {
+  const { table, id } = req.params;
+  try {
+    const sql = `DELETE FROM \`${table}\` WHERE id = ?`;
+    const [result] = await pool.query(sql, [id]);
+    res.json({ success: true, affectedRows: result.affectedRows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// Insert a new record
+export async function insertRecord(req, res) {
+  const { table } = req.params;
+  const newRecord = req.body;
+  console.log('insertRecord newRecord:', newRecord);
+  console.log('Table:', table);
+  // Validate input
+  if (!newRecord || typeof newRecord !== 'object' || Object.keys(newRecord).length === 0) {
+    return res.status(400).json({ error: 'No record data provided.' });
+  }
+  try {
+    const fields = Object.keys(newRecord).map(f => `\`${f}\``).join(', ');
+    const placeholders = Object.keys(newRecord).map(() => '?').join(', ');
+    const values = Object.values(newRecord);
+    const sql = `INSERT INTO \`${table}\` (${fields}) VALUES (${placeholders})`;
+    console.log('SQL:', sql);
+    console.log('Values:', values);
+    const [result] = await pool.query(sql, values);
+    console.log('Insert result:', result);
+    res.json({ success: true, insertId: result.insertId });
+  } catch (err) {
+    console.error('Error inserting record:', err);
+    if (err.stack) console.error(err.stack);
+    res.status(500).json({ error: err.message });
+  }
+  
+  
+}
+
 // Admin controller: retrieve tables, fields, records, and update records
 import pool from '../../config/db.js';
 

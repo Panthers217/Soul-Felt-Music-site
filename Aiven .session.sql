@@ -49,4 +49,7 @@
 --   is_active BOOLEAN DEFAULT TRUE
 -- );
 
-ALTER TABLE tracks ADD COLUMN promo_track VARCHAR(255);
+-- ALTER TABLE tracks ADD COLUMN promo_track VARCHAR(255);
+-- ALTER TABLE users ADD COLUMN demos BOOLEAN;
+-- ALTER TABLE artists ADD COLUMN demos BOOLEAN;
+
