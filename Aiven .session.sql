@@ -41,15 +41,52 @@
 
 -- -- Add more tables for news, videos, community, etc. as needed
 
--- CREATE TABLE newsletter (
---   id SERIAL PRIMARY KEY,
---   email VARCHAR(100) UNIQUE NOT NULL,
---   phone_number VARCHAR(20),
---   subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---   is_active BOOLEAN DEFAULT TRUE
--- );
+
+-- Table for audio URLs with references to artist and album
+
+
 
 -- ALTER TABLE tracks ADD COLUMN promo_track VARCHAR(255);
 -- ALTER TABLE users ADD COLUMN demos BOOLEAN;
 -- ALTER TABLE artists ADD COLUMN demos BOOLEAN;
 
+-- ALTER TABLE artists DROP COLUMN "featured_track"; --- IGNORE ---
+-- ALTER TABLE tracks ADD COLUMN promo_track BOOLEAN;
+-- ALTER TABLE tracks DROP COLUMN promo_track;
+
+-- CREATE TABLE promotional_tracks (
+--   id SERIAL PRIMARY KEY,
+--   artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
+--   album_id INTEGER REFERENCES albums(id) ON DELETE CASCADE,
+--   audio_url VARCHAR(255),
+--   promote_track BOOLEAN,
+--   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- ALTER TABLE promotional_tracks ADD COLUMN title TEXT;
+-- ALTER TABLE promotional_tracks ADD COLUMN duration TEXT;
+-- ALTER TABLE promotional_tracks ADD COLUMN demos TEXT;
+-- ALTER TABLE promotional_tracks ADD COLUMN top_track BOOLEAN;
+-- ALTER TABLE promotional_tracks ADD COLUMN featured_track BOOLEAN;
+-- ALTER TABLE promotional_tracks ADD COLUMN promo_audio_url VARCHAR(255);
+
+-- CREATE TABLE promotional_videos (
+--   id SERIAL PRIMARY KEY,
+--   artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
+--   album_id INTEGER REFERENCES albums(id) ON DELETE CASCADE,
+--   promo_video_url VARCHAR(255),
+--   activate_video BOOLEAN,
+--   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+ALTER TABLE albums ADD COLUMN activate BOOLEAN;
+ALTER TABLE artist_images ADD COLUMN activate BOOLEAN;
+ALTER TABLE artists ADD COLUMN activate BOOLEAN;
+ALTER TABLE promotional_tracks ADD COLUMN activate BOOLEAN;
+ALTER TABLE purchases ADD COLUMN activate BOOLEAN;
+ALTER TABLE tracks ADD COLUMN activate BOOLEAN;
+ALTER TABLE videos ADD COLUMN activate BOOLEAN;
+ALTER TABLE promotional_videos ADD COLUMN demos BOOLEAN;
+ALTER TABLE videos ADD COLUMN demos BOOLEAN;
+ALTER TABLE artist_images ADD COLUMN demos BOOLEAN;
+ALTER TABLE users ADD COLUMN activate BOOLEAN;

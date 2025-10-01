@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import CalendarModal from "./modal/CalendarModal";
+import CalendarIcon from "./modal/CalendarIcon";
 import ArtistSearchForm from "./ArtistSearchForm";
 import axios from "axios";
 import AdminSqlViewer from "./AdminSqlViewer";
@@ -26,6 +28,14 @@ function SelectTable({ table, setTable, tableOptions }) {
   );
 }
 function SelectFields({ table1, fields1, setFields1, tableFields1 }) {
+  // Utility: remove fields that are 'id' or end with '_id'
+  function filterOutIdFields(fields) {
+    return fields.filter((field) => field !== "id" && !field.endsWith("_id"));
+  }
+  const filteredFields =
+    table1 && tableFields1[table1]
+      ? filterOutIdFields(tableFields1[table1])
+      : [];
   return (
     <div>
       <label className="block mb-2 font-semibold">Select Fields</label>
@@ -37,9 +47,9 @@ function SelectFields({ table1, fields1, setFields1, tableFields1 }) {
             e.target.selectedOptions,
             (opt) => opt.value
           );
-          // If 'all' is selected, select all fields
+          // If 'all' is selected, select all filtered fields
           if (selected.includes("all")) {
-            setFields1(tableFields1[table1] || []);
+            setFields1(filteredFields);
           } else {
             setFields1(selected);
           }
@@ -48,12 +58,11 @@ function SelectFields({ table1, fields1, setFields1, tableFields1 }) {
         required
       >
         <option value="all">Select All</option>
-        {table1 &&
-          tableFields1[table1]?.map((field) => (
-            <option key={field} value={field}>
-              {field}
-            </option>
-          ))}
+        {filteredFields.map((field) => (
+          <option key={field} value={field}>
+            {field}
+          </option>
+        ))}
       </select>
     </div>
   );
@@ -65,15 +74,68 @@ const InputFields = ({ fields, fieldValues, setFieldValues }) => {
       {fields.map((field, i) => (
         <div key={field} className="mb-2">
           <label className="block mb-1">{field}</label>
-          <input
-            type="text"
-            autoFocus={i === 0} // focus only the first input initially
-            value={fieldValues[field] || ""}
-            onChange={(e) =>
-              setFieldValues({ ...fieldValues, [field]: e.target.value })
-            }
-            className="w-full p-2 border rounded"
-          />
+          {field === "cover_url" ||
+          field === "image_url" ||
+          field === "promo_audio_url" ||
+          field === "promo_video_url" ||
+          field === "video_url" ||
+          field === "audio_url" ? (
+            <>
+              <input
+                type="file"
+                accept={
+                  field === "audio_url"
+                    ? "audio/*"
+                    : field === "video_url"
+                    ? "video/*"
+                    : field === "image_url"
+                    ? "image/*"
+                    : field === "promo_audio_url"
+                    ? "audio/*"
+                    : field === "promo_video_url"
+                    ? "video/*"
+                    : "image/*"
+                }
+                onChange={(e) => {
+                  setFieldValues({
+                    ...fieldValues,
+                    [field]: e.target.files[0],
+                  });
+                }}
+                className="w-full p-2 border rounded mb-1"
+              />
+              <span className="text-xs text-gray-500">
+                (Optional: upload a file or enter a URL below)
+              </span>
+              <input
+                type="text"
+                value={
+                  typeof fieldValues[field] === "string"
+                    ? fieldValues[field]
+                    : ""
+                }
+                onChange={(e) =>
+                  setFieldValues({ ...fieldValues, [field]: e.target.value })
+                }
+                className="w-full p-2 border rounded mt-1"
+                placeholder={
+                  field === "audio_url"
+                    ? "Audio URL (optional)"
+                    : "Image URL (optional)"
+                }
+              />
+            </>
+          ) : (
+            <input
+              type="text"
+              autoFocus={i === 0}
+              value={fieldValues[field] || ""}
+              onChange={(e) =>
+                setFieldValues({ ...fieldValues, [field]: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+            />
+          )}
         </div>
       ))}
     </div>
@@ -108,7 +170,7 @@ function ExistingArtist({
   setRows,
   message,
   handleSubmit,
-  dbSnapshot
+  dbSnapshot,
 }) {
   useEffect(() => {
     setInputMode("single");
@@ -121,12 +183,16 @@ function ExistingArtist({
     setSearchValue("");
   }, [searchType]);
 
-
   // Search dbSnapshot for artist
   const handleArtistSearch = (e) => {
     e.preventDefault();
     setArtistResult(null);
-    if (!searchValue || !dbSnapshot || !dbSnapshot["artists"] || !dbSnapshot["artists"].records) {
+    if (
+      !searchValue ||
+      !dbSnapshot ||
+      !dbSnapshot["artists"] ||
+      !dbSnapshot["artists"].records
+    ) {
       setArtistResult({ error: "No artist data available" });
       return;
     }
@@ -141,8 +207,6 @@ function ExistingArtist({
     }
     setArtistResult(found || { error: "Artist not found" });
   };
-
-  
 
   return (
     <div>
@@ -229,6 +293,15 @@ function UploadNewArtist({
   message,
   handleSubmit,
 }) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Helper to format date as yyyy-mm-dd
+  function formatDate(date) {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -268,13 +341,44 @@ function UploadNewArtist({
           tableFields1={tableFields}
         />
       )}
-      {/* Render input boxes for each selected field */}
+      {/* Render input boxes for each selected field, with calendar for release_date */}
       {inputMode === "single" && fields.length > 0 && (
-        <InputFields
-          fields={fields}
-          fieldValues={fieldValues}
-          setFieldValues={setFieldValues}
-        />
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">Enter values for selected fields:</h3>
+          {fields.map((field, i) =>
+            field === "release_date" ? (
+              <div key={field} className="mb-2 relative">
+                <label className="block mb-1">{field}</label>
+                <input
+                  type="text"
+                  value={formatDate(fieldValues[field])}
+                  onChange={e => setFieldValues({ ...fieldValues, [field]: e.target.value })}
+                  className="w-full p-2 border rounded pr-10"
+                  placeholder="YYYY-MM-DD"
+                  readOnly
+                />
+                <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <CalendarIcon onClick={() => setCalendarOpen(true)} />
+                </span>
+                <CalendarModal
+                  isOpen={calendarOpen}
+                  onClose={() => setCalendarOpen(false)}
+                  onSelectDate={date => {
+                    setFieldValues({ ...fieldValues, [field]: formatDate(date) });
+                    setCalendarOpen(false);
+                  }}
+                />
+              </div>
+            ) : (
+              <InputFields
+                key={field}
+                fields={[field]}
+                fieldValues={fieldValues}
+                setFieldValues={setFieldValues}
+              />
+            )
+          )}
+        </div>
       )}
       {/* CSV rows input */}
       {inputMode === "multiple" && (
@@ -308,8 +412,8 @@ function AdminDashboard() {
   const [message, setMessage] = useState("");
   const [tableOptions, setTableOptions] = useState([]);
   const [dbSnapshot, setDbSnapshot] = useState(null);
+  const [mode, setMode] = useState("live");
 
-  
   useEffect(() => {
     setInputMode("");
     setTable("");
@@ -343,59 +447,108 @@ function AdminDashboard() {
     }
   }, [dbSnapshot]);
 
-  // When table changes, update fields and rows from dbSnapshot
+  // When table changes, update fields, rows, and initialize fieldValues to null for all fields
   useEffect(() => {
     if (dbSnapshot && table && dbSnapshot[table]) {
       // Set fields from dbSnapshot
-      setFields(dbSnapshot[table].fields || []);
+      const newFields = dbSnapshot[table].fields || [];
+      setFields(newFields);
       // Set rows as CSV string
       const records = dbSnapshot[table].records || [];
       if (records.length > 0 && dbSnapshot[table].fields) {
-        const csvRows = records.map(record =>
-          dbSnapshot[table].fields.map(field => record[field] ?? "").join(",")
+        const csvRows = records.map((record) =>
+          dbSnapshot[table].fields.map((field) => record[field] ?? "").join(",")
         );
         setRows(csvRows.join("\n"));
       } else {
         setRows("");
       }
+
+      async function insertFieldsValues() {
+        // Utility: remove fields that are 'id' or end with '_id'
+        function filterOutIdFields(fields) {
+          return fields.filter(
+            (field) => field !== "id" && !field.endsWith("_id")
+          );
+        }
+
+        // Initialize fieldValues to empty string for filtered fields
+        const filteredFields = await filterOutIdFields(newFields);
+        const initialFieldValues = await filteredFields.reduce((acc, field) => {
+          acc[field] = "";
+          return acc;
+        }, {});
+        // Add boolean fields demos and activate, default to false
+
+        initialFieldValues["demos"] = false;
+        initialFieldValues["activate"] = false;
+        initialFieldValues["featured_artists"] = false;
+        initialFieldValues["is_active"] = false;
+        initialFieldValues["promote_track"] = false;
+        initialFieldValues["top_track"] = false;
+        initialFieldValues["featured_track"] = false;
+        // initialFieldValues["release_date"] = new Date().toISOString().split("T")[0];
+        setFields(filteredFields);
+        setFieldValues(initialFieldValues);
+      }
+      insertFieldsValues();
     }
   }, [dbSnapshot, table]);
 
- 
   const tableFields = React.useMemo(() => {
     if (!dbSnapshot) return {};
     const fieldsObj = {};
-    Object.keys(dbSnapshot).forEach(tableName => {
+    Object.keys(dbSnapshot).forEach((tableName) => {
       fieldsObj[tableName] = dbSnapshot[tableName].fields || [];
     });
     return fieldsObj;
   }, [dbSnapshot]);
 
-  
-
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, modeArg = mode) => {
     e.preventDefault();
+
+    console.log("your fields", fieldValues);
     setMessage("");
-    // Parse fields and rows
-    const fieldList = fields.split(",").map((f) => f.trim());
-    const rowList = rows
-      .split("\n")
-      .map((row) => row.split(",").map((v) => v.trim()));
-    // Send to backend
-    const response = await fetch("/api/admin/upload-table-data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ table, fields: fieldList, rows: rowList }),
-    });
-    const result = await response.json();
-    setMessage(
-      result.message ||
-        (result.success ? "Upload successful!" : "Upload failed.")
-    );
+
+    if (Array.isArray(fields) && fields.length > 0) {
+      // Mode is available as modeArg --- this is your mode state variable
+      console.log("Current mode in handleSubmit:", modeArg);
+      console.log("Selected field values:", fieldValues);
+
+      // Use FormData for file upload
+      const formData = new FormData();
+      // Append each field value as its own entry
+      Object.entries(fieldValues).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      // formData.append("mode", modeArg);
+
+      try {
+        const response = await axios.post(
+          `/api/admin/records/${table}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "x-mode": modeArg,
+            },
+          }
+        );
+        const result = response.data;
+        setMessage(
+          result.message ||
+            (result.success ? "Upload successful!" : "Upload failed.")
+        );
+      } catch (error) {
+        setMessage(
+          "Upload failed: " + (error.response?.data?.message || error.message)
+        );
+      }
+    }
   };
 
-    // Update a record in the selected table
+  // Update a record in the selected table
   async function handleUpdateRecord(table, id, updates) {
     try {
       const response = await fetch(`/api/admin/records/${table}/${id}`, {
@@ -404,7 +557,10 @@ function AdminDashboard() {
         body: JSON.stringify(updates),
       });
       const result = await response.json();
-      setMessage(result.message || (result.success ? "Update successful!" : "Update failed."));
+      setMessage(
+        result.message ||
+          (result.success ? "Update successful!" : "Update failed.")
+      );
       return result;
     } catch (error) {
       setMessage("Update failed: " + error.message);
@@ -419,18 +575,21 @@ function AdminDashboard() {
         method: "DELETE",
       });
       const result = await response.json();
-      setMessage(result.message || (result.success ? "Delete successful!" : "Delete failed."));
+      setMessage(
+        result.message ||
+          (result.success ? "Delete successful!" : "Delete failed.")
+      );
       return result;
     } catch (error) {
       setMessage("Delete failed: " + error.message);
       return { success: false, error: error.message };
     }
   }
-  
 
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
+        <div className="mb-2 font-semibold">Current Mode: {mode}</div>
         <AdminSqlViewer
           table={table}
           fields={fields}
@@ -438,9 +597,23 @@ function AdminDashboard() {
           dbSnapshot={dbSnapshot}
         />
         <div className="bg-white p-4 rounded shadow-md w-full max-w-lg mb-6">
-          <label className="block mb-2 font-bold text-lg text-center">
-            Soul Felt Music Artist
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="font-bold text-lg">Soul Felt Music Artist</label>
+            <button
+              className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-bold"
+              onClick={() => setMode(mode === "live" ? "demo" : "live")}
+            >
+              {mode === "live" ? "Switch to Demo Mode" : "Switch to Live Mode"}
+            </button>
+          </div>
+          <div
+            className={`mb-4 text-center font-extrabold text-2xl ${
+              mode === "live" ? "text-green-600" : "text-orange-500"
+            }`}
+          >
+            {mode === "live" ? "LIVE MODE" : "DEMO MODE"}
+          </div>
+
           <select
             value={artistMenu || ""}
             onChange={(e) => setArtistMenu(e.target.value)}
@@ -465,7 +638,7 @@ function AdminDashboard() {
             rows={rows}
             setRows={setRows}
             message={message}
-            handleSubmit={handleSubmit}
+            handleSubmit={(e) => handleSubmit(e, mode)}
             artistMenu={artistMenu}
           />
         )}
@@ -484,7 +657,7 @@ function AdminDashboard() {
             rows={rows}
             setRows={setRows}
             message={message}
-            handleSubmit={handleSubmit}
+            handleSubmit={(e) => handleSubmit(e, mode)}
             artistMenu={artistMenu}
             dbSnapshot={dbSnapshot}
           />

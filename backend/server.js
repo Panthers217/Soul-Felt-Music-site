@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 
 // Routers
 app.use('/api/artists', artistRouter);
+// app.use('/api/artist-images', artistImageRouter);
 // app.use('/api/users', userRouter);
 app.use('/api/albums', albumRouter);
 app.use('/api/tracks', trackRouter);
