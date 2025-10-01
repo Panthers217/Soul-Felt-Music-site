@@ -27,40 +27,7 @@ const data2 = fs.readFileSync(
 const artists = [...artistsDataFromJson];
 // Example: Array of image file paths
 const imagePaths = [...artists];
-// console.log(imagePaths)
-// console.log(data2)
 
-// const p = artists.map((artist, idx, arr) => {
-//   console.log(arr[idx].name);
-
-// });
-
-// async function uploadImages() {
-//   const uploadPromises = artists.map(async (artist, idx, arr) => {
-//     const fileName = path.basename(arr[idx].img);
-//     const safeName = arr[idx].name.replace(/[^a-zA-Z0-9-_]/g, "_");
-//     const publicId = `${safeName}_${fileName}`;
-//     // Fix the path: remove '/src' and '%20' and prepend correct relative path
-
-//     let imgPath = path
-//       .join(__dirname, "../frontend", arr[idx].img)
-//       .replace("%20", " ");
-//     try {
-//       const result = await cloudinary.uploader.upload(imgPath, {
-//         folder: "SoulFeltMusicImages/DemoImages/TopTrackCardImage",
-//         use_filename: true, // keep original filename base
-//         unique_filename: true, // avoid random suffix
-//         overwrite: true,
-//         public_id: publicId,
-//       });
-//       console.log(`Uploaded ${imgPath}: ${result.secure_url}`);
-//     } catch (err) {
-//       console.error(`Error uploading ${imgPath}:`, err.message);
-//     }
-//   });
-
-//   await Promise.all(uploadPromises);
-// }
 
 async function uploadImages({
   array = artists,
