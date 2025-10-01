@@ -67,7 +67,12 @@ function SelectFields({ table1, fields1, setFields1, tableFields1 }) {
     </div>
   );
 }
-const InputFields = ({ fields, fieldValues, setFieldValues }) => {
+const InputFields = ({
+  fields,
+  fieldValues,
+  setFieldValues,
+  requiredFields = [],
+}) => {
   return (
     <div className="mb-4">
       <h3 className="font-semibold mb-2">Enter values for selected fields:</h3>
@@ -103,6 +108,7 @@ const InputFields = ({ fields, fieldValues, setFieldValues }) => {
                   });
                 }}
                 className="w-full p-2 border rounded mb-1"
+                required={requiredFields.includes(field)}
               />
               <span className="text-xs text-gray-500">
                 (Optional: upload a file or enter a URL below)
@@ -123,6 +129,7 @@ const InputFields = ({ fields, fieldValues, setFieldValues }) => {
                     ? "Audio URL (optional)"
                     : "Image URL (optional)"
                 }
+                required={requiredFields.includes(field)}
               />
             </>
           ) : (
@@ -134,6 +141,8 @@ const InputFields = ({ fields, fieldValues, setFieldValues }) => {
                 setFieldValues({ ...fieldValues, [field]: e.target.value })
               }
               className="w-full p-2 border rounded"
+              required={requiredFields.includes(field)}
+              placeholder={field === "phone_number" ? "e.g. 000-123-4567" : field === "email" ? "e.g. example@example.com" : undefined}
             />
           )}
         </div>
@@ -294,6 +303,8 @@ function UploadNewArtist({
   handleSubmit,
 }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   // Helper to format date as yyyy-mm-dd
   function formatDate(date) {
@@ -302,9 +313,61 @@ function UploadNewArtist({
     return d.toISOString().split("T")[0];
   }
 
+  // Fields that require boolean dropdown
+  const booleanFields = [
+    "demos",
+    "top_track",
+    "featured_track",
+    "activate",
+    "activate_video",
+    "featured_artists",
+    "is_active",
+    "promote_track",
+    "promo",
+    
+  ];
+
+  // Fields that are required
+  const requiredFields = ["name", "release_date", "title","email ","phone_number"];
+  // Helper to check if a field is required
+  const isRequired = (field) => requiredFields.includes(field);
+  
+  //
+  const isEmailvalid = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Helper to validate phone numbers (allow dashes, spaces, parentheses)
+  const isPhoneValid = (phone) => {
+    if (!phone) return false;
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, "");
+    return digits.length === 10;
+  };
+
+  // Custom submit handler to validate email before calling parent handleSubmit
+  const handleLocalSubmit = (e) => {
+    if (fields.includes("email") && !isEmailvalid(fieldValues.email)) {
+      e.preventDefault();
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    if (fields.includes("phone_number")) { // Validate phone if phone field is included
+      if (!isPhoneValid(fieldValues.phone_number)) {
+        e.preventDefault();
+        setPhoneError("Please enter a valid 10-digit phone number.");
+        return;
+      }
+    }
+    setEmailError("");
+    setPhoneError("");
+    handleSubmit(e);
+  };
+
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleLocalSubmit}
       className="bg-white p-8 rounded shadow-md w-full max-w-lg"
     >
       <h2 className="text-2xl font-bold mb-6 text-center">
@@ -344,40 +407,123 @@ function UploadNewArtist({
       {/* Render input boxes for each selected field, with calendar for release_date */}
       {inputMode === "single" && fields.length > 0 && (
         <div className="mb-4">
-          <h3 className="font-semibold mb-2">Enter values for selected fields:</h3>
-          {fields.map((field, i) =>
-            field === "release_date" ? (
-              <div key={field} className="mb-2 relative">
-                <label className="block mb-1">{field}</label>
-                <input
-                  type="text"
-                  value={formatDate(fieldValues[field])}
-                  onChange={e => setFieldValues({ ...fieldValues, [field]: e.target.value })}
-                  className="w-full p-2 border rounded pr-10"
-                  placeholder="YYYY-MM-DD"
-                  readOnly
-                />
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                  <CalendarIcon onClick={() => setCalendarOpen(true)} />
-                </span>
-                <CalendarModal
-                  isOpen={calendarOpen}
-                  onClose={() => setCalendarOpen(false)}
-                  onSelectDate={date => {
-                    setFieldValues({ ...fieldValues, [field]: formatDate(date) });
-                    setCalendarOpen(false);
-                  }}
-                />
-              </div>
-            ) : (
+          <h3 className="font-semibold mb-2">
+            Enter values for selected fields:
+          </h3>
+          {/* Render prioritized fields first: name, title, image_url (if present) */}
+          {['name', 'title', 'image_url'].filter(f => fields.includes(f)).map((field) => {
+            return (
               <InputFields
                 key={field}
                 fields={[field]}
                 fieldValues={fieldValues}
                 setFieldValues={setFieldValues}
+                requiredFields={requiredFields}
               />
-            )
-          )}
+            );
+          })}
+          {/* Render the rest of the fields, except prioritized ones */}
+          {fields.filter(field => !['name', 'title', 'image_url'].includes(field)).map((field) => {
+            if (field === "release_date") {
+              return (
+                <div key={field} className="mb-2 relative">
+                  <label className="block mb-1">{field}</label>
+                  <input
+                    type="text"
+                    value={formatDate(fieldValues[field])}
+                    onChange={(e) =>
+                      setFieldValues({
+                        ...fieldValues,
+                        [field]: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded pr-10"
+                    placeholder="YYYY-MM-DD"
+                    required={isRequired(field)}
+                  />
+                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <CalendarIcon onClick={() => setCalendarOpen(true)} />
+                  </span>
+                  <CalendarModal
+                    isOpen={calendarOpen}
+                    onClose={() => setCalendarOpen(false)}
+                    onSelectDate={(date) => {
+                      setFieldValues({
+                        ...fieldValues,
+                        [field]: formatDate(date),
+                      });
+                      setCalendarOpen(false);
+                    }}
+                  />
+                </div>
+              );
+            } else if (booleanFields.includes(field)) {
+              return (
+                <div key={field} className="mb-2">
+                  <label className="block mb-1">{field}</label>
+                  <select
+                    className="w-full p-2 border rounded"
+                    value={
+                      fieldValues[field] === 1
+                        ? "true"
+                        : fieldValues[field] === 0
+                        ? "false"
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value === "true" ? 1 : 0;
+                      setFieldValues({ ...fieldValues, [field]: val });
+                    }}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select true or false
+                    </option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+              );
+            } else if (field === "email") {
+              return (
+                <div key={field} className="mb-2">
+                  <InputFields
+                    fields={[field]}
+                    fieldValues={fieldValues}
+                    setFieldValues={setFieldValues}
+                    requiredFields={requiredFields}
+                  />
+                  {emailError && (
+                    <div className="text-red-500 text-sm">{emailError}</div>
+                  )}
+                </div>
+              );
+            } else if (field === "phone_number") {
+              return (
+                <div key={field} className="mb-2">
+                  <InputFields
+                    fields={[field]}
+                    fieldValues={fieldValues}
+                    setFieldValues={setFieldValues}
+                    requiredFields={requiredFields}
+                  />
+                  {phoneError && (
+                    <div className="text-red-500 text-sm">{phoneError}</div>
+                  )}
+                </div>
+              );
+            } else {
+              return (
+                <InputFields
+                  key={field}
+                  fields={[field]}
+                  fieldValues={fieldValues}
+                  setFieldValues={setFieldValues}
+                  requiredFields={requiredFields}
+                />
+              );
+            }
+          })}
         </div>
       )}
       {/* CSV rows input */}
@@ -518,11 +664,13 @@ function AdminDashboard() {
 
       // Use FormData for file upload
       const formData = new FormData();
-      // Append each field value as its own entry
+      // Only append field values for the selected table
+      const tableFieldsSet = new Set(fields);
       Object.entries(fieldValues).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (tableFieldsSet.has(key)) {
+          formData.append(key, value);
+        }
       });
-      // formData.append("mode", modeArg);
 
       try {
         const response = await axios.post(

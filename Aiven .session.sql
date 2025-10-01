@@ -79,14 +79,32 @@
 --   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 -- );
 
-ALTER TABLE albums ADD COLUMN activate BOOLEAN;
-ALTER TABLE artist_images ADD COLUMN activate BOOLEAN;
-ALTER TABLE artists ADD COLUMN activate BOOLEAN;
-ALTER TABLE promotional_tracks ADD COLUMN activate BOOLEAN;
-ALTER TABLE purchases ADD COLUMN activate BOOLEAN;
-ALTER TABLE tracks ADD COLUMN activate BOOLEAN;
-ALTER TABLE videos ADD COLUMN activate BOOLEAN;
-ALTER TABLE promotional_videos ADD COLUMN demos BOOLEAN;
-ALTER TABLE videos ADD COLUMN demos BOOLEAN;
-ALTER TABLE artist_images ADD COLUMN demos BOOLEAN;
-ALTER TABLE users ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE albums ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE artist_images ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE artists ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE promotional_tracks ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE purchases ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE tracks ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE videos ADD COLUMN activate BOOLEAN;
+-- ALTER TABLE promotional_videos ADD COLUMN demos BOOLEAN;
+-- ALTER TABLE videos ADD COLUMN demos BOOLEAN;
+-- ALTER TABLE artist_images ADD COLUMN demos BOOLEAN;
+-- ALTER TABLE users ADD COLUMN activate BOOLEAN;
+
+
+-- ALTER TABLE promotional_tracks DROP COLUMN duration;
+-- ALTER TABLE artist_images DROP COLUMN uploaded_at;
+-- ALTER TABLE promotional_videos DROP COLUMN uploaded_at
+-- ALTER TABLE promotional_tracks DROP COLUMN uploaded_at
+
+-- ALTER TABLE tracks ADD COLUMN release_date Date;
+-- ALTER TABLE videos ADD COLUMN release_date Date;
+-- ALTER TABLE promotional_tracks ADD COLUMN duration INTEGER;
+-- ALTER TABLE promotional_videos ADD COLUMN duration INTEGER;
+-- ALTER TABLE promotional_tracks ADD COLUMN release_date Date;
+-- ALTER TABLE promotional_videos ADD COLUMN release_date Date;
+
+ALTER TABLE promotional_videos ADD COLUMN title TEXT;
+ALTER TABLE videos ADD COLUMN title TEXT;
+
+

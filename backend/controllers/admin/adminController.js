@@ -157,7 +157,7 @@ export async function insertRecord(req, res) {
       // await pool.query(insertSql, values);
       // res.json({ success: true, inserted: fieldValues });
     
-      console.log("No valid fields to insert.");
+      // console.log("No valid fields to insert.");
       // res.status(400).json({ success: false, message: "No valid fields to insert." });
 
 
