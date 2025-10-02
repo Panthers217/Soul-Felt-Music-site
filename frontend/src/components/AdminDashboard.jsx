@@ -146,6 +146,8 @@ function MultipleInputFields({ rows, setRows }) {
 }
 
 function TableSelector({ table, setTable, tableOptions, searchResult }) {
+  // State for calendar modal in update modal
+  const [calendarOpen, setCalendarOpen] = useState(false);
   // Validation logic from UploadNewArtist
   const booleanFields = [
     "demos",
@@ -336,75 +338,38 @@ function TableSelector({ table, setTable, tableOptions, searchResult }) {
                 }}
               >
                 {/* Render editable fields using InputFields logic and validation */}
-                {Object.entries(editValues).map(([field, value], i) => (
-                  <div key={field} className="mb-2">
-                    <label className="block mb-1 font-semibold">{field.replace(/_/g, ' ')}{isRequired(field) && <span className="text-red-500">*</span>}</label>
-                    {typeof value === 'boolean' || booleanFields.includes(field) ? (
-                      <select
-                        className="w-full p-2 border rounded"
-                        value={editValues[field] === 1 || editValues[field] === true ? 'true' : 'false'}
-                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value === 'true' ? 1 : 0 })}
-                        required={isRequired(field)}
-                      >
-                        <option value="" disabled>
-                          Select true or false
-                        </option>
-                        <option value="true">true</option>
-                        <option value="false">false</option>
-                      </select>
-                    ) : field === 'release_date' ? (
+                {Object.keys(editValues).map((field, i) =>
+                  field === "release_date" ? (
+                    <div key={field} className="mb-2 relative">
+                      <label className="block mb-1 font-semibold">release_date<span className="text-red-500">*</span></label>
                       <input
                         type="text"
-                        className="w-full p-2 border rounded"
-                        value={editValues[field] || ''}
+                        className="w-full p-2 border rounded pr-10"
+                        value={editValues[field] || ""}
                         onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
                         placeholder="YYYY-MM-DD"
                         required={isRequired(field)}
                       />
-                    ) : field.endsWith('_url') ? (
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded"
-                        value={editValues[field] || ''}
-                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
-                        placeholder="URL"
-                        required={isRequired(field)}
+                      <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <CalendarIcon onClick={() => setCalendarOpen(true)} />
+                      </span>
+                      <CalendarModal
+                        isOpen={calendarOpen}
+                        onClose={() => setCalendarOpen(false)}
+                        onSelectDate={date => {
+                          setEditValues({ ...editValues, [field]: new Date(date).toISOString().split("T")[0] });
+                          setCalendarOpen(false);
+                        }}
                       />
-                    ) : field === 'email' ? (
-                      <>
-                        <input
-                          type="email"
-                          className="w-full p-2 border rounded"
-                          value={editValues[field] || ''}
-                          onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
-                          required={isRequired(field)}
-                          placeholder="e.g. example@example.com"
-                        />
-                        {emailError && <div className="text-red-500 text-sm">{emailError}</div>}
-                      </>
-                    ) : field === 'phone_number' ? (
-                      <>
-                        <input
-                          type="text"
-                          className="w-full p-2 border rounded"
-                          value={editValues[field] || ''}
-                          onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
-                          required={isRequired(field)}
-                          placeholder="e.g. 000-123-4567"
-                        />
-                        {phoneError && <div className="text-red-500 text-sm">{phoneError}</div>}
-                      </>
-                    ) : (
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded"
-                        value={editValues[field] || ''}
-                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
-                        required={isRequired(field)}
-                      />
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ) : null
+                )}
+                <InputFields
+                  fields={Object.keys(editValues).filter(f => f !== "release_date")}
+                  fieldValues={editValues}
+                  setFieldValues={setEditValues}
+                  requiredFields={requiredFields}
+                />
                 <div className="flex justify-end gap-4 mt-4">
                   <button
                     type="button"
