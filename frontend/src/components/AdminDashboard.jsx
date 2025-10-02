@@ -1,3 +1,6 @@
+
+// Stylish TableSelector component for table selection (used in ExistingArtist)
+
 import React, { useEffect, useState } from "react";
 import CalendarModal from "./modal/CalendarModal";
 import CalendarIcon from "./modal/CalendarIcon";
@@ -5,28 +8,6 @@ import ArtistSearchForm from "./ArtistSearchForm";
 import axios from "axios";
 import AdminSqlViewer from "./AdminSqlViewer";
 
-function SelectTable({ table, setTable, tableOptions }) {
-  return (
-    <div>
-      <label className="block mb-2 font-semibold">Select Table</label>
-      <select
-        value={table || ""}
-        onChange={(e) => setTable(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-        required
-      >
-        <option value="" disabled>
-          Choose a table
-        </option>
-        {tableOptions.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
 function SelectFields({ table1, fields1, setFields1, tableFields1 }) {
   // Utility: remove fields that are 'id' or end with '_id'
   function filterOutIdFields(fields) {
@@ -164,7 +145,294 @@ function MultipleInputFields({ rows, setRows }) {
   );
 }
 
+function TableSelector({ table, setTable, tableOptions, searchResult }) {
+  // Validation logic from UploadNewArtist
+  const booleanFields = [
+    "demos",
+    "top_track",
+    "featured_track",
+    "activate",
+    "activate_video",
+    "featured_artists",
+    "is_active",
+    "promote_track",
+    "promo",
+  ];
+  const requiredFields = ["name", "release_date", "title", "email", "phone_number"];
+  const isRequired = (field) => requiredFields.includes(field);
+  const isEmailvalid = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  const isPhoneValid = (phone) => {
+    if (!phone) return false;
+    const digits = phone.replace(/\D/g, "");
+    return digits.length === 10;
+  };
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [pendingUpdate, setPendingUpdate] = useState(null);
+  const [editValues, setEditValues] = useState({});
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState("");
+  const [updateSuccess, setUpdateSuccess] = useState("");
+
+  // Update handler
+  const handleUpdateRecord = async (record) => {
+    setUpdateLoading(true);
+    setUpdateError("");
+    setUpdateSuccess("");
+    try {
+      // Use FormData for file upload (like UploadNewArtist)
+      const formData = new FormData();
+      Object.entries(record).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      const response = await axios.put(`/api/admin/updatedRecord/${table}/${record.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setUpdateSuccess(response.data.message || "Update successful!");
+      setShowUpdateModal(false);
+    } catch (err) {
+      setUpdateError(err.response?.data?.message || err.message || "Update failed");
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+  const [tableData, setTableData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (table) {
+      setLoading(true);
+      setError("");
+      fetch(`/api/admin/records/${table}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch table data");
+          return res.json();
+        })
+        .then((data) => {
+          setTableData(data.records || data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setTableData(null);
+          setLoading(false);
+        });
+    } else {
+      setTableData(null);
+    }
+  }, [table]);
+
+  // If searchResult is a record (not error), filter to only show that card
+  let filteredData = tableData;
+  if (searchResult && typeof searchResult === 'object' && !searchResult.error) {
+    filteredData = [searchResult];
+  }
+
+  return (
+    <div className="mb-6 flex flex-col items-center w-full">
+      <label className="mb-2 text-lg font-bold text-purple-700">Select Table to Update</label>
+      <div className="relative w-full max-w-xs mb-4">
+        <select
+          value={table || ""}
+          onChange={(e) => setTable(e.target.value)}
+          className="block w-full px-4 py-2 pr-8 text-base border-2 border-purple-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white text-purple-900 font-semibold appearance-none transition duration-200"
+        >
+          <option value="" disabled>
+            Choose a table
+          </option>
+          {tableOptions.map((opt) => (
+            <option key={opt} value={opt} className="text-purple-800">
+              {opt.charAt(0).toUpperCase() + opt.slice(1).replace(/_/g, ' ')}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-purple-700">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </div>
+      {/* Table Data Display */}
+      <div className="w-full max-w-2xl">
+        {/* Only show cards if a table is selected */}
+        {table && (
+          <>
+            {loading && <div className="text-purple-600 font-semibold">Loading table data...</div>}
+            {error && <div className="text-red-500 font-semibold">{error}</div>}
+            {updateError && <div className="text-red-500 font-semibold">{updateError}</div>}
+            {updateSuccess && <div className="text-green-600 font-semibold">{updateSuccess}</div>}
+            {filteredData && Array.isArray(filteredData) && filteredData.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                {filteredData.map((row, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white border border-purple-200 rounded-xl shadow-lg p-6 flex flex-col gap-2 transition-transform transform hover:scale-105 hover:shadow-2xl"
+                  >
+                    <div className="flex flex-col gap-y-2">
+                      {Object.entries(row).map(([field, value]) => (
+                        <div key={field} className="flex flex-col mb-2">
+                          <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-1">
+                            {field.replace(/_/g, ' ')}
+                          </span>
+                          <span className="text-base text-purple-900 break-words">
+                            {value === null || value === undefined || String(value).trim() === "" ? "null" : String(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 font-bold self-end"
+                      onClick={() => {
+                        setPendingUpdate(row);
+                        setEditValues(row);
+                        setShowUpdateModal(true);
+                      }}
+                    >
+                      Update
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {filteredData && Array.isArray(filteredData) && filteredData.length === 0 && (
+              <div className="text-gray-500 italic">No records found for this table.</div>
+            )}
+          </>
+        )}
+        {/* Update Modal */}
+        {showUpdateModal && pendingUpdate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full relative">
+              <h3 className="text-xl font-bold mb-4 text-center text-purple-700">Edit Record Before Update</h3>
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  let valid = true;
+                  if (isRequired("email") && !isEmailvalid(editValues.email)) {
+                    setEmailError("Please enter a valid email address.");
+                    valid = false;
+                  } else {
+                    setEmailError("");
+                  }
+                  if (isRequired("phone_number") && !isPhoneValid(editValues.phone_number)) {
+                    setPhoneError("Please enter a valid 10-digit phone number.");
+                    valid = false;
+                  } else {
+                    setPhoneError("");
+                  }
+                  // Check required fields
+                  for (const field of requiredFields) {
+                    if (!editValues[field] || String(editValues[field]).trim() === "") {
+                      valid = false;
+                    }
+                  }
+                  if (!valid) return;
+                  handleUpdateRecord(editValues);
+                }}
+              >
+                {/* Render editable fields using InputFields logic and validation */}
+                {Object.entries(editValues).map(([field, value], i) => (
+                  <div key={field} className="mb-2">
+                    <label className="block mb-1 font-semibold">{field.replace(/_/g, ' ')}{isRequired(field) && <span className="text-red-500">*</span>}</label>
+                    {typeof value === 'boolean' || booleanFields.includes(field) ? (
+                      <select
+                        className="w-full p-2 border rounded"
+                        value={editValues[field] === 1 || editValues[field] === true ? 'true' : 'false'}
+                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value === 'true' ? 1 : 0 })}
+                        required={isRequired(field)}
+                      >
+                        <option value="" disabled>
+                          Select true or false
+                        </option>
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                      </select>
+                    ) : field === 'release_date' ? (
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded"
+                        value={editValues[field] || ''}
+                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
+                        placeholder="YYYY-MM-DD"
+                        required={isRequired(field)}
+                      />
+                    ) : field.endsWith('_url') ? (
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded"
+                        value={editValues[field] || ''}
+                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
+                        placeholder="URL"
+                        required={isRequired(field)}
+                      />
+                    ) : field === 'email' ? (
+                      <>
+                        <input
+                          type="email"
+                          className="w-full p-2 border rounded"
+                          value={editValues[field] || ''}
+                          onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
+                          required={isRequired(field)}
+                          placeholder="e.g. example@example.com"
+                        />
+                        {emailError && <div className="text-red-500 text-sm">{emailError}</div>}
+                      </>
+                    ) : field === 'phone_number' ? (
+                      <>
+                        <input
+                          type="text"
+                          className="w-full p-2 border rounded"
+                          value={editValues[field] || ''}
+                          onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
+                          required={isRequired(field)}
+                          placeholder="e.g. 000-123-4567"
+                        />
+                        {phoneError && <div className="text-red-500 text-sm">{phoneError}</div>}
+                      </>
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded"
+                        value={editValues[field] || ''}
+                        onChange={e => setEditValues({ ...editValues, [field]: e.target.value })}
+                        required={isRequired(field)}
+                      />
+                    )}
+                  </div>
+                ))}
+                <div className="flex justify-end gap-4 mt-4">
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 font-semibold"
+                    onClick={() => setShowUpdateModal(false)}
+                    disabled={updateLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-bold"
+                    disabled={updateLoading}
+                  >
+                    {updateLoading ? 'Updating...' : 'Confirm Update'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 function ExistingArtist({
+  // Stylish TableSelector component for table selection
+ 
   inputMode,
   setInputMode,
   table,
@@ -184,101 +452,68 @@ function ExistingArtist({
   useEffect(() => {
     setInputMode("single");
   }, [setInputMode]);
+
   const [searchType, setSearchType] = useState("id");
   const [searchValue, setSearchValue] = useState("");
   const [artistResult, setArtistResult] = useState(null);
+
+  // Clear search handler
+  const handleClearSearch = () => {
+    setArtistResult(null);
+  };
 
   useEffect(() => {
     setSearchValue("");
   }, [searchType]);
 
-  // Search dbSnapshot for artist
+
+  // Search dbSnapshot for selected table
   const handleArtistSearch = (e) => {
     e.preventDefault();
     setArtistResult(null);
-    if (
-      !searchValue ||
-      !dbSnapshot ||
-      !dbSnapshot["artists"] ||
-      !dbSnapshot["artists"].records
-    ) {
-      setArtistResult({ error: "No artist data available" });
+    if (!searchValue || !dbSnapshot || !table || !dbSnapshot[table] || !dbSnapshot[table].records) {
+      setArtistResult({ error: "No data available for this table" });
       return;
     }
-    const records = dbSnapshot["artists"].records;
+    const records = dbSnapshot[table].records;
     let found = null;
-    if (searchType === "id") {
-      found = records.find((a) => String(a.id) === String(searchValue));
-    } else if (searchType === "name") {
-      found = records.find(
-        (a) => a.name && a.name.toLowerCase() === searchValue.toLowerCase()
-      );
+    if (["albums", "promotional_videos", "promotional_tracks", "tracks", "videos"].includes(table)) {
+      if (searchType === "id") {
+        found = records.find((r) => String(r.id) === String(searchValue));
+      } else if (searchType === "title") {
+        found = records.find((r) => r.title && r.title.toLowerCase() === searchValue.toLowerCase());
+      } else if (searchType === "artist_id") {
+        found = records.find((r) => String(r.artist_id) === String(searchValue));
+      }
+    } else if (table === "artists") {
+      if (searchType === "id") {
+        found = records.find((a) => String(a.id) === String(searchValue));
+      } else if (searchType === "name") {
+        found = records.find((a) => a.name && a.name.toLowerCase() === searchValue.toLowerCase());
+      }
+    } else {
+      // Any other table: only id
+      found = records.find((r) => String(r.id) === String(searchValue));
     }
-    setArtistResult(found || { error: "Artist not found" });
+    setArtistResult(found || { error: "Record not found" });
   };
 
   return (
     <div>
       <ArtistSearchForm
+        table={table}
+        setTable={setTable}
+        tableOptions={tableOptions}
         searchType={searchType}
         setSearchType={setSearchType}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         handleArtistSearch={handleArtistSearch}
         artistResult={artistResult}
+        onClearSearch={handleClearSearch}
       />
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-lg"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Artist Name: {artistResult?.name || "Unknown"} | Artist Id:{" "}
-          {artistResult?.id || "Unknown"}
-        </h2>
-
-        {/* Select Table */}
-        {inputMode && (
-          <SelectTable
-            table={table}
-            setTable={setTable}
-            tableOptions={tableOptions}
-          />
-        )}
-        {/* Select Fields: Only visible if inputMode is 'single' and a table is selected */}
-        {inputMode === "single" && table && (
-          <SelectFields
-            table1={table}
-            fields1={fields}
-            setFields1={setFields}
-            tableFields1={tableFields}
-          />
-        )}
-        {/* Render input boxes for each selected field */}
-        {inputMode === "single" && fields.length > 0 && (
-          <InputFields
-            fields={fields}
-            fieldValues={fieldValues}
-            setFieldValues={setFieldValues}
-          />
-        )}
-        {/* CSV rows input */}
-        {inputMode === "multiple" && (
-          <MultipleInputFields rows={rows} setRows={setRows} />
-        )}
-        {/* Submit button only visible if input is visible */}
-        {((inputMode === "single" && fields.length > 0) ||
-          inputMode === "multiple") && (
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            Upload
-          </button>
-        )}
-        {message && (
-          <div className="mt-4 text-center text-blue-600">{message}</div>
-        )}
-      </form>
+      {/* Stylish TableSelector for updating/viewing tables */}
+      <TableSelector table={table} setTable={setTable} tableOptions={tableOptions} searchResult={artistResult} />
     </div>
   );
 }
@@ -389,11 +624,30 @@ function UploadNewArtist({
       </select>
       {/* Select Table */}
       {inputMode && (
-        <SelectTable
-          table={table}
-          setTable={setTable}
-          tableOptions={tableOptions}
-        />
+        <div className="mb-6 flex flex-col items-center w-full">
+          <label className="mb-2 text-lg font-bold text-purple-700">Select Table</label>
+          <div className="relative w-full max-w-xs mb-4">
+            <select
+              value={table || ""}
+              onChange={e => setTable(e.target.value)}
+              className="block w-full px-4 py-2 pr-8 text-base border-2 border-purple-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white text-purple-900 font-semibold appearance-none transition duration-200"
+            >
+              <option value="" disabled>
+                Choose a table
+              </option>
+              {tableOptions.map(opt => (
+                <option key={opt} value={opt} className="text-purple-800">
+                  {opt.charAt(0).toUpperCase() + opt.slice(1).replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-purple-700">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+          </div>
+        </div>
       )}
       {/* Select Fields: Only visible if inputMode is 'single' and a table is selected */}
       {inputMode === "single" && table && (
@@ -407,9 +661,9 @@ function UploadNewArtist({
       {/* Render input boxes for each selected field, with calendar for release_date */}
       {inputMode === "single" && fields.length > 0 && (
         <div className="mb-4">
-          <h3 className="font-semibold mb-2">
+          {/* <h3 className="font-semibold mb-2">
             Enter values for selected fields:
-          </h3>
+          </h3> */}
           {/* Render prioritized fields first: name, title, image_url (if present) */}
           {['name', 'title', 'image_url'].filter(f => fields.includes(f)).map((field) => {
             return (
@@ -430,7 +684,7 @@ function UploadNewArtist({
                   <label className="block mb-1">{field}</label>
                   <input
                     type="text"
-                    value={formatDate(fieldValues[field])}
+                    value={fieldValues[field] || ""}
                     onChange={(e) =>
                       setFieldValues({
                         ...fieldValues,
@@ -768,7 +1022,7 @@ function AdminDashboard() {
             className="w-full p-2 mb-4 border rounded"
           >
             <option value="upload">Upload New Artist</option>
-            <option value="search">Search Existing Artist</option>
+            <option value="search">Update Existing Records</option>
           </select>
         </div>
         {artistMenu === "upload" && (
