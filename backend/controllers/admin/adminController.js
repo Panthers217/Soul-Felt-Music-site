@@ -29,21 +29,40 @@ export async function insertRecord(req, res) {
   const { table } = req.params;
   const mode = req.headers['x-mode'] || req.headers['xmode'] || req.body.mode;
 
+    const columns = Object.keys(req.body).map(key => `\`${key}\``);
+    const values = Object.values(req.body);
+    const placeholders = columns.map(() => '?');
+
+    // Create an object from columns and values (columns as keys, values as values)
+    // Remove backticks from column names for object keys
+    const columnKeys = columns.map(col => col.replace(/`/g, ""));
+    const columnValueObj = {};
+    columnKeys.forEach((key, idx) => {
+      columnValueObj[key] = values[idx];
+    });
+        
+    // You can now use columnValueObj as needed
+
+    const fieldValues = { ...req.body.fields };
+
+  console.log(`Insert mode: ${mode}`);
   // const { fields, rows, formData } = req.body;
   console.log('Form Data on line 28:', { body: req.body, file: req.file, files: req.files });
 
   // Retrieve xmode from header (case-insensitive)
-  const fieldValues = { ...req.body.fields };
+ 
 
   // Unified logic for live and demo modes
-  if (req.files && Array.isArray(req.files) && (mode === "live" || mode === "demo")) {
+  if (req.files && Array.isArray(req.files) && (mode === "live" || mode === "demo") && columns.length > 0) {
     // Prepare an object to hold field values for SQL insert
+    
   
     for (const file of req.files) {
       let folderPath = "";
       let fieldKey = file.fieldname;
-  // Set folderPath based on mode and fieldname
-  if (mode === "live") {
+    // Set folderPath based on mode and fieldname
+    if (mode === "live") {
+      console.log(`mode is ${mode} and files are present`);
         switch (true) {
           case fieldKey.includes("cover_url"):
             folderPath = "SoulFeltMusic/SoulFeltMusicImages/AlbumCovers";
@@ -66,6 +85,7 @@ export async function insertRecord(req, res) {
           default:
             folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
         }
+        
       } else {
         switch (true) {
           case fieldKey.includes("cover_url"):
@@ -109,10 +129,27 @@ export async function insertRecord(req, res) {
         throw new Error("File object missing path and buffer");
       }
       // Use Cloudinary URL for the matching field
-      fieldValues[fieldKey] = result.secure_url;
+      columnValueObj[fieldKey] = await result.secure_url;
+      console.log("hello from line 109");
+     
+      console.log(`columnValueObj${Object.values(columnValueObj)}`);
+
+      const c = Object.keys(columnValueObj);
+      const val = Object.values(columnValueObj);
+      console.log(`col: ${c}`);
+      console.log(`val: ${val}`);
+      // Build SQL insert statement
+      const col = c.map(f => `\`${f}\``).join(", ");
+      const placeholders = c.map(() => "?").join(", ");
+      const values = val;
+      const insertSql = `INSERT INTO \`${table}\` (${col}) VALUES (${placeholders})`;
+      await pool.query(insertSql, values);
+      res.json({ success: true, inserted: columnValueObj });
+      
       // Alter table to add field if not exists
-      // const alterSql = `ALTER TABLE \`${table}\` ADD COLUMN IF NOT EXISTS \`${fieldKey}\` VARCHAR(255)`;
-      // await pool.query(alterSql);
+    //  const sql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
+    //     await pool.query(sql, values);
+    //   res.json({ success: true, inserted: fieldValues });
     }
     // Build SQL insert statement
     // const columns = Object.keys(fieldValues).map(f => `\`${f}\``).join(", ");
@@ -121,11 +158,13 @@ export async function insertRecord(req, res) {
     // const insertSql = `INSERT INTO \`${table}\` (${columns}) VALUES (${placeholders})`;
     // await pool.query(insertSql, values);
     // res.json({ success: true, inserted: fieldValues });
-  } else {
+  } 
+  else {
     // Build columns and values from fieldValues
-    const columns = Object.keys(fieldValues).map(key => `\`${key}\``);
-    const values = Object.values(fieldValues);
-    const placeholders = columns.map(() => '?');
+    //   const columns = Object.keys(req.body).map(key => `\`${key}\``);
+    //   const values = Object.values(req.body);
+    // const placeholders = columns.map(() => '?');
+
     if (columns.length > 0) {
     //   console.log("Prepared to insert record with fields:", fieldValues);
       console.log("Columns:", columns);
@@ -143,15 +182,16 @@ export async function insertRecord(req, res) {
     }
     console.log("No files uploaded or multer not configured.");
   }
-// upload to database
-    
-    const columns = Object.keys(req.body).map(key => `\`${key}\``);
-    const values = Object.values(req.body);
-    const placeholders = columns.map(() => '?');
+  // upload to database
+
+    /////////---------------------------------/////
+    // const columns = Object.keys(req.body).map(key => `\`${key}\``);
+    // const values = Object.values(req.body);
+    // const placeholders = columns.map(() => '?');
     //   console.log("Prepared to insert record with fields:", fieldValues);
-      console.log(`Columns: ${columns}`);
-      console.log(`Values: ${values}`);
-      console.log(`Placeholders: ${placeholders}`);
+      // console.log(`Columns: ${columns}`);
+      // console.log(`Values: ${values}`);
+      // console.log(`Placeholders: ${placeholders}`);
       // Uncomment below to actually perform the insert
       // const insertSql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
       // await pool.query(insertSql, values);
