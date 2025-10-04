@@ -12,6 +12,10 @@ export const ApiDataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
 
+  // Mode state for admin dashboard
+  const [mode, setMode] = useState("live");
+  
+
   useEffect(() => {
     axios.get('/api/artists')
       .then(res => setArtists(res.data))
@@ -39,8 +43,24 @@ export const ApiDataProvider = ({ children }) => {
       });
   }, []);
 
+ //admin data fetch
+ // Admin related state
+  const [dbSnapshot, setDbSnapshot] = useState(null);
+
+      useEffect(() => {
+          axios
+            .get("/api/admin/tables-with-fields-records")
+            .then((res) => {
+              setDbSnapshot(res.data);
+              console.log("DB Snapshot:", res.data);
+            })
+            .catch((err) => {
+              console.error("Error fetching DB snapshot:", err);
+            });
+        }, []);
+
   return (
-    <ApiDataContext.Provider value={{ artists, albums, tracks, users, error }}>
+    <ApiDataContext.Provider value={{ artists, albums, tracks, users, error, dbSnapshot, setDbSnapshot, mode, setMode }}>
       {children}
     </ApiDataContext.Provider>
   );
