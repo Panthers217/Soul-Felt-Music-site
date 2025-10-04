@@ -22,6 +22,7 @@ import ArtistOverview from "./components/ArtistOverview";
 import ArtistStore from "./components/ArtistStore";
 import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
 import Login from "./components/Login"; // Assuming you have a Login component
+import UploadNewArtist from './components/adminComponents/UploadNewArtist';
 function App() {
   return (
     <Router>
@@ -45,7 +46,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* Admin dashboard route */}
-            <Route path="/admin/sql-viewer" element={<AdminSqlViewer />} /> {/* Admin SQL Viewer route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>
