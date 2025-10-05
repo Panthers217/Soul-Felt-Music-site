@@ -93,7 +93,7 @@ export function useArtistFormValidation(
           console.log("Mode:", mode);
           break;
         case "update":
-          // handleUpdateRecord(e, valuesToCheck);
+          handleUpdateRecord(e, valuesToCheck);
           console.log("Mode:", mode);
           console.log("Updating record with values:", valuesToCheck, mode);
           break;
