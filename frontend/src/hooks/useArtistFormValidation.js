@@ -44,7 +44,7 @@ export function useArtistFormValidation(
 
   // Fields that are required
   const requiredFields = useMemo(
-    () => ["name", "release_date", "title", "email ", "phone_number"],
+    () => ["name", "release_date", "title", "email ", "phone_number", ...booleanFields],
     []
   );
 

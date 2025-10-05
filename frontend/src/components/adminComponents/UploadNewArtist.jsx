@@ -13,12 +13,57 @@ function UploadNewArtist() {
   const [rows, setRows] = useState("");
   const [message, setMessage] = useState("");
   const [tableOptions, setTableOptions] = useState([]);
-  const { dbSnapshot } = useApiData();
+  const { dbSnapshot,} = useApiData();
+
+  // Reset form to initial state
+  const resetForm = () => {
+    setInputMode("");
+    setFieldValues({});
+    setTable("");
+    setFields([]);
+    setRows("");
+   
+  };
 
    // Handle form submission Api call
   async function handleUploadNewRecord(e, values, modeArg) {
     e.preventDefault();
     setMessage("");
+    // Handle single record upload (values is an object)
+    if (values && typeof values === "object" && !Array.isArray(values)) {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      try {
+        console.log("Submitting single record:", Object.fromEntries(formData.entries()));
+        const response = await axios.post(
+          `/api/admin/records/${table}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "x-mode": modeArg,
+            },
+          }
+        );
+        const result = response.data;
+        setMessage(
+          result.message ||
+            (result.success ? "Upload successful!" : "Upload failed.")
+        );
+        if (result.success) {
+          resetForm();
+        }
+      } catch (error) {
+         
+        setMessage(
+          "Upload failed: " + (error.response?.data?.message || error.message)
+        );
+      }
+      
+      return;
+    }
     if (Array.isArray(values) && values.length > 0) {
       const formData = new FormData();
       const tableFieldsSet = new Set(values);
@@ -28,6 +73,8 @@ function UploadNewArtist() {
         }
       });
       try {
+        console.log("Submitting single record:", Object.fromEntries(formData.entries()));
+        
         const response = await axios.post(
           `/api/admin/records/${table}`,
           formData,

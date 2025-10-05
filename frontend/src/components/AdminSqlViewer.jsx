@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Disc3, Mic } from "lucide-react";
 import axios from "axios";
+import { useApiData } from "../context/ApiDataContext";
 //Admin password: admin123
 const user = {
   name: "Alex Thompson",
@@ -9,6 +10,7 @@ const user = {
 };
 
 function AdminSqlViewer({ dbSnapshot }) {
+  const { refreshSqlViewerTableCount, triggerRefreshSqlViewerTable } = useApiData();
   // Always declare hooks at the top level
   const tableKeys = dbSnapshot && Object.keys(dbSnapshot);
   // If only artists table is present, default to it
@@ -43,7 +45,7 @@ function AdminSqlViewer({ dbSnapshot }) {
     if (dbSnapshot && selectedTable && dbSnapshot[selectedTable]) {
       setSelectedFields(dbSnapshot[selectedTable].fields?.slice(0, 3) || []);
     }
-  }, [selectedTable, dbSnapshot]);
+  }, [selectedTable, dbSnapshot, ]);
 
   // If only artists table is present, force selection
   useEffect(() => {
@@ -54,7 +56,7 @@ function AdminSqlViewer({ dbSnapshot }) {
     ) {
       setSelectedTable("artists");
     }
-  }, [dbSnapshot]);
+  }, [dbSnapshot, ]);
 
   // Search function for albums and artists
   const getFilteredRecords = () => {
@@ -231,11 +233,20 @@ function AdminSqlViewer({ dbSnapshot }) {
           />
         </div>
       </div>
-
+      {/* Refresh Table Button */}
+      <div className="w-full max-w-3xl flex justify-end mb-4">
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+          onClick={triggerRefreshSqlViewerTable}
+        >
+          Refresh Table
+        </button>
+      </div>
       {/* Main Card */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow p-6 flex gap-6 mb-6">
         {/* Select Table */}
         <div className="w-1/3">
+        
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Table
           </label>
