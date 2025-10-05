@@ -20,6 +20,7 @@ function ExistingArtist({
   const [tableData, setTableData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [messageForDelete, setMessageForDelete] = useState("");
 
   // Move handleUpdateRecord above useArtistFormValidation
   const handleUpdateRecord = async (record) => {
@@ -49,6 +50,24 @@ function ExistingArtist({
     }
   };
   const { requiredFields, booleanFields, handleLocalSubmit, isRestrictedField } = useArtistFormValidation(handleUpdateRecord);
+
+ // Delete a record from the selected table
+  async function handleDeleteRecord(table, id) {
+    try {
+      const response = await fetch(`/api/admin/records/${table}/${id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      setMessageForDelete(
+        result.message ||
+          (result.success ? "Delete successful!" : "Delete failed.")
+      );
+      return result;
+    } catch (error) {
+      setMessageForDelete("Delete failed: " + error.message);
+      return { success: false, error: error.message };
+    }
+  }
 
   useEffect(() => {
       if (table) {

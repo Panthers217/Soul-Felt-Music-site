@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import UpdateArtistInfoModal from "../modal/UpdateArtistInfoModal";
+import DeleteRecordModal from "../modal/DeleteRecordModal";
 
 function TableSelector({
   table,
@@ -22,34 +23,10 @@ function TableSelector({
   loading,
   error,
   isRestrictedField,
+  handleDeleteRecord,
 }) {
-  
-  // const [tableData, setTableData] = useState(null);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
-
-  // useEffect(() => {
-  //   if (table) {
-  //     setLoading(true);
-  //     setError("");
-  //     fetch(`/api/admin/records/${table}`)
-  //       .then((res) => {
-  //         if (!res.ok) throw new Error("Failed to fetch table data");
-  //         return res.json();
-  //       })
-  //       .then((data) => {
-  //         setTableData(data.records || data);
-  //         setLoading(false);
-  //       })
-  //       .catch((err) => {
-  //         setError(err.message);
-  //         setTableData(null);
-  //         setLoading(false);
-  //       });
-  //   } else {
-  //     setTableData(null);
-  //   }
-  // }, [table]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteRecordId, setDeleteRecordId] = useState(null);
 
   // If searchResult is a record (not error), filter to only show that card
   let filteredData = tableData;
@@ -137,16 +114,27 @@ function TableSelector({
                           </div>
                         ))}
                       </div>
-                      <button
-                        className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 font-bold self-end"
-                        onClick={() => {
-                          setPendingUpdate(row);
-                          setEditValues(row);
-                          setShowUpdateModal(true);
-                        }}
-                      >
-                        Update
-                      </button>
+                      <div className="flex gap-2 mt-2 self-end">
+                        <button
+                          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 font-bold"
+                          onClick={() => {
+                            setPendingUpdate(row);
+                            setEditValues(row);
+                            setShowUpdateModal(true);
+                          }}
+                        >
+                          Update
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-bold"
+                          onClick={() => {
+                            setDeleteRecordId(row.id);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -160,6 +148,16 @@ function TableSelector({
               )}
           </>
         )}
+        {/* Delete Modal */}
+        <DeleteRecordModal
+          show={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onDelete={() => {
+            handleDeleteRecord(table, deleteRecordId);
+            setShowDeleteModal(false);
+          }}
+          recordId={deleteRecordId}
+        />
         {/* Update Modal */}
         <UpdateArtistInfoModal
           show={showUpdateModal}

@@ -688,42 +688,42 @@ function AdminDashboard() {
   };
 
   // Update a record in the selected table
-  async function handleUpdateRecord(table, id, updates) {
-    try {
-      const response = await fetch(`/api/admin/records/${table}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
-      const result = await response.json();
-      setMessage(
-        result.message ||
-          (result.success ? "Update successful!" : "Update failed.")
-      );
-      return result;
-    } catch (error) {
-      setMessage("Update failed: " + error.message);
-      return { success: false, error: error.message };
-    }
-  }
+  // async function handleUpdateRecord(table, id, updates) {
+  //   try {
+  //     const response = await fetch(`/api/admin/records/${table}/${id}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(updates),
+  //     });
+  //     const result = await response.json();
+  //     setMessage(
+  //       result.message ||
+  //         (result.success ? "Update successful!" : "Update failed.")
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     setMessage("Update failed: " + error.message);
+  //     return { success: false, error: error.message };
+  //   }
+  // }
 
-  // Delete a record from the selected table
-  async function handleDeleteRecord(table, id) {
-    try {
-      const response = await fetch(`/api/admin/records/${table}/${id}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-      setMessage(
-        result.message ||
-          (result.success ? "Delete successful!" : "Delete failed.")
-      );
-      return result;
-    } catch (error) {
-      setMessage("Delete failed: " + error.message);
-      return { success: false, error: error.message };
-    }
-  }
+  // // Delete a record from the selected table
+  // async function handleDeleteRecord(table, id) {
+  //   try {
+  //     const response = await fetch(`/api/admin/records/${table}/${id}`, {
+  //       method: "DELETE",
+  //     });
+  //     const result = await response.json();
+  //     setMessage(
+  //       result.message ||
+  //         (result.success ? "Delete successful!" : "Delete failed.")
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     setMessage("Delete failed: " + error.message);
+  //     return { success: false, error: error.message };
+  //   }
+  // }
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
