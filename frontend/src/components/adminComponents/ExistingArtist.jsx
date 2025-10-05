@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import ArtistSearchForm from "../ArtistSearchForm";
 import TableSelector from "./TableSelector";
 import { useArtistFormValidation } from "../../hooks/useArtistFormValidation";
-
+import axios from "axios";
 function ExistingArtist({
   setInputMode,
   table,
@@ -49,55 +49,55 @@ function ExistingArtist({
       setUpdateLoading(false);
     }
   };
-  const { requiredFields, booleanFields, handleLocalSubmit, isRestrictedField } = useArtistFormValidation(handleUpdateRecord);
+  const {
+    requiredFields,
+    booleanFields,
+    handleLocalSubmit,
+    isRestrictedField,
+  } = useArtistFormValidation(handleUpdateRecord);
 
- // Delete a record from the selected table
+  // Delete a record from the selected table
   async function handleDeleteRecord(table, id) {
     try {
-      const response = await fetch(`/api/admin/records/${table}/${id}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-      setMessageForDelete(
+      const response = await axios.delete(`/api/admin/records/${table}/${id}`);
+      const result = response.data;
+      const message =
         result.message ||
-          (result.success ? "Delete successful!" : "Delete failed.")
-      );
+        (result.success ? "Delete successful!" : "Delete failed.");
+      setMessageForDelete(message);
+      if (message) {
+        window.alert(message);
+      }
       return result;
     } catch (error) {
-      setMessageForDelete("Delete failed: " + error.message);
+      setMessageForDelete("Delete failed: " + (error.response?.data?.message || error.message));
+      window.alert("Delete failed: " + (error.response?.data?.message || error.message));
       return { success: false, error: error.message };
     }
   }
 
   useEffect(() => {
-      if (table) {
-        setLoading(true);
-        setError("");
-        fetch(`/api/admin/records/${table}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch table data");
-            return res.json();
-          })
-          .then((data) => {
-            setTableData(data.records || data);
-            setLoading(false);
-          })
-          .catch((err) => {
-            setError(err.message);
-            setTableData(null);
-            setLoading(false);
-          });
-      } else {
-        setTableData(null);
-      }
-    }, [table]);
-
-
-
- 
-
-
-
+    if (table) {
+      setLoading(true);
+      setError("");
+      fetch(`/api/admin/records/${table}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch table data");
+          return res.json();
+        })
+        .then((data) => {
+          setTableData(data.records || data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setTableData(null);
+          setLoading(false);
+        });
+    } else {
+      setTableData(null);
+    }
+  }, [table, messageForDelete]);
 
   useEffect(() => {
     setInputMode("single");
@@ -202,7 +202,8 @@ function ExistingArtist({
         isRestrictedField={isRestrictedField}
         tableData={tableData}
         loading={loading}
-        error={error} 
+        error={error}
+        handleDeleteRecord={handleDeleteRecord}
       />
     </div>
   );
