@@ -24,8 +24,8 @@ router.get('/fields/:table', getFields);
 // GET records for a table
 router.get('/records/:table', getRecords);
 
-// PUT update a record in a table by id
-router.put('/records/:table/:id', updateRecord);
+// PUT update a record in a table by id (with file upload support)
+router.put('/records/:table/:id', upload.any(), updateRecord);
 
 // DELETE a record in a table by id
 router.delete('/records/:table/:id', deleteRecord);
