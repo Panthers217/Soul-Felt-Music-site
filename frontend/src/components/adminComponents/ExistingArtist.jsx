@@ -23,20 +23,29 @@ function ExistingArtist({
   const [messageForDelete, setMessageForDelete] = useState("");
 
   // Move handleUpdateRecord above useArtistFormValidation
-  const handleUpdateRecord = async (record) => {
+  const handleUpdateRecord = async (e, values, modeArg) => {
+     e.preventDefault();
     setUpdateLoading(true);
     setUpdateError("");
     setUpdateSuccess("");
     try {
       const formData = new FormData();
-      Object.entries(record).forEach(([key, value]) => {
-        formData.append(key, value);
+      Object.entries(values).forEach(([key, value]) => {
+       
+        // Format date fields
+        let v = value;
+        if (key === "release_date" && typeof v === "string" && v.includes("T")) {
+          v = v.split("T")[0];
+        }
+        formData.append(key, v);
       });
-      const response = await window.axios.put(
-        `/api/admin/updatedRecord/${table}/${record.id}`,
+      const response = await axios.put(
+        `/api/admin/records/${table}/${values.id}`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "multipart/form-data",
+            "x-mode": modeArg,
+           },
         }
       );
       setUpdateSuccess(response.data.message || "Update successful!");
@@ -49,12 +58,17 @@ function ExistingArtist({
       setUpdateLoading(false);
     }
   };
+
+  // Custom hook for form validation
+  // Pass correct arguments: fields, fieldValues, handleUploadNewRecord (undefined), handleUpdateRecord
+  const fields = [];
+  const fieldValues = {};
   const {
     requiredFields,
     booleanFields,
     handleLocalSubmit,
     isRestrictedField,
-  } = useArtistFormValidation(handleUpdateRecord);
+  } = useArtistFormValidation(fields, fieldValues, undefined, handleUpdateRecord);
 
   // Delete a record from the selected table
   async function handleDeleteRecord(table, id) {

@@ -231,15 +231,112 @@ export async function getRecords(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+
 export async function updateRecord(req, res) {
   const { table, id } = req.params;
-  const updates = req.body; // { field1: value1, field2: value2, ... }
+  const mode = req.headers['x-mode'] || req.headers['xmode'] || req.body.mode;
   try {
-    const setClause = Object.keys(updates)
+    let updates = {};
+    if (req.is('multipart/form-data')) {
+      updates = { ...req.body };
+      delete updates.id;
+    } else {
+      updates = { ...req.body };
+      delete updates.id;
+    }
+    // Handle file upload if file(s) present
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      for (const file of req.files) {
+        let folderPath = "";
+        let fieldKey = file.fieldname;
+        // Set folderPath based on mode and fieldname
+        if (mode === "live") {
+          switch (true) {
+            case fieldKey.includes("cover_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicImages/AlbumCovers";
+              break;
+            case fieldKey.includes("image_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicImages/ArtistImages";
+              break;
+            case fieldKey.includes("audio_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicAudio/Tracks";
+              break;
+            case fieldKey.includes("promo_audio_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicAudio/PromoTracks";
+              break;
+            case fieldKey.includes("video_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicVideos/Videos";
+              break;
+            case fieldKey.includes("promo_video_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicVideos/PromoVideos";
+              break;
+            default:
+              folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
+          }
+        } else {
+          switch (true) {
+            case fieldKey.includes("cover_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/AlbumCoversDemos";
+              break;
+            case fieldKey.includes("image_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/ArtistImagesDemo";
+              break;
+            case fieldKey.includes("audio_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoTrack";
+              break;
+            case fieldKey.includes("promo_audio_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoPromoTrack";
+              break;
+            case fieldKey.includes("video_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoVideos";
+              break;
+            case fieldKey.includes("promo_video_url"):
+              folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoPromoVideos";
+              break;
+            default:
+              folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
+          }
+        }
+        // Upload to Cloudinary
+        let result;
+        if (file.path) {
+          result = await cloudinary.uploader.upload(file.path, {
+            folder: folderPath,
+            public_id: `upload_${file.originalname}`,
+          });
+        } else if (file.buffer) {
+          result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              { folder: folderPath, public_id: `upload_${file.originalname}` },
+              (error, result) => error ? reject(error) : resolve(result)
+            );
+            stream.end(file.buffer);
+          });
+        } else {
+          throw new Error("File object missing path and buffer");
+        }
+        // Use Cloudinary URL for the matching field
+        updates[fieldKey] = await result.secure_url;
+      }
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: "No fields to update." });
+    }
+     console.log("Updates to apply:", updates);
+    // Use idField for the id param, and filter updates for SQL
+    const idField = id; // Always use the id from params
+    const filteredUpdates = Object.fromEntries(
+      Object.entries(updates).filter(
+        ([field]) => field !== 'id' && !field.endsWith('_id')
+      )
+    );
+    const filteredFields = Object.keys(filteredUpdates);
+    const setClause = filteredFields
       .map((field) => `\`${field}\` = ?`)
       .join(", ");
-    const values = Object.values(updates);
-    values.push(id); // id for WHERE clause
+    const values = filteredFields.map((field) => filteredUpdates[field]);
+    values.push(idField); // id for WHERE clause
     const sql = `UPDATE \`${table}\` SET ${setClause} WHERE id = ?`;
     const [result] = await pool.query(sql, values);
     res.json({ success: true, affectedRows: result.affectedRows });
@@ -247,6 +344,9 @@ export async function updateRecord(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+
+
 export async function getTablesWithFieldsAndRecords(req, res) {
   try {
     // Get all table names

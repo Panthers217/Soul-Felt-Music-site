@@ -33,7 +33,12 @@ function UploadNewArtist() {
     if (values && typeof values === "object" && !Array.isArray(values)) {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value);
+        // Format date fields
+        let v = value;
+        if (key === "release_date" && typeof v === "string" && v.includes("T")) {
+          v = v.split("T")[0];
+        }
+        formData.append(key, v);
       });
       try {
         console.log("Submitting single record:", Object.fromEntries(formData.entries()));
