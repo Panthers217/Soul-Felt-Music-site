@@ -120,9 +120,9 @@ function UploadNewArtist() {
   // When table changes, update fields and fieldValues
   useEffect(() => {
     if (dbSnapshot && table && dbSnapshot[table]) {
-      // Remove id fields
+      // Remove id fields and fields ending with '_id' or '_public_identifier'
       const newFields = (dbSnapshot[table].fields || []).filter(
-        (field) => field !== "id" && !field.endsWith("_id")
+        (field) => field !== "id" && !field.endsWith("_id") && !field.endsWith("_public_identifier")
       );
       setFields(newFields);
       // Initialize fieldValues
@@ -147,7 +147,10 @@ function UploadNewArtist() {
       const records = dbSnapshot[table].records || [];
       if (records.length > 0 && dbSnapshot[table].fields) {
         const csvRows = records.map((record) =>
-          dbSnapshot[table].fields.map((field) => record[field] ?? "").join(",")
+          dbSnapshot[table].fields
+            .filter((field) => field !== "id" && !field.endsWith("_id") && !field.endsWith("_public_identifier"))
+            .map((field) => record[field] ?? "")
+            .join(",")
         );
         setRows(csvRows.join("\n"));
       } else {

@@ -16,6 +16,37 @@ cloudinary.config({
 export async function deleteRecord(req, res) {
   const { table, id } = req.params;
   try {
+    // Map of table to file field
+    const fileFieldMap = {
+      albums: 'cover_url',
+      artist_images: 'image_url',
+      promotional_tracks: 'promo_audio_url',
+      promotional_videos: 'promo_video_url',
+      tracks: 'audio_url',
+      videos: 'video_url',
+    };
+    const fileField = fileFieldMap[table];
+    let publicId;
+    if (fileField) {
+      // Get the file URL from the DB
+      const [rows] = await pool.query(`SELECT \`${fileField}\` FROM \`${table}\` WHERE id = ?`, [id]);
+      if (rows.length && rows[0][fileField]) {
+        const fileUrl = rows[0][fileField];
+        // Extract public_id from the URL (assuming format .../folder/public_id.ext)
+        // This logic may need to be adjusted if your URLs are structured differently
+        const urlParts = fileUrl.split('/');
+        const fileNameWithExt = urlParts[urlParts.length - 1];
+        const [publicIdBase] = fileNameWithExt.split('.');
+        // Remove extension, keep folder path for public_id
+        publicId = urlParts.slice(urlParts.length - 2).join('/').replace(/\.[^/.]+$/, '');
+        // Try to delete from Cloudinary
+        try {
+          await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+        } catch (cloudErr) {
+          console.error('Cloudinary delete error:', cloudErr);
+        }
+      }
+    }
     const sql = `DELETE FROM \`${table}\` WHERE id = ?`;
     const [result] = await pool.query(sql, [id]);
     res.json({ success: true, affectedRows: result.affectedRows });
@@ -115,12 +146,13 @@ export async function insertRecord(req, res) {
       if (file.path) {
         result = await cloudinary.uploader.upload(file.path, {
           folder: folderPath,
-          public_id: `upload_${file.originalname}`,
+          // public_id: `upload_${file.originalname}`,
         });
+        // public_id: `upload_${file.originalname}`
       } else if (file.buffer) {
         result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { folder: folderPath, public_id: `upload_${file.originalname}` },
+            { folder: folderPath, /*public_id: `upload_${file.originalname}` */ },
             (error, result) => error ? reject(error) : resolve(result)
           );
           stream.end(file.buffer);
@@ -128,10 +160,11 @@ export async function insertRecord(req, res) {
       } else {
         throw new Error("File object missing path and buffer");
       }
-      // Use Cloudinary URL for the matching field
-      columnValueObj[fieldKey] = await result.secure_url;
+      // Use Cloudinary URL and public_id for the matching field
+      columnValueObj[fieldKey] = result.secure_url;
+      // Also store public_id in a separate field if desired (e.g., `${fieldKey}_public_id`)
+      columnValueObj[`${fieldKey}_public_identifier`] = result.public_id;
       console.log("hello from line 109");
-     
       console.log(`columnValueObj${Object.values(columnValueObj)}`);
 
       const c = Object.keys(columnValueObj);
@@ -247,6 +280,15 @@ export async function updateRecord(req, res) {
     }
     // Handle file upload if file(s) present
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      // Map of table to file field
+      const fileFieldMap = {
+        albums: 'cover_url',
+        artist_images: 'image_url',
+        promotional_tracks: 'promo_audio_url',
+        promotional_videos: 'promo_video_url',
+        tracks: 'audio_url',
+        videos: 'video_url',
+      };
       for (const file of req.files) {
         let folderPath = "";
         let fieldKey = file.fieldname;
@@ -298,17 +340,55 @@ export async function updateRecord(req, res) {
               folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
           }
         }
+        // If this field is a managed Cloudinary field, delete the old file first
+        // Get the old public_id from the DB if the column exists
+        const publicIdField = `${fieldKey}_public_identifier`;
+        let oldPublicId = null;
+        try {
+          const [rows] = await pool.query(`SELECT \`${publicIdField}\` FROM \`${table}\` WHERE id = ?`, [id]);
+          if (rows.length && rows[0][publicIdField]) {
+            oldPublicId = rows[0][publicIdField];
+          }
+        } catch (e) {
+          // Column may not exist, fallback to extracting from URL
+        }
+        if (!oldPublicId) {
+          // Fallback: extract from file URL if public_id column doesn't exist
+          const [rows] = await pool.query(`SELECT \`${fieldKey}\` FROM \`${table}\` WHERE id = ?`, [id]);
+          if (rows.length && rows[0][fieldKey]) {
+            const fileUrl = rows[0][fieldKey];
+            const urlParts = fileUrl.split('/');
+            const fileNameWithExt = urlParts[urlParts.length - 1];
+            const [publicIdBase] = fileNameWithExt.split('.');
+            oldPublicId = urlParts.slice(urlParts.length - 2).join('/').replace(/\.[^/.]+$/, '');
+          }
+        }
+        if (oldPublicId) {
+          // Determine resource_type based on field
+          let resourceType = 'image';
+          if (fieldKey.includes('audio_url') || fieldKey.includes('promo_audio_url')) {
+            resourceType = 'raw';
+          } else if (fieldKey.includes('video_url') || fieldKey.includes('promo_video_url')) {
+            resourceType = 'video';
+          }
+          console.log(`Deleting old file with public_id: ${oldPublicId} and resource_type: ${resourceType}`);
+          try {
+            await cloudinary.uploader.destroy(oldPublicId, { resource_type: resourceType });
+          } catch (cloudErr) {
+            console.error('Cloudinary update delete error:', cloudErr);
+          }
+        }
         // Upload to Cloudinary
         let result;
         if (file.path) {
           result = await cloudinary.uploader.upload(file.path, {
             folder: folderPath,
-            public_id: `upload_${file.originalname}`,
+            /*public_id: `upload_${file.originalname}`, */
           });
         } else if (file.buffer) {
           result = await new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
-              { folder: folderPath, public_id: `upload_${file.originalname}` },
+              { folder: folderPath, /*public_id: `upload_${file.originalname}` */ },
               (error, result) => error ? reject(error) : resolve(result)
             );
             stream.end(file.buffer);
@@ -317,7 +397,9 @@ export async function updateRecord(req, res) {
           throw new Error("File object missing path and buffer");
         }
         // Use Cloudinary URL for the matching field
+        //Reassign to updates for SQL update
         updates[fieldKey] = await result.secure_url;
+        updates[`${fieldKey}_public_identifier`] = await result.public_id;
       }
     }
     if (Object.keys(updates).length === 0) {
