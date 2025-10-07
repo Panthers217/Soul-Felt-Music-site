@@ -179,18 +179,8 @@ export async function insertRecord(req, res) {
       await pool.query(insertSql, values);
       res.json({ success: true, inserted: columnValueObj });
       
-      // Alter table to add field if not exists
-    //  const sql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
-    //     await pool.query(sql, values);
-    //   res.json({ success: true, inserted: fieldValues });
+     
     }
-    // Build SQL insert statement
-    // const columns = Object.keys(fieldValues).map(f => `\`${f}\``).join(", ");
-    // const placeholders = Object.keys(fieldValues).map(() => "?").join(", ");
-    // const values = Object.values(fieldValues);
-    // const insertSql = `INSERT INTO \`${table}\` (${columns}) VALUES (${placeholders})`;
-    // await pool.query(insertSql, values);
-    // res.json({ success: true, inserted: fieldValues });
   } 
   else {
     // Build columns and values from fieldValues
@@ -198,41 +188,34 @@ export async function insertRecord(req, res) {
     //   const values = Object.values(req.body);
     // const placeholders = columns.map(() => '?');
 
-    if (columns.length > 0) {
-    //   console.log("Prepared to insert record with fields:", fieldValues);
-      console.log("Columns:", columns);
-      console.log("Values:", values);
-      console.log("Placeholders:", placeholders);
-      // Fix: log req.body as JSON string if it's an object
+    // if (columns.length > 0) {
+    // //   console.log("Prepared to insert record with fields:", fieldValues);
+    //   console.log("Columns:", columns);
+    //   console.log("Values:", values);
+    //   console.log("Placeholders:", placeholders);
+    //   // Fix: log req.body as JSON string if it's an object
      
-      // Uncomment below to actually perform the insert
-      // const insertSql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
-      // await pool.query(insertSql, values);
-      // res.json({ success: true, inserted: fieldValues });
+    //   // Uncomment below to actually perform the insert
+    //   const insertSql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
+    //   await pool.query(insertSql, values);
+    //   res.json({ success: true, inserted: fieldValues });
+    // } else {
+    //   console.log("No valid fields to insert.");
+    //   res.status(400).json({ success: false, message: "No valid fields to insert." });
+    // }
+    // console.log("No files uploaded or multer not configured.");
+  }
+  // upload to database
+
+   if (columns.length > 0) {
+      const insertSql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
+      await pool.query(insertSql, values);
+      res.json({ success: true, inserted: columnValueObj });
     } else {
       console.log("No valid fields to insert.");
       res.status(400).json({ success: false, message: "No valid fields to insert." });
     }
-    console.log("No files uploaded or multer not configured.");
-  }
-  // upload to database
-
-    /////////---------------------------------/////
-    // const columns = Object.keys(req.body).map(key => `\`${key}\``);
-    // const values = Object.values(req.body);
-    // const placeholders = columns.map(() => '?');
-    //   console.log("Prepared to insert record with fields:", fieldValues);
-      // console.log(`Columns: ${columns}`);
-      // console.log(`Values: ${values}`);
-      // console.log(`Placeholders: ${placeholders}`);
-      // Uncomment below to actually perform the insert
-      // const insertSql = `INSERT INTO \`${table}\` (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
-      // await pool.query(insertSql, values);
-      // res.json({ success: true, inserted: fieldValues });
-    
-      // console.log("No valid fields to insert.");
-      // res.status(400).json({ success: false, message: "No valid fields to insert." });
-
+    return;
 
 } // <-- Add this closing brace to properly end insertRecord function
 
