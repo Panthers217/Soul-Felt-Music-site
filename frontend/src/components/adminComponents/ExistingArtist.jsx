@@ -4,6 +4,8 @@ import ArtistSearchForm from "../ArtistSearchForm";
 import TableSelector from "./TableSelector";
 import { useArtistFormValidation } from "../../hooks/useArtistFormValidation";
 import axios from "axios";
+import { useUserLogin } from '../../hooks/useUserLogin.js';
+import { toast } from 'react-hot-toast';
 function ExistingArtist({
   setInputMode,
   table,
@@ -21,17 +23,18 @@ function ExistingArtist({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [messageForDelete, setMessageForDelete] = useState("");
+  const [refreshTable, setRefreshTable] = useState(false);
 
   // Move handleUpdateRecord above useArtistFormValidation
+  const { user } = useUserLogin();
   const handleUpdateRecord = async (e, values, modeArg) => {
-     e.preventDefault();
+    e.preventDefault();
     setUpdateLoading(true);
     setUpdateError("");
     setUpdateSuccess("");
     try {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-       
         // Format date fields
         let v = value;
         if (key === "release_date" && typeof v === "string" && v.includes("T")) {
@@ -39,21 +42,31 @@ function ExistingArtist({
         }
         formData.append(key, v);
       });
+      if (!user || !user.getIdToken) {
+        throw new Error("You must be logged in as an admin to update records.");
+      }
+      const token = await user.getIdToken();
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "x-mode": modeArg,
+          "Authorization": `Bearer ${token}`,
+        },
+      };
       const response = await axios.put(
         `/api/admin/records/${table}/${values.id}`,
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data",
-            "x-mode": modeArg,
-           },
-        }
+        config
       );
+      toast.success(response.data.message || "Update successful!");
       setUpdateSuccess(response.data.message || "Update successful!");
       setShowUpdateModal(false);
+      setRefreshTable(rt => !rt); // trigger TableSelector refresh
     } catch (err) {
       setUpdateError(
         err.response?.data?.message || err.message || "Update failed"
       );
+      toast.error(err.response?.data?.message || err.message || "Update failed");
     } finally {
       setUpdateLoading(false);
     }
@@ -73,19 +86,30 @@ function ExistingArtist({
   // Delete a record from the selected table
   async function handleDeleteRecord(table, id) {
     try {
-      const response = await axios.delete(`/api/admin/records/${table}/${id}`);
+      if (!user || !user.getIdToken) {
+        throw new Error("You must be logged in as an admin to delete records.");
+      }
+      const token = await user.getIdToken();
+      const config = {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      };
+      const response = await axios.delete(`/api/admin/records/${table}/${id}`, config);
       const result = response.data;
-      const message =
-        result.message ||
-        (result.success ? "Delete successful!" : "Delete failed.");
+      const message = result.message || (result.success ? "Delete successful!" : "Delete failed.");
       setMessageForDelete(message);
-      if (message) {
-        window.alert(message);
+      if (result.success) {
+        toast.success(message);
+        setRefreshTable(rt => !rt); // trigger TableSelector refresh
+      } else {
+        toast.error(message);
       }
       return result;
     } catch (error) {
-      setMessageForDelete("Delete failed: " + (error.response?.data?.message || error.message));
-      window.alert("Delete failed: " + (error.response?.data?.message || error.message));
+      const errMsg = "Delete failed: " + (error.response?.data?.message || error.message);
+      setMessageForDelete(errMsg);
+      toast.error(errMsg);
       return { success: false, error: error.message };
     }
   }
@@ -111,7 +135,7 @@ function ExistingArtist({
     } else {
       setTableData(null);
     }
-  }, [table, messageForDelete]);
+  }, [table, messageForDelete, refreshTable]);
 
   useEffect(() => {
     setInputMode("single");

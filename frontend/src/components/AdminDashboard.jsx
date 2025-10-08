@@ -13,6 +13,9 @@ import InputFields from "./adminComponents/InputFields";
 import MultipleInputFields from "./adminComponents/MultipleInputFields";
 import TableSelector from "./adminComponents/TableSelector";
 import ExistingArtist from "./adminComponents/ExistingArtist";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 // const InputFields = ({
 //   fields,
@@ -551,6 +554,8 @@ import ExistingArtist from "./adminComponents/ExistingArtist";
 
 //Main exporting component
 
+
+
 function AdminDashboard() {
   const [artistMenu, setArtistMenu] = useState("upload");
   const [inputMode, setInputMode] = useState("");
@@ -724,9 +729,29 @@ function AdminDashboard() {
   //     return { success: false, error: error.message };
   //   }
   // }
+  const navigate = useNavigate();
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/admin/login");
+    } catch (error) {
+      alert("Logout failed: " + error.message);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
+        {/* Logout button at the top */}
+        <div className="w-full flex justify-end items-center pt-6 pb-2 px-8">
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-bold shadow"
+            onClick={handleLogout}
+          >
+            Log Out Admin
+          </button>
+        </div>
         <div className="mb-2 font-semibold">Current Mode: {mode}</div>
         <AdminSqlViewer
           table={table}

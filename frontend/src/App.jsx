@@ -23,10 +23,42 @@ import ArtistStore from "./components/ArtistStore";
 import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
 import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
+import { Toaster } from 'react-hot-toast';
+import { useUserLogin } from './hooks/useUserLogin.js';
+import { Navigate } from 'react-router-dom';
 function App() {
+  const { user, loading } = useUserLogin();
+  // Helper to check admin claim
+  const isAdmin = user && user.getIdTokenResult && user.email && user.getIdTokenResult;
+
+  // Custom AdminDashboard route protection
+  function AdminDashboardRoute() {
+    const [isAdminUser, setIsAdminUser] = React.useState(null);
+    const [checking, setChecking] = React.useState(true);
+    React.useEffect(() => {
+      let mounted = true;
+      async function checkAdmin() {
+        setChecking(true);
+        if (user && user.getIdTokenResult) {
+          const tokenResult = await user.getIdTokenResult();
+          if (mounted) setIsAdminUser(tokenResult.claims.admin === true);
+        } else {
+          if (mounted) setIsAdminUser(false);
+        }
+        setChecking(false);
+      }
+      checkAdmin();
+      return () => { mounted = false; };
+    }, [user]);
+    if (loading || checking || isAdminUser === null) return null;
+    if (!user || !isAdminUser) return <Navigate to="/" replace />;
+    return <AdminDashboard />;
+  }
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        <Toaster />
         {/* <NavBar /> */}
         <ResponsiveNavbar />
         <main className="flex-1">
@@ -45,7 +77,7 @@ function App() {
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
-            <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* Admin dashboard route */}
+            <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>

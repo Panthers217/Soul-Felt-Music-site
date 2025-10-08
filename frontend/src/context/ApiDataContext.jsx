@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useUserLogin } from "../hooks/useUserLogin.js";
 
 const ApiDataContext = createContext();
 
@@ -12,10 +13,21 @@ export const ApiDataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
   const [refreshSqlViewerTable, setRefreshSqlViewerTable] = useState(false);
-  const triggerRefreshSqlViewerTable = () => setRefreshSqlViewerTable(prev => !prev);
+  const triggerRefreshSqlViewerTable = () =>
+    setRefreshSqlViewerTable((prev) => !prev);
 
   // Mode state for admin dashboard
   const [mode, setMode] = useState("live");
+  
+
+  
+
+  // Persist mode changes to localStorage
+  useEffect(() => {
+    localStorage.setItem("soulFeltMode", mode);
+    console.log("Mode set to:", mode);
+   
+  }, [mode]);
 
   useEffect(() => {
     axios
@@ -51,18 +63,28 @@ export const ApiDataProvider = ({ children }) => {
   //admin data fetch
   // Admin related state
   const [dbSnapshot, setDbSnapshot] = useState(null);
+  const { user } = useUserLogin();
 
   useEffect(() => {
-    axios
-      .get("/api/admin/tables-with-fields-records")
-      .then((res) => {
+    async function fetchAdminData() {
+      try {
+        let config = {};
+        if (user && user.getIdToken) {
+          const token = await user.getIdToken();
+          config.headers = { Authorization: `Bearer ${token}` };
+        }
+        const res = await axios.get(
+          "/api/admin/tables-with-fields-records",
+          config
+        );
         setDbSnapshot(res.data);
         console.log("DB Snapshot:", res.data);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching DB snapshot:", err);
-      });
-  }, [refreshSqlViewerTable]);
+      }
+    }
+    fetchAdminData();
+  }, [refreshSqlViewerTable, user]);
 
   return (
     <ApiDataContext.Provider
