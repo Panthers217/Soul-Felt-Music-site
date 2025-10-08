@@ -9,7 +9,10 @@ const InputFields = ({
   requiredFields = [],
   booleanFields = [],
   isRestrictedField = () => false,
+  validateIdFields = () => ({}),
 }) => {
+  // Get validation errors for _id fields
+  const idFieldErrors = validateIdFields(fieldValues);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Helper to check if a field is release_date
@@ -39,6 +42,10 @@ const InputFields = ({
       {fields.map((field, i) => (
         <div key={field} className="mb-2 relative">
           <label className="block mb-1">{field}</label>
+          {/* Show error for _id fields */}
+          {field.endsWith('_id') && idFieldErrors[field] && (
+            <span className="text-red-500 text-xs block mb-1">{idFieldErrors[field]}</span>
+          )}
           {field === "cover_url" ||
           field === "image_url" ||
           field === "promo_audio_url" ||

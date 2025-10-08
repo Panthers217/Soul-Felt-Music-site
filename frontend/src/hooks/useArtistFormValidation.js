@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, } from "react";
 import { useApiData } from "../context/ApiDataContext";
 
 export function useArtistFormValidation(
@@ -7,11 +7,13 @@ export function useArtistFormValidation(
   handleUploadNewRecord,
   handleUpdateRecord
 ) {
-  const { mode, setMode } = useApiData();
+  const { mode, setMode,  } = useApiData();
+
+  
 
   // Stable callback to get the current mode
   const getMode = useCallback(() => mode, [mode]);
-  
+  console.log("Current mode in hook:", mode);
 
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");

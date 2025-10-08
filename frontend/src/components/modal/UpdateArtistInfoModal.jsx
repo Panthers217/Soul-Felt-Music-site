@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import InputFields from "../adminComponents/InputFields";
 import DeleteRecordModal from "./DeleteRecordModal";
+import ConfirmModeModal from "./ConfirmModeModal";
 
 export default function UpdateArtistInfoModal({
   show,
@@ -17,6 +18,8 @@ export default function UpdateArtistInfoModal({
   table,
 }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [submitEvent, setSubmitEvent] = useState(null);
   if (!show || !pendingUpdate) return null;
   // Get the currently visible fields
   const visibleFields = Object.keys(editValues);
@@ -26,6 +29,22 @@ export default function UpdateArtistInfoModal({
     filteredValues[field] = editValues[field];
   });
   const recordId = editValues.id;
+  // Removed duplicate useState declarations
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    setSubmitEvent(e);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmUpdate = () => {
+    setShowConfirmModal(false);
+    if (submitEvent) {
+      handleLocalSubmit(submitEvent, "update", visibleFields, filteredValues);
+      setSubmitEvent(null);
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -33,9 +52,7 @@ export default function UpdateArtistInfoModal({
           <h3 className="text-xl font-bold mb-4 text-center text-purple-700">
             Edit Record Before Update
           </h3>
-          <form
-            onSubmit={(e) => handleLocalSubmit(e, "update", visibleFields, filteredValues)}
-          >
+          <form onSubmit={handleFormSubmit}>
             <InputFields
               fields={visibleFields}
               fieldValues={editValues}
@@ -72,6 +89,12 @@ export default function UpdateArtistInfoModal({
           </form>
         </div>
       </div>
+      <ConfirmModeModal
+        show={showConfirmModal}
+        onChangeMode={() => {}}
+        onConfirm={handleConfirmUpdate}
+        onCancel={() => setShowConfirmModal(false)}
+      />
       <DeleteRecordModal
         show={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

@@ -28,22 +28,36 @@ export async function deleteRecord(req, res) {
     const fileField = fileFieldMap[table];
     let publicId;
     if (fileField) {
-      // Get the file URL from the DB
-      const [rows] = await pool.query(`SELECT \`${fileField}\` FROM \`${table}\` WHERE id = ?`, [id]);
-      if (rows.length && rows[0][fileField]) {
-        const fileUrl = rows[0][fileField];
-        // Extract public_id from the URL (assuming format .../folder/public_id.ext)
-        // This logic may need to be adjusted if your URLs are structured differently
-        const urlParts = fileUrl.split('/');
-        const fileNameWithExt = urlParts[urlParts.length - 1];
-        const [publicIdBase] = fileNameWithExt.split('.');
-        // Remove extension, keep folder path for public_id
-        publicId = urlParts.slice(urlParts.length - 2).join('/').replace(/\.[^/.]+$/, '');
-        // Try to delete from Cloudinary
-        try {
-          await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
-        } catch (cloudErr) {
-          console.error('Cloudinary delete error:', cloudErr);
+      // Get all fields for the record
+      const [rows] = await pool.query(`SELECT * FROM \`${table}\` WHERE id = ?`, [id]);
+      if (rows.length) {
+        // Find any field ending with '_public_identifier'
+        const identifierField = Object.keys(rows[0]).find(key => key.endsWith('_public_identifier'));
+        if (identifierField && rows[0][identifierField]) {
+          publicId = rows[0][identifierField];
+        } else if (rows[0][fileField]) {
+          // Fallback: extract from file URL if public_id column doesn't exist
+          const fileUrl = rows[0][fileField];
+          const urlParts = fileUrl.split('/');
+          const fileNameWithExt = urlParts[urlParts.length - 1];
+          const [publicIdBase] = fileNameWithExt.split('.');
+          publicId = urlParts.slice(urlParts.length - 2).join('/').replace(/\.[^/.]+$/, '');
+        }
+        if (publicId) {
+          // Determine resource_type based on fileField
+          let resourceType = 'image';
+          if (fileField.includes('video')) {
+            resourceType = 'video';
+          } else if (fileField.includes('audio')) {
+            resourceType = 'raw';
+          }
+          console.log('Cloudinary delete debug:', { publicId, resourceType });
+          try {
+            const destroyResult = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+            console.log('Cloudinary destroy result:', destroyResult);
+          } catch (cloudErr) {
+            console.error('Cloudinary delete error:', cloudErr);
+          }
         }
       }
     }
@@ -60,9 +74,10 @@ export async function insertRecord(req, res) {
   const { table } = req.params;
   const mode = req.headers['x-mode'] || req.headers['xmode'] || req.body.mode;
 
-    const columns = Object.keys(req.body).map(key => `\`${key}\``);
-    const values = Object.values(req.body);
-    const placeholders = columns.map(() => '?');
+  const columns = Object.keys(req.body).map(key => `\`${key}\``);
+  // Convert empty strings to null for all values
+  const values = Object.values(req.body).map(v => v === "" ? null : v);
+  const placeholders = columns.map(() => '?');
 
     // Create an object from columns and values (columns as keys, values as values)
     // Remove backticks from column names for object keys
@@ -86,73 +101,39 @@ export async function insertRecord(req, res) {
   // Unified logic for live and demo modes
   if (req.files && Array.isArray(req.files) && (mode === "live" || mode === "demo") && columns.length > 0) {
     // Prepare an object to hold field values for SQL insert
-    
-  
     for (const file of req.files) {
       let folderPath = "";
       let fieldKey = file.fieldname;
-    // Set folderPath based on mode and fieldname
-    if (mode === "live") {
-      console.log(`mode is ${mode} and files are present`);
+      // Set folderPath based on mode and fieldname
+      if (mode === "live") {
         switch (true) {
-          case fieldKey.includes("cover_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicImages/AlbumCovers";
-            break;
-          case fieldKey.includes("image_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicImages/ArtistImages";
-            break;
-          case fieldKey.includes("audio_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicAudio/Tracks";
-            break;
-          case fieldKey.includes("promo_audio_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicAudio/PromoTracks";
-            break;
-          case fieldKey.includes("video_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicVideos/Videos";
-            break;
-          case fieldKey.includes("promo_video_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicVideos/PromoVideos";
-            break;
-          default:
-            folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
+          case fieldKey.includes("cover_url"): folderPath = "SoulFeltMusic/SoulFeltMusicImages/AlbumCovers"; break;
+          case fieldKey.includes("image_url"): folderPath = "SoulFeltMusic/SoulFeltMusicImages/ArtistImages"; break;
+          case fieldKey.includes("audio_url"): folderPath = "SoulFeltMusic/SoulFeltMusicAudio/Tracks"; break;
+          case fieldKey.includes("promo_audio_url"): folderPath = "SoulFeltMusic/SoulFeltMusicAudio/PromoTracks"; break;
+          case fieldKey.includes("video_url"): folderPath = "SoulFeltMusic/SoulFeltMusicVideos/Videos"; break;
+          case fieldKey.includes("promo_video_url"): folderPath = "SoulFeltMusic/SoulFeltMusicVideos/PromoVideos"; break;
+          default: folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
         }
-        
       } else {
         switch (true) {
-          case fieldKey.includes("cover_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/AlbumCoversDemos";
-            break;
-          case fieldKey.includes("image_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/ArtistImagesDemo";
-            break;
-          case fieldKey.includes("audio_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoTrack";
-            break;
-          case fieldKey.includes("promo_audio_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoPromoTrack";
-            break;
-          case fieldKey.includes("video_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoVideos";
-            break;
-          case fieldKey.includes("promo_video_url"):
-            folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoPromoVideos";
-            break;
-          default:
-            folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
+          case fieldKey.includes("cover_url"): folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/AlbumCoversDemos"; break;
+          case fieldKey.includes("image_url"): folderPath = "SoulFeltMusic/SoulFeltMusicImages/DemoImages/ArtistImagesDemo"; break;
+          case fieldKey.includes("audio_url"): folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoTrack"; break;
+          case fieldKey.includes("promo_audio_url"): folderPath = "SoulFeltMusic/SoulFeltMusicAudio/DemoTracksWebdev/DemoPromoTrack"; break;
+          case fieldKey.includes("video_url"): folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoVideos"; break;
+          case fieldKey.includes("promo_video_url"): folderPath = "SoulFeltMusic/SoulFeltMusicVideos/DemoVideosWebDev/DemoPromoVideos"; break;
+          default: folderPath = "SoulFeltMusic/SoulFeltMusicMisc";
         }
       }
       // Upload to Cloudinary
       let result;
       if (file.path) {
-        result = await cloudinary.uploader.upload(file.path, {
-          folder: folderPath,
-          // public_id: `upload_${file.originalname}`,
-        });
-        // public_id: `upload_${file.originalname}`
+        result = await cloudinary.uploader.upload(file.path, { folder: folderPath });
       } else if (file.buffer) {
         result = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { folder: folderPath, /*public_id: `upload_${file.originalname}` */ },
+            { folder: folderPath },
             (error, result) => error ? reject(error) : resolve(result)
           );
           stream.end(file.buffer);
@@ -162,26 +143,19 @@ export async function insertRecord(req, res) {
       }
       // Use Cloudinary URL and public_id for the matching field
       columnValueObj[fieldKey] = result.secure_url;
-      // Also store public_id in a separate field if desired (e.g., `${fieldKey}_public_id`)
       columnValueObj[`${fieldKey}_public_identifier`] = result.public_id;
-      console.log("hello from line 109");
-      console.log(`columnValueObj${Object.values(columnValueObj)}`);
-
-      const c = Object.keys(columnValueObj);
-      const val = Object.values(columnValueObj);
-      console.log(`col: ${c}`);
-      console.log(`val: ${val}`);
-      // Build SQL insert statement
-      const col = c.map(f => `\`${f}\``).join(", ");
-      const placeholders = c.map(() => "?").join(", ");
-      const values = val;
-      const insertSql = `INSERT INTO \`${table}\` (${col}) VALUES (${placeholders})`;
-      await pool.query(insertSql, values);
-      res.json({ success: true, inserted: columnValueObj });
-      
-     
     }
-  } 
+    // After all files processed, insert record and send response once
+    const c = Object.keys(columnValueObj);
+    const val = Object.values(columnValueObj);
+    const col = c.map(f => `\`${f}\``).join(", ");
+    const placeholders = c.map(() => "?").join(", ");
+    const values = val;
+    const insertSql = `INSERT INTO \`${table}\` (${col}) VALUES (${placeholders})`;
+    await pool.query(insertSql, values);
+    res.json({ success: true, inserted: columnValueObj });
+    return;
+  }
   else {
     // Build columns and values from fieldValues
     //   const columns = Object.keys(req.body).map(key => `\`${key}\``);
@@ -393,8 +367,7 @@ export async function updateRecord(req, res) {
     const idField = id; // Always use the id from params
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(
-        ([field]) => field !== 'id' && !field.endsWith('_id')
-      )
+        ([field]) => field !== 'id' )
     );
     const filteredFields = Object.keys(filteredUpdates);
     const setClause = filteredFields

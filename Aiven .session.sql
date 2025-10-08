@@ -244,3 +244,4 @@
 -- ALTER TABLE promotional_tracks DROP COLUMN Cloudinary_public_id TEXT;
 -- ALTER TABLE tracks DROP COLUMN Cloudinary_public_id TEXT;
 -- ALTER TABLE albums DROP COLUMN Cloudinary_public_id TEXT;
+ALTER TABLE albums MODIFY COLUMN artist_id INT ;
