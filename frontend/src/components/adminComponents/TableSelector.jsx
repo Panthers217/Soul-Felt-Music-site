@@ -28,10 +28,14 @@ function TableSelector({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteRecordId, setDeleteRecordId] = useState(null);
 
-  // If searchResult is a record (not error), filter to only show that card
+  // Filter tableData based on searchResult from ArtistSearchForm
   let filteredData = tableData;
-  if (searchResult && typeof searchResult === "object" && !searchResult.error) {
-    filteredData = [searchResult];
+  if (searchResult) {
+    if (typeof searchResult === "object" && !searchResult.error) {
+      filteredData = [searchResult];
+    } else if (searchResult.error) {
+      filteredData = [];
+    }
   }
 
   return (

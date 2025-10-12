@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, } from "react";
-import { useApiData } from "../context/ApiDataContext";
 
 export function useArtistFormValidation(
   fields,
@@ -7,13 +6,11 @@ export function useArtistFormValidation(
   handleUploadNewRecord,
   handleUpdateRecord
 ) {
-  const { mode, setMode,  } = useApiData();
+  
 
   
 
   // Stable callback to get the current mode
-  const getMode = useCallback(() => mode, [mode]);
-  console.log("Current mode in hook:", mode);
 
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -32,22 +29,24 @@ export function useArtistFormValidation(
   );
 
   // Fields that require boolean dropdown
-  const booleanFields = [
-    "demos",
-    "top_track",
-    "featured_track",
-    "activate",
-    "activate_video",
-    "featured_artists",
-    "is_active",
-    "promote_track",
-    "promo",
-  ];
-
+  const booleanFields = useMemo(
+    () => [
+      "demos",
+      "top_track",
+      "featured_track",
+      "activate",
+      "activate_video",
+      "featured_artists",
+      "is_active",
+      "promote_track",
+      "promo",
+    ],
+    []
+  );
   // Fields that are required
   const requiredFields = useMemo(
     () => ["name", "release_date", "title", "email ", "phone_number", ...booleanFields],
-    []
+    [booleanFields]
   );
 
   // Helper to check if a field is required
@@ -71,7 +70,7 @@ export function useArtistFormValidation(
 
   // Custom submit handler to validate email/phone before calling the correct handler based on actionType
   const handleLocalSubmit = useCallback(
-    (e, actionType, fieldsArg, fieldValuesArg) => {
+    (e, actionType, fieldsArg, fieldValuesArg,mode) => {
       e.preventDefault();
       const fieldsToCheck = fieldsArg || fields;
       const valuesToCheck = fieldValuesArg || fieldValues;
@@ -109,6 +108,8 @@ export function useArtistFormValidation(
       fieldValues,
       isEmailvalid,
       isPhoneValid,
+      handleUploadNewRecord,
+      handleUpdateRecord,
     ]
   );
 
@@ -125,8 +126,7 @@ export function useArtistFormValidation(
     isPhoneValid,
     handleLocalSubmit,
     isRestrictedField,
-    mode,
-    setMode,
-    getMode,
-  };
-}
+    };
+    
+  }
+  

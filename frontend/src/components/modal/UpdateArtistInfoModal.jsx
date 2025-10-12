@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import InputFields from "../adminComponents/InputFields";
 import DeleteRecordModal from "./DeleteRecordModal";
 import ConfirmModeModal from "./ConfirmModeModal";
@@ -17,6 +18,15 @@ export default function UpdateArtistInfoModal({
   handleDeleteRecord,
   table,
 }) {
+
+  const [demosValue, setDemosValue] = useState(null);
+  // Debugging: Log the 'demos' field whenever editValues changes
+  useEffect(() => {
+    if (editValues && typeof editValues === 'object' && 'demos' in editValues) {
+      setDemosValue(editValues.demos);
+    }
+  }, [editValues]);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitEvent, setSubmitEvent] = useState(null);
@@ -48,7 +58,7 @@ export default function UpdateArtistInfoModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full relative">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full relative overflow-y-auto max-h-screen">
           <h3 className="text-xl font-bold mb-4 text-center text-purple-700">
             Edit Record Before Update
           </h3>
@@ -94,6 +104,7 @@ export default function UpdateArtistInfoModal({
         onChangeMode={() => {}}
         onConfirm={handleConfirmUpdate}
         onCancel={() => setShowConfirmModal(false)}
+        demosValue={demosValue}
       />
       <DeleteRecordModal
         show={showDeleteModal}
