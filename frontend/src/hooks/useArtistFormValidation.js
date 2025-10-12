@@ -22,9 +22,9 @@ export function useArtistFormValidation(
     return d.toISOString().split("T")[0];
   }, []);
 
-  // Restriction: block input for 'id' and fields ending with '_id'
+  // Restriction: block input for 'id'
   const isRestrictedField = useCallback(
-    (field) => field === "id" || field.endsWith("_id"),
+    (field) => field === "id" ,
     []
   );
 

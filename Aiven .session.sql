@@ -247,12 +247,12 @@
 -- ALTER TABLE tracks MODIFY COLUMN artist_id INT ;
 
 -- ALTER TABLE tracks ADD COLUMN image_description TEXT;
-ALTER TABLE tracks ADD COLUMN genre TEXT;
-ALTER TABLE artists ADD COLUMN genre TEXT;
+-- ALTER TABLE tracks ADD COLUMN genre TEXT;
+-- ALTER TABLE artists ADD COLUMN genre TEXT;
 
-ALTER TABLE promotional_tracks ADD COLUMN genre TEXT;
-ALTER TABLE promotional_videos ADD COLUMN genre TEXT;
-ALTER TABLE videos ADD COLUMN genre TEXT;
+-- ALTER TABLE promotional_tracks ADD COLUMN genre TEXT;
+-- ALTER TABLE promotional_videos ADD COLUMN genre TEXT;
+-- ALTER TABLE videos ADD COLUMN genre TEXT;
 
 
 
@@ -260,3 +260,6 @@ ALTER TABLE videos ADD COLUMN genre TEXT;
 -- ALTER TABLE promotional_videos ADD COLUMN tags TEXT;
 -- ALTER TABLE promotional_videos ADD COLUMN file_size TEXT;
 -- ALTER TABLE promotional_videos ADD COLUMN format TEXT;
+
+ALTER TABLE videos MODIFY COLUMN artist_id INT;
+ALTER TABLE videos MODIFY COLUMN album_id INT;
