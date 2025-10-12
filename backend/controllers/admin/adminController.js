@@ -128,32 +128,70 @@ export async function insertRecord(req, res) {
       }
       // Upload to Cloudinary
       let result;
-      if (file.path) {
-        result = await cloudinary.uploader.upload(file.path, { folder: folderPath });
-      } else if (file.buffer) {
-        result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: folderPath },
-            (error, result) => error ? reject(error) : resolve(result)
-          );
-          stream.end(file.buffer);
-        });
-      } else {
-        throw new Error("File object missing path and buffer");
+      // Prepare metadata if available
+      const metaDataFields = ['title', 'tags', 'image_description', 'video_description', 'audio_description','genre',];
+      let metadata = {};
+      for (const key of metaDataFields) {
+        if (columnValueObj[key]) {
+          metadata[key] = columnValueObj[key];
+        }
       }
+      let uploadOptions = { folder: folderPath };
+      if (Object.keys(metadata).length > 0) {
+        uploadOptions.context = metadata;
+      }
+        // Set resource_type based on fieldKey
+          if (fieldKey.includes('audio_url') || fieldKey.includes('promo_audio_url')) {
+            uploadOptions.resource_type = 'video';
+          } else if (fieldKey.includes('video_url') || fieldKey.includes('promo_video_url')) {
+            uploadOptions.resource_type = 'video';
+          }
+      try {
+        if (file.path) {
+          result = await cloudinary.uploader.upload(file.path, uploadOptions);
+        } else if (file.buffer) {
+          result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              uploadOptions,
+              (error, result) => error ? reject(error) : resolve(result)
+            );
+            stream.end(file.buffer);
+          });
+        } else {
+          throw new Error("File object missing path and buffer");
+        }
+      } catch (uploadErr) {
+        console.error('Cloudinary upload error:', uploadErr);
+        continue; // Skip this file and continue with others
+      }
+
       // Use Cloudinary URL and public_id for the matching field
-      columnValueObj[fieldKey] = result.secure_url;
-      columnValueObj[`${fieldKey}_public_identifier`] = result.public_id;
+      if (result) {
+        if ('duration' in result) columnValueObj['duration'] = result.duration;
+        if ('format' in result) columnValueObj['format'] = result.format;
+        if ('bytes' in result) columnValueObj['file_size'] = result.bytes;
+        columnValueObj[fieldKey] = result.secure_url;
+        columnValueObj[`${fieldKey}_public_identifier`] = result.public_id;
+      }
+
     }
-    // After all files processed, insert record and send response once
-    const c = Object.keys(columnValueObj);
-    const val = Object.values(columnValueObj);
+    // After all files processed, filter out non-existent columns before insert
+    const [tableFields] = await pool.query(`SHOW COLUMNS FROM \`${table}\``);
+    const validFields = tableFields.map(f => f.Field);
+    const filteredObj = {};
+    Object.keys(columnValueObj).forEach(key => {
+      if (validFields.includes(key)) {
+        filteredObj[key] = columnValueObj[key];
+      }
+    });
+    const c = Object.keys(filteredObj);
+    const val = Object.values(filteredObj);
     const col = c.map(f => `\`${f}\``).join(", ");
     const placeholders = c.map(() => "?").join(", ");
     const values = val;
     const insertSql = `INSERT INTO \`${table}\` (${col}) VALUES (${placeholders})`;
     await pool.query(insertSql, values);
-    res.json({ success: true, inserted: columnValueObj });
+    res.json({ success: true, inserted: filteredObj });
     return;
   }
   else {
@@ -324,7 +362,7 @@ export async function updateRecord(req, res) {
           // Determine resource_type based on field
           let resourceType = 'image';
           if (fieldKey.includes('audio_url') || fieldKey.includes('promo_audio_url')) {
-            resourceType = 'raw';
+            resourceType = 'video';
           } else if (fieldKey.includes('video_url') || fieldKey.includes('promo_video_url')) {
             resourceType = 'video';
           }
@@ -335,23 +373,51 @@ export async function updateRecord(req, res) {
             console.error('Cloudinary update delete error:', cloudErr);
           }
         }
+        // Log audio_url value and folderPath just before Cloudinary upload
+        if (fieldKey === 'audio_url') {
+          console.log('audio_url about to be uploaded:', file.path || file.buffer);
+        }
+        console.log('Cloudinary upload folderPath:', folderPath);
         // Upload to Cloudinary
         let result;
-        if (file.path) {
-          result = await cloudinary.uploader.upload(file.path, {
-            folder: folderPath,
-            /*public_id: `upload_${file.originalname}`, */
-          });
-        } else if (file.buffer) {
-          result = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-              { folder: folderPath, /*public_id: `upload_${file.originalname}` */ },
-              (error, result) => error ? reject(error) : resolve(result)
-            );
-            stream.end(file.buffer);
-          });
-        } else {
-          throw new Error("File object missing path and buffer");
+        try {
+          // Set resource_type: 'raw' for audio files
+          let uploadOptions = { folder: folderPath };
+          if (fieldKey.includes('audio_url') || fieldKey.includes('promo_audio_url')) {
+            uploadOptions.resource_type = 'video';
+          }
+          // Assign file extension to format
+          const extMatch = file.originalname.match(/\.([a-zA-Z0-9]+)$/);
+          if (extMatch) {
+            uploadOptions.format = extMatch[1].toLowerCase();
+          }
+          // Add metadata fields if present
+          const metaDataFields = ['title', 'tags', 'image_description', 'video_description', 'audio_description', 'genre'];
+          let metadata = {};
+          for (const key of metaDataFields) {
+            if (updates[key]) {
+              metadata[key] = updates[key];
+            }
+          }
+          if (Object.keys(metadata).length > 0) {
+            uploadOptions.context = metadata;
+          }
+          if (file.path) {
+            result = await cloudinary.uploader.upload(file.path, uploadOptions);
+          } else if (file.buffer) {
+            result = await new Promise((resolve, reject) => {
+              const stream = cloudinary.uploader.upload_stream(
+                uploadOptions,
+                (error, result) => error ? reject(error) : resolve(result)
+              );
+              stream.end(file.buffer);
+            });
+          } else {
+            throw new Error("File object missing path and buffer");
+          }
+        } catch (uploadErr) {
+          console.error('Cloudinary upload error:', uploadErr);
+          continue; // Skip this file and continue with others
         }
         // Use Cloudinary URL for the matching field
         //Reassign to updates for SQL update
@@ -362,12 +428,58 @@ export async function updateRecord(req, res) {
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ success: false, message: "No fields to update." });
     }
+    // Update Cloudinary metadata even if no file is present
+    // Only run if audio_url, image_url, video_url, promo_audio_url, promo_video_url exist in updates
+    const metaDataFields = ['title', 'tags', 'image_description', 'video_description', 'audio_description', 'genre'];
+    let metadata = {};
+    for (const key of metaDataFields) {
+      if (updates[key]) {
+        metadata[key] = updates[key];
+      }
+    }
+    
+    // Find the public identifier for the resource
+    const cloudinaryFieldKeys = Object.keys(updates).filter(k => k.endsWith('_public_identifier'));
+    for (const publicIdKey of cloudinaryFieldKeys) {
+      const publicId = updates[publicIdKey];
+      if (publicId && Object.keys(metadata).length > 0) {
+        try {
+          await cloudinary.uploader.explicit(publicId, {
+            type: 'upload',
+            context: metadata,
+            resource_type: (table === 'artist_images' || table === 'albums') ? 'image' : 'video'
+          });
+        } catch (metaErr) {
+          console.error('Cloudinary metadata update error:', metaErr);
+        }
+      }
+    }
      console.log("Updates to apply:", updates);
+    // Filter out fields with empty, null, or undefined values
+    // For tracks table, treat 'duration' as integer field
+    function filterEmptyFields(obj) {
+      return Object.fromEntries(
+        Object.entries(obj).filter(([key, value]) => {
+          // Convert string 'null' or '' to actual null for integer fields
+          if (table === 'tracks' && key === 'duration') {
+            if (value === 'null' || value === '') return false;
+            if (typeof value === 'string' && !isNaN(value)) return true;
+            if (typeof value === 'number') return true;
+            return false;
+          }
+          return value !== undefined && value !== null && value !== '' && value !== 'null';
+        })
+      );
+    }
+
     // Use idField for the id param, and filter updates for SQL
     const idField = id; // Always use the id from params
-    const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(
-        ([field]) => field !== 'id' )
+    const filteredUpdates = filterEmptyFields(
+      Object.fromEntries(
+        Object.entries(updates).filter(
+          ([field]) => field !== 'id'
+        )
+      )
     );
     const filteredFields = Object.keys(filteredUpdates);
     const setClause = filteredFields
@@ -375,6 +487,7 @@ export async function updateRecord(req, res) {
       .join(", ");
     const values = filteredFields.map((field) => filteredUpdates[field]);
     values.push(idField); // id for WHERE clause
+    
     const sql = `UPDATE \`${table}\` SET ${setClause} WHERE id = ?`;
     const [result] = await pool.query(sql, values);
     res.json({ success: true, affectedRows: result.affectedRows });

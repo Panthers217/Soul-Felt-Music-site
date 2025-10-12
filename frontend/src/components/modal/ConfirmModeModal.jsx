@@ -1,9 +1,31 @@
 import React from "react";
 import { useApiData } from "../../context/ApiDataContext";
+import { useEffect } from "react";
 
 
-export default function ConfirmModeModal({ show, onConfirm, onCancel }) {
+export default function ConfirmModeModal({ show, onConfirm, onCancel,demosValue }) {
   const { mode, setMode } = useApiData();
+  const [uploadJsx, setUploadJsx] = React.useState(null);
+
+// Sync mode with demosValue when it changes
+  useEffect(() => {
+    if(demosValue){
+      setMode(demosValue === 1 ? 'demo' : 'live');
+      demosValue === 1
+        ? setUploadJsx(
+            <p>
+              Your previous upload was in <span className="text-orange-500 font-bold">demo</span> mode.
+            </p>
+          )
+        : setUploadJsx(
+            <p>
+              Your previous upload was in <span className="text-green-600 font-bold">live</span> mode.
+            </p>
+          );
+    }
+  }, [demosValue, setMode]);
+  
+
   if (!show) return null;
   const modeTextColor = mode === "live" ? "text-green-600" : "text-orange-500";
   const modeDisplay = mode.charAt(0).toUpperCase() + mode.slice(1);
@@ -20,6 +42,7 @@ export default function ConfirmModeModal({ show, onConfirm, onCancel }) {
           </span>
           mode.
         </p>
+        {uploadJsx}
         <label className="block mb-2 font-semibold text-center">Change Mode</label>
         <select
           value={mode}

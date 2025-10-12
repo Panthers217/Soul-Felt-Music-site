@@ -49,6 +49,7 @@ function UploadNewArtist() {
         formData.append(key, v);
       });
       try {
+        console.log("modeArg:", mode);
         console.log("Submitting single record:", Object.fromEntries(formData.entries()));
         if (!user || !user.getIdToken) {
           throw new Error("You must be logged in as an admin to upload records.");
@@ -128,7 +129,7 @@ function UploadNewArtist() {
         setTable(tables[0]);
       }
     }
-  }, [dbSnapshot]);
+  }, [dbSnapshot, table]);
 
   // When table changes, update fields and fieldValues
   useEffect(() => {
@@ -297,7 +298,7 @@ function UploadNewArtist() {
           setShowConfirmModal(false);
           if (pendingSubmitEvent) {
             // Always use the latest mode from context
-            handleLocalSubmit(pendingSubmitEvent, "upload", undefined, undefined, mode);
+            handleLocalSubmit(pendingSubmitEvent, "upload", undefined, undefined,mode );
             setPendingSubmitEvent(null);
           }
         }}

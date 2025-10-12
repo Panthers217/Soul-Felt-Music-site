@@ -103,7 +103,7 @@ function ArtistSearchForm({
       >
         Search
       </button>
-      {artistResult && (
+      {/* {artistResult && (
         <div className="mt-4 p-2 border rounded bg-gray-100">
           {artistResult.error ? (
             <span className="text-red-600">{artistResult.error}</span>
@@ -113,7 +113,7 @@ function ArtistSearchForm({
             </pre>
           )}
         </div>
-      )}
+      )} */}
     </form>
   );
 }
