@@ -21,10 +21,14 @@
 -- ALTER TABLE tracks DROP COLUMN audio_url_public_id;
 -- ALTER TABLE videos DROP COLUMN video_url_public_id;
 
-ALTER TABLE albums ADD COLUMN cover_url_public_identifier VARCHAR(255);
-ALTER TABLE artist_images ADD COLUMN image_url_public_identifier VARCHAR(255);
-ALTER TABLE promotional_tracks ADD COLUMN promo_audio_url_public_identifier VARCHAR(255);
-ALTER TABLE promotional_videos ADD COLUMN promo_video_url_public_identifier VARCHAR(255);
-ALTER TABLE tracks ADD COLUMN audio_url_public_identifier VARCHAR(255);
-ALTER TABLE videos ADD COLUMN video_url_public_identifier VARCHAR(255);
+-- ALTER TABLE albums ADD COLUMN cover_url_public_identifier VARCHAR(255);
+-- ALTER TABLE artist_images ADD COLUMN image_url_public_identifier VARCHAR(255);
+-- ALTER TABLE promotional_tracks ADD COLUMN promo_audio_url_public_identifier VARCHAR(255);
+-- ALTER TABLE promotional_videos ADD COLUMN promo_video_url_public_identifier VARCHAR(255);
+-- ALTER TABLE tracks ADD COLUMN audio_url_public_identifier VARCHAR(255);
+-- ALTER TABLE videos ADD COLUMN video_url_public_identifier VARCHAR(255);
 
+CREATE TABLE website_mode (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  demo BOOLEAN NOT NULL
+);

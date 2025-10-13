@@ -18,9 +18,9 @@ export const ApiDataProvider = ({ children }) => {
 
   // Mode state for admin dashboard
   const [mode, setMode] = useState("live");
-  
 
-  
+  // website mode state
+  const [websiteMode, setWebsiteMode] = useState();
 
   // Persist mode changes to localStorage
   useEffect(() => {

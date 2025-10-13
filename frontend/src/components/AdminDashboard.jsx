@@ -752,6 +752,26 @@ function AdminDashboard() {
             Log Out Admin
           </button>
         </div>
+        {/* Website Mode Toggle Button */}
+        {/* <div className="w-full flex justify-end items-center px-8 mb-4">
+          <button
+            className="px-4 py-2 rounded font-bold shadow bg-indigo-600 text-white hover:bg-indigo-700"
+            onClick={async () => {
+              // Toggle local demo value and send in API call header
+              const demoValue = window.confirm("Switch to LIVE mode? Click Cancel for DEMO mode.") ? 1 : 0;
+              try {
+                await axios.post("/api/website-mode", {}, {
+                  headers: { demo: demoValue }
+                });
+                alert(`Website mode updated to ${demoValue === 1 ? 'LIVE' : 'DEMO'}`);
+              } catch (err) {
+                alert("Failed to update website mode: " + (err.response?.data?.message || err.message));
+              }
+            }}
+          >
+            Toggle Website Mode
+          </button>
+        </div> */}
         <div className="mb-2 font-semibold">Current Mode: {mode}</div>
         <AdminSqlViewer
           table={table}
@@ -776,6 +796,8 @@ function AdminDashboard() {
           >
             {mode === "live" ? "LIVE MODE" : "DEMO MODE"}
           </div>
+
+          
 
           <select
             value={artistMenu || ""}

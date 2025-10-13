@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 // FadeCarouselImages: handles fade animation and image rendering
 export const FadeCarouselImages = ({ images, current, ImageDivName, isVisible=true }) => {
-
+  
   const fadeBase = `${isVisible ? "block" : "hidden"} transition-opacity duration-700 ease-in-out ${ImageDivName}`;
   return (
     <>
