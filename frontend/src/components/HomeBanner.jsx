@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import heroPic1 from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroPic1.png";
 import heroWelcomePic from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroWelcomePic.svg";
 import FadeCarousel, { FadeCarouselImages } from "./FadeCarousel";
+import { useApiData } from "../context/ApiDataContext.jsx";
+
+    // { id: 1, src: 'https://via.placeholder.com/300', alt: 'Image 1', title: 'Image 1' },
 
 
 
 
-
-const DemoBannerMobile = () => {
+const DemoBannerMobile = ({ albumImages }) => {
+  
   return (
     <div data-layer="Frame 32" className="Frame32  w-[425px] h-auto aspect-[425/630] minMobile:aspect-[320/475]  relative bg-[#101516]">
        {/* welcome logo */}
@@ -22,7 +25,7 @@ const DemoBannerMobile = () => {
       <div data-layer="Frame 30" className="Frame30 w-full aspect-{423.68/423.68} left-0 top-[166.82px] absolute">
         {/* <img data-layer="envato-labs-ai-3b01044f-1de4-4452-9c34-535e87650b3f 2" className="EnvatoLabsAi3b01044f1de444529c34535e87650b3f2  left-0 top-0 absolute" src={heroPic1} /> */}
        <div className="flex z-0 w-full h-full left-0 top-0 absolute">
-        <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={true} indicatorVisibility={false} />
+        <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={true} indicatorVisibility={false} />
         </div>
         <div data-layer="ButtonGroup" className="Buttongroup w-full left-0 top-0 absolute flex flex-col items-center pt-[11%] z-10">
           <div data-layer="Title" className="Title mt-8 mb-6 text-center text-[#fffced] text-[6vw] sm:text-[5vw] font-bold font-['Roboto'] leading-tight">Experience the Soul of Music</div>
@@ -45,7 +48,7 @@ const DemoBannerMobile = () => {
           <div data-layer="Rectangle" className="Rectangle size-[15.89px] left-[32.44px] top-0 absolute bg-[#fffced]/30 rounded-full" />
           <div data-layer="Rectangle" className="Rectangle size-[15.89px] left-[64.21px] top-0 absolute bg-[#aa2a46] rounded-full" />
       </div> */}
-      <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
+      <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
     </div>
       
 </div>
@@ -53,7 +56,7 @@ const DemoBannerMobile = () => {
 }
 
 
-const DemoBannerTablet = () => {
+const DemoBannerTablet = ({ albumImages }) => {
   return (
     <div className="relative w-full max-w-[900px] aspect-[900/700] mx-auto bg-[#101516] flex flex-col items-center justify-center overflow-hidden rounded-[2vw]">
       {/* White background frame */}
@@ -78,7 +81,7 @@ const DemoBannerTablet = () => {
           src={heroPic1}
           alt="Hero"
         /> */}
-         <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
+         <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
       </div>
       {/* Main Content */}
       <div className="absolute w-full h-full flex flex-col justify-center items-center z-30 pt-[12%] pb-[4%] px-[8%]">
@@ -99,14 +102,14 @@ const DemoBannerTablet = () => {
           {/* <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#aa2a46] rounded-full" /> */}
-                <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
+                <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
 
         </div>
       </div>
     </div>
   );
 };
-const DemoBannerLaptop = () => {
+const DemoBannerLaptop = ({albumImages}) => {
   return (
     <div className="relative w-full max-w-[1440px] aspect-[1440/700] mx-auto bg-[#101516] flex flex-col items-center justify-center overflow-hidden rounded-[1.4vw]">
       {/* White background frame */}
@@ -149,7 +152,7 @@ const DemoBannerLaptop = () => {
           {/* <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#aa2a46] rounded-full" /> */}
-                <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
+                <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`left-0 top-0 absolute`} imageVisibility={false} indicatorVisibility={true} />
 
         </div>
       </div>
@@ -157,7 +160,7 @@ const DemoBannerLaptop = () => {
   );
 };
 
-const DemoBannerDesktop = () => {
+const DemoBannerDesktop = ({albumImages}) => {
   return (
     <div
       data-layer="Hero section desktop"
@@ -182,7 +185,7 @@ const DemoBannerDesktop = () => {
           src={heroPic1}
           alt="Hero"
         /> */}
-          <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
+          <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
       </div>
       {/* Main Content */}
       <div className="relative w-full text-nowrap h-full flex flex-col justify-center items-center z-30 pt-[8%] pb-[3%] px-[12%]">
@@ -212,25 +215,41 @@ const DemoBannerDesktop = () => {
 };
 
 const HomeBanner = () => {
-  
+  const { dbSnapshot } = useApiData();
+ let albumImages = []
+  // Only log albums from dbSnapshot
+  if (dbSnapshot && dbSnapshot.albums.records) {
+    // console.log("albums in dbSnapshot:", dbSnapshot.albums.records);
+     albumImages = dbSnapshot.albums.records
+      .map((album) => ({
+        id: album.id,
+        src: album.cover_url,
+        alt: album.cover_url,
+        title: album.title,
+      }))
+      // .filter((image) => image.src);
+    
+   
+  }
+  console.log("Album images for carousel:", albumImages)
 
   return (
     <>
     {/* Mobile only */}
   <div className="block sm:flex md:hidden lg:hidden xl:hidden ">
-    <DemoBannerMobile />
+    <DemoBannerMobile albumImages={albumImages} />
   </div>
   {/* Tablet only */}
   <div className="hidden md:block lg:hidden xl:hidden sm:hidden">
 
-    <DemoBannerTablet />
+    <DemoBannerTablet albumImages={albumImages} />
   </div>
   {/* Desktop only */}
   <div className="hidden sm:hidden md:hidden lg:block xl:hidden ">
-    <DemoBannerLaptop />
+    <DemoBannerLaptop albumImages={albumImages} />
   </div>
   <div className="hidden  sm:hidden md:hidden lg:hidden xl:flex">
-    <DemoBannerDesktop />
+    <DemoBannerDesktop albumImages={albumImages} />
   </div>
     </>
   );

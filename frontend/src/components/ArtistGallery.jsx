@@ -1,6 +1,10 @@
 import React from 'react';
+import { useApiData } from '../context/ApiDataContext.jsx';
 
 export const ArtistGallery = () => {
+  const { artists: fetchedArtists } = useApiData();
+  console.log("Fetched artists from context:", fetchedArtists);
+
   const artists = [
     {
       name: 'Soul Felt Collective',
