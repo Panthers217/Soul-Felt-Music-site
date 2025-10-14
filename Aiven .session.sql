@@ -533,8 +533,8 @@ CREATE TABLE website_mode (
 -- ALTER TABLE videos MODIFY COLUMN album_id INT;
 
 
-CREATE TABLE website_mode (
-  id SERIAL PRIMARY KEY,
-  demo BOOLEAN,
-);
-);
+-- CREATE TABLE website_mode (
+--   id SERIAL PRIMARY KEY,
+--   demo BOOLEAN,
+-- );
+-- );
