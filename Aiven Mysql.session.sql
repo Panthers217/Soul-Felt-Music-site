@@ -28,7 +28,9 @@
 -- ALTER TABLE tracks ADD COLUMN audio_url_public_identifier VARCHAR(255);
 -- ALTER TABLE videos ADD COLUMN video_url_public_identifier VARCHAR(255);
 
-CREATE TABLE website_mode (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  demo BOOLEAN NOT NULL
-);
+-- CREATE TABLE website_mode (
+--   id INT AUTO_INCREMENT PRIMARY KEY,
+--   demo BOOLEAN NOT NULL
+-- );
+
+ALTER TABLE artist_images ADD COLUMN artist_name VARCHAR(255);
