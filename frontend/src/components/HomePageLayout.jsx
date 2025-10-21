@@ -344,11 +344,11 @@ const DemoBannerDesktop = () => {
 const HomePageLayout = () => {
   return (
     <>
-      <div className="flex-col justify-center items-center  bg-[#101516]">
+      <div className="flex flex-col justify-center items-center gap-8 md:gap-12 lg:gap-16 bg-[#101516] py-8">
         <HomeBanner />
         <ArtistGallery />
         <VideoPlayerComponent />
-        <ImageCarousel /> 
+        {/* <ImageCarousel />  */}
         <PopularAlbums /> 
       </div>
       

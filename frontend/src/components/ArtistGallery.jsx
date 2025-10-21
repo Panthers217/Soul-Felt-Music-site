@@ -13,6 +13,16 @@ export const ArtistGallery = () => {
     artists = dbSnapshot.artist_images.records;
   }
 
+  // Transform Cloudinary URL to resize image to 259x194
+  const getResizedImageUrl = (url) => {
+    if (!url) return url;
+    // Check if it's a Cloudinary URL
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/w_259,h_194,c_fill/');
+    }
+    return url;
+  };
+
   // const artists = [
   //   {
   //     name: 'Soul Felt Collective',
@@ -76,8 +86,10 @@ export const ArtistGallery = () => {
               style={{ animationDelay: `${idx * 0.1}s` }}
             >
               <img
-                src={artist.image_url}
+                src={getResizedImageUrl(artist.image_url)}
                 alt={artist.artist_name}
+                width="259"
+                height="194"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-75"
               />
               <div className="absolute inset-0 flex flex-col justify-end items-center bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">

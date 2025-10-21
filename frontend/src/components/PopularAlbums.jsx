@@ -36,8 +36,6 @@ import { useApiData } from "../context/ApiDataContext.jsx";
 //   },
 // ];
 
-const clamp = (num, min, max) => Math.max(min, Math.min(num, max));
-
 const PopularAlbumsCarousel = () => {
   const { dbSnapshot } = useApiData();
   let albums = [];
@@ -50,23 +48,28 @@ const PopularAlbumsCarousel = () => {
       id: img.id || index,
       image: img.cover_url,
       alt: img.description || `Image ${index + 1}`,
-      title: img.title
- || `Image ${index + 1}`,
+      title: img.title || `Image ${index + 1}`,
     }));
   }
 
   const [centerIdx, setCenterIdx] = useState(2);
 
   const handlePrev = () =>
-    setCenterIdx((idx) => clamp(idx - 1, 0, albums.length - 1));
+    setCenterIdx((idx) => (idx - 1 + albums.length) % albums.length);
   const handleNext = () =>
-    setCenterIdx((idx) => clamp(idx + 1, 0, albums.length - 1));
+    setCenterIdx((idx) => (idx + 1) % albums.length);
 
-  // Calculate visible albums (always show 5 if possible)
+  // Calculate visible albums (always show 5 with wrapping)
   const getVisibleAlbums = () => {
+    if (albums.length === 0) return [];
     if (albums.length <= 5) return albums;
-    const start = clamp(centerIdx - 2, 0, albums.length - 5);
-    return albums.slice(start, start + 5);
+    
+    const visible = [];
+    for (let i = -2; i <= 2; i++) {
+      const idx = (centerIdx + i + albums.length) % albums.length;
+      visible.push(albums[idx]);
+    }
+    return visible;
   };
 
   const visibleAlbums = getVisibleAlbums();
@@ -83,7 +86,6 @@ const PopularAlbumsCarousel = () => {
             onClick={handlePrev}
             className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center z-30 transition"
             aria-label="Previous"
-            disabled={centerIdx === 0}
           >
             <svg
               width="24"
@@ -113,7 +115,6 @@ const PopularAlbumsCarousel = () => {
             onClick={handleNext}
             className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center z-30 transition"
             aria-label="Next"
-            disabled={centerIdx === albums.length - 1}
           >
             <svg
               width="24"
