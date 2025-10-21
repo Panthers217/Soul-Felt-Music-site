@@ -1,7 +1,8 @@
 // Dynamic GetMusic component
 
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { useParams, useLocation} from "react-router-dom";
+import ReactPlayer from "react-player";
 
 /**
  * ArtistOverview.jsx
@@ -41,24 +42,105 @@ function GetMusic({ artistName, musicText, buttonText, supportText }) {
 }
 // Dynamic FeaturedTracks component
 function FeaturedTracks({ tracks }) {
+  const [playingTrack, setPlayingTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  console.log("Featured Tracks:", tracks?.[0]?.img);
+  
+  const handleTrackClick = (idx) => {
+    console.log("Clicking track:", idx, "URL:", tracks[idx]?.promo_audio_url);
+    if (playingTrack === idx) {
+      setIsPlaying(false);
+      setTimeout(() => setPlayingTrack(null), 100);
+    } else {
+      setPlayingTrack(idx);
+      setIsPlaying(true);
+    }
+  };
+  
   return (
     <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%]">
       <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Featured Tracks</h2>
-          <span className="text-xs md:text-sm text-white/60">Click any track to preview</span>
         </div>
-        <div className="mt-4 md:mt-6 rounded-lg bg-[#11131a] ring-1 ring-white/10 p-4 md:p-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
           {(tracks && tracks.length > 0 ? tracks : [
-            { title: "Track 1", artist: "Artist 1" },
-            { title: "Track 2", artist: "Artist 2" }
+            { title: "Track 1", artist_name: "Artist 1" },
+            { title: "Track 2", artist_name: "Artist 2" }
           ]).map((track, idx) => (
-            <div key={idx} className="relative h-20 md:h-24 w-full rounded-md bg-white/[0.03] ring-1 ring-white/10 mb-2 flex items-center justify-between px-4">
-              <div>
-                <div className="font-semibold text-white text-base md:text-lg">{track.title}</div>
-                <div className="text-white/70 text-xs md:text-sm">{track.artist}</div>
+            <div key={idx} className="group relative bg-[#181818] rounded-lg overflow-hidden ring-1 ring-white/5 hover:bg-[#282828] transition-all duration-300">
+              {/* Track Image - Square Album Cover */}
+              <div className="relative w-full aspect-square overflow-hidden bg-[#282828]">
+                <img 
+                  src={track.img || 'https://via.placeholder.com/300x300?text=No+Image'} 
+                  alt={track.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Play overlay */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-200 ${playingTrack === idx ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                  <button
+                    onClick={() => handleTrackClick(idx)}
+                    className="w-12 h-12 rounded-full bg-[#1ed760] flex items-center justify-center shadow-xl hover:scale-105 hover:bg-[#1fdf64] transition-all duration-200"
+                  >
+                    {playingTrack === idx && isPlaying ? (
+                      <div className="flex gap-1">
+                        <div className="w-1 h-4 bg-black rounded-sm"></div>
+                        <div className="w-1 h-4 bg-black rounded-sm"></div>
+                      </div>
+                    ) : (
+                      <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[12px] border-l-black border-b-[8px] border-b-transparent ml-1"></div>
+                    )}
+                  </button>
+                </div>
+                {/* Playing indicator */}
+                {playingTrack === idx && isPlaying && (
+                  <div className="absolute top-2 right-2 px-2 py-1 bg-[#1ed760] rounded-full text-black text-[10px] font-bold flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse"></div>
+                  </div>
+                )}
               </div>
-              <div className="absolute right-4 bottom-4 h-6 w-6 md:h-8 md:w-8 rounded-full bg-[#d63c65]" />
+              
+              {/* Track Info */}
+              <div className="p-3">
+                <h3 className="text-white font-semibold text-sm mb-1 line-clamp-1 hover:underline cursor-pointer">
+                  {track.title}
+                </h3>
+                <p className="text-white/60 text-xs mb-3 line-clamp-1">{track.artist_name || track.artist || 'Unknown Artist'}</p>
+                
+                {/* Audio Player - shown when playing */}
+                {track.promo_audio_url && playingTrack === idx && (
+                  <div className="mb-3 -mx-3 px-3 py-2 bg-black/30">
+                    <ReactPlayer
+                      src={track.promo_audio_url}
+                      playing={isPlaying}
+                      controls={true}
+                      volume={0.5}
+                      width="100%"
+                      height="32px"
+                      onEnded={() => {
+                        setIsPlaying(false);
+                        setPlayingTrack(null);
+                      }}
+                      config={{
+                        file: {
+                          forceAudio: true,
+                          attributes: {
+                            controlsList: 'nodownload',
+                            preload: 'auto'
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Action Button */}
+                <button className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105">
+                  <span className="i-lucide-shopping-cart text-xs" />
+                  Buy Now
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -82,16 +164,10 @@ function Influences({ influences }) {
   );
 }
 // Dynamic ArtistBio component
-function ArtistBio({ bio, artistName }) {
+function ArtistBio({ bio }) {
   return (
     <div className="mt-4 space-y-4 text-[13.5px] leading-6 md:text-lg md:leading-7 text-white/85 xl:text-xl ">
-      {(bio && Array.isArray(bio) ? bio : [
-        `${artistName} is a visionary electronic music producer and composer who has been pushing the boundaries of synthwave and ambient music for over a decade. Born in the neon-lit streets of Tokyo and raised between Los Angeles and Berlin, ${artistName}'s multicultural background deeply influences their ethereal soundscapes.`,
-        `Their music combines nostalgic 80s synthesizers with modern production techniques, creating immersive sonic journeys that transport listeners to otherworldly dimensions. ${artistName}'s breakthrough album "Echoes of Tomorrow" garnered critical acclaim and established them as a leading voice in the neo-synthwave movement.`,
-        `With over 2.3 million monthly listeners across streaming platforms and collaborations with renowned artists like Midnight Collective and Neon Dreams, ${artistName} continues to evolve their sound while staying true to their cosmic aesthetic. Their live performances are legendary, featuring stunning visual displays that complement their atmospheric compositions.`
-      ]).map((paragraph, idx) => (
-        <p key={idx}>{paragraph}</p>
-      ))}
+      {bio ? bio : "No biography available."}
     </div>
   );
 }
@@ -126,18 +202,31 @@ const Pill = ({ children }) => (
 
 function ArtistOverview() {
   const { id } = useParams();
-  const { state } = useLocation();            // { album: {...} } if navigated via Link
+  const { state } = useLocation();            // { art: {...}, albumImage: {...} } if navigated via Link
   const album = state?.art ?? JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //This keeps the page working on reloads (until the session ends).
-  const artistPics = state?.albumImage ?? JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //This keeps the page working on reloads (until the session ends).
-
-  const [artistPICS] = useState(artistPics.cover_photo.urls.regular);
+  const artistPics = state?.albumImage ?? JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //Fallback
+  console.log("State passed to ArtistOverview", state);
+  // Use artist image_url from the artists table (passed as art.img)
+  const artistImageUrl = album?.img || artistPics?.cover_photo?.urls?.regular;
   
-  // If user refreshed, state is gone. Fallback: fetch by ID / read from store.
-  // const album = state?.album ?? albumsStore.get(id);
-
-
-  // TODO: Replace with real artist data lookup
-  const artistName = album.name ?? "Unknown Artist";
+  const artistName = album?.name ?? "Unknown Artist";
+  
+  // Extract bio, career_highlights, and influences from the passed artist data
+  const artistBio = album?.bio || null;
+  const careerHighlights = album?.career_highlights || null;
+  const artistInfluences = album?.influences || null;
+  console.log("Artist bio:", artistBio);
+  console.log("Career highlights:", careerHighlights);
+  console.log("Artist influences:", artistInfluences);
+  // Parse career_highlights if it's a newline-separated string
+  const parsedHighlights = careerHighlights 
+    ? careerHighlights.split('\n').filter(line => line.trim())
+    : null;
+  
+  // Parse influences if it's a comma-separated string
+  const parsedInfluences = artistInfluences
+    ? artistInfluences.split(',').map(inf => inf.trim()).filter(inf => inf)
+    : null;
 
 
 
@@ -150,11 +239,13 @@ function ArtistOverview() {
       <div className="mx-auto w-[92%] md:w-[90%] lg:w-[86%]">
         {/* Mobile: image above, info below */}
         <div className="block md:hidden">
-          <img
-            src={artistPICS}
-            alt={artistName}
-            className="mx-auto lg:h-48 object-cover rounded-sm shadow-lg border-4 border-white/10"
-          />
+          <div className="w-80 h-80 sm:w-72 sm:h-72 mx-auto">
+            <img
+              src={artistImageUrl}
+              alt={artistName}
+              className="w-full h-full object-cover rounded-lg shadow-2xl ring-2 ring-white/10"
+            />
+          </div>
           <h1 className="mt-6 md:mt-8 lg:mt-10 text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">{artistName}</h1>
           {/* Genre pills */}
           <div className="mt-3 md:mt-4 flex flex-wrap items-center gap-2 md:gap-3">
@@ -188,12 +279,14 @@ function ArtistOverview() {
           </div>
         </div>
         {/* Laptop & desktop: image wraps around info section */}
-        <div className="hidden md:flex md:flex-row md:items-center md:gap-8 lg:gap-16">
-          <img
-            src={artistPICS}
-            alt={artistName}
-            className="w-40 h-40 lg:w-56 lg:h-56 rounded-full object-cover shadow-lg border-4 border-white/10 flex-shrink-0"
-          />
+        <div className="hidden md:flex md:flex-row md:items-center md:gap-8 lg:gap-12">
+          <div className="w-56 h-56 lg:w-72 lg:h-72 xl:w-80 xl:h-80 flex-shrink-0">
+            <img
+              src={artistImageUrl}
+              alt={artistName}
+              className="w-full h-full object-cover rounded-lg shadow-2xl ring-2 ring-white/10"
+            />
+          </div>
           <div className="flex-1 flex flex-col justify-center">
             <h1 className="mt-0 text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">{artistName}</h1>
             {/* Genre pills */}
@@ -234,17 +327,17 @@ function ArtistOverview() {
       <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%] ">
         <div className="rounded-xl md:rounded-2xl bg-white/[0.035] p-4 md:p-6 lg:p-8 ring-1 ring-white/10">
           <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">About {artistName}</h2>
-          <ArtistBio bio={album.bio} artistName={artistName} />
+          <ArtistBio bio={artistBio} />
 
           {/* Two info cards (static for now, replace with dynamic if available) */}
           <div className="mt-5 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="rounded-lg bg-white/[0.03] p-4 md:p-5 ring-1 ring-white/10">
               <h3 className="font-semibold text-white">Career Highlights</h3>
-              <CareerHighlights highlights={album.career_highlights} />
+              <CareerHighlights highlights={parsedHighlights} />
             </div>
             <div className="rounded-lg bg-white/[0.03] p-4 md:p-5 ring-1 ring-white/10">
               <h3 className="font-semibold text-white">Influences</h3>
-              <Influences influences={album.influences} />
+              <Influences influences={parsedInfluences} />
             </div>
           </div>
         </div>

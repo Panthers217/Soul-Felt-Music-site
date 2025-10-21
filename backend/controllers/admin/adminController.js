@@ -181,7 +181,19 @@ export async function insertRecord(req, res) {
     const filteredObj = {};
     Object.keys(columnValueObj).forEach(key => {
       if (validFields.includes(key)) {
-        filteredObj[key] = columnValueObj[key];
+        let value = columnValueObj[key];
+        
+        // Convert boolean-like strings to actual boolean values
+        if (typeof value === 'string') {
+          const lowerValue = value.toLowerCase();
+          if (lowerValue === 'yes' || lowerValue === 'true') {
+            value = true;
+          } else if (lowerValue === 'no' || lowerValue === 'false') {
+            value = false;
+          }
+        }
+        
+        filteredObj[key] = value;
       }
     });
     const c = Object.keys(filteredObj);
@@ -444,13 +456,26 @@ export async function updateRecord(req, res) {
       const publicId = updates[publicIdKey];
       if (publicId && Object.keys(metadata).length > 0) {
         try {
+          // Determine resource_type based on the field name
+          let resourceType = 'image';
+          if (publicIdKey.includes('audio')) {
+            resourceType = 'video'; // Cloudinary treats audio as video resource type
+          } else if (publicIdKey.includes('video')) {
+            resourceType = 'video';
+          }
+          
           await cloudinary.uploader.explicit(publicId, {
             type: 'upload',
             context: metadata,
-            resource_type: (table === 'artist_images' || table === 'albums') ? 'image' : 'video'
+            resource_type: resourceType
           });
         } catch (metaErr) {
-          console.error('Cloudinary metadata update error:', metaErr);
+          // Only log non-404 errors (404 means asset doesn't exist in Cloudinary)
+          if (metaErr.http_code !== 404) {
+            console.error('Cloudinary metadata update error:', metaErr);
+          } else {
+            console.warn(`Skipping metadata update - Cloudinary asset not found: ${publicId}`);
+          }
         }
       }
     }

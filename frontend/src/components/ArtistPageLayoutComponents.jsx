@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useApiData } from "../context/ApiDataContext";
 import {
   trackcardImage,
   topTrackcardImage,
@@ -8,58 +9,11 @@ import {
 } from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/artist_mockup_pics /artistImages.js";
 import bannerImage from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/artist_mockup_pics /artist_banner_pic/Image+Overlay.png";
 
-// --- DUMMY DATA ---
-const countries = [
-  "All countries",
-  "Australia",
-  "Canada",
-  "France",
-  "Germany",
-  "Ireland",
-  "Netherlands",
-  "New Zealand",
-  "United Kingdom",
-  "USA",
-];
+// --- DUMMY DATA (will be replaced by database) ---
+// topTracks will be loaded from database in component
 
-const artistNames = [
-  "Panic! At The Disco",
-  "Lukas Graham",
-  "Marshmello & Bastille",
-  "XXXTENTACION & Lil",
-  "Gucci Mane, Bruno",
-  "Loud Luxury Feat.",
-  "Lil Wayne",
-  "Silk City & Dua Lipa",
-  "Khalid",
-  "Bad Bunny Feat.",
-  "Dynoro & Gigi",
-  "Benny Blanco, Halsey",
-  "Rita Ora",
-  "Ariana Grande",
-  "Clean Bandit Feat.",
-  "DJ Snake Feat.",
-  "Don Diablo Feat.",
-  "The Prince Karma",
-];
-
-const artists = artistNames.map((name, idx) => ({
-  name,
-  img: trackcardImage[idx],
-}));
-
-// THIS IS FOR THE SQL DEMO
-const artistJsonInfo = [...artists];
-export const ArtistJsonInfo = () => {
-  return [...artistJsonInfo];
-};
-
-// const m = JSON.parse(JSON.stringify([...artistJsonInfo])i);
-// console.log(m);
-
-
-
-const topTracks = [
+// Keeping for fallback images only
+const FALLBACK_topTracks = [
   {
     title: "Woman Like Me",
     artist: "Little Mix Feat. Nicki Minaj",
@@ -91,17 +45,8 @@ const topTracks = [
     img: topTrackcardImage[5],
   },
 ];
-console.log("Top Track Cards", [...topTracks]);
 
-const artistSqldemo = artistNames.map((name, idx) => ({
-  name,
-  artist_country: countries[idx % countries.length],
-  img: trackcardImage[idx],
-  track: topTracks[idx % topTracks.length]?.title || "",
-  demo: true,
-}));
-
-console.log(artistSqldemo);
+// topTracks will be loaded from database in component
 
 // --- POSITION DATA ---
 const artistTabletPositions = [
@@ -161,6 +106,102 @@ async function fetchArtistImage() {
 }
 
 const ArtistPageComponent = () => {
+  const { dbSnapshot } = useApiData();
+
+  // Get artists from database
+  const dbArtists = dbSnapshot?.artists?.records || [];
+
+  // Debug logging to see what fields are available
+  console.log("DB Artists sample:", dbArtists[0]);
+
+  // Get promotional_tracks from database
+  const promotionalTracks = dbSnapshot?.promotional_tracks?.records || [];
+  const artistImages = dbSnapshot?.artist_images?.records || [];
+  
+  // Get tracks from database and filter for top tracks
+  const dbTracks = dbSnapshot?.tracks?.records || [];
+  const albums = dbSnapshot?.albums?.records || [];
+
+  console.log("Albums from database:", albums);
+  
+  // Helper function to get image for promotional track
+  const getPromotionalTrackImage = (track) => {
+    // First, try to get artist image using artist_image_id
+    if (track.artist_image_id) {
+      const artistImage = artistImages.find((img) => img.id === track.artist_image_id);
+      if (artistImage?.image_url) {
+        return artistImage.image_url;
+      }
+    }
+    
+    // Fallback to album cover if artist_image_id is not set
+    if (track.album_id) {
+      const album = albums.find((a) => a.id === track.album_id);
+      if (album?.cover_url) {
+        return album.cover_url;
+      }
+    }
+    
+    // Final fallback to default images
+    return null;
+  };
+  
+  // Derive artists array with name and img properties
+  const artists = dbArtists.map((artist, idx) => {
+    // Filter promotional tracks for this artist where featured_track = 1
+    const artistFeaturedTracks = promotionalTracks
+      .filter(
+        (track) => track.artist_id === artist.id && (track.featured_track === 1 || track.featured_track === true)
+      )
+      .map((track) => ({
+        ...track,
+        img: getPromotionalTrackImage(track)
+      }));
+    
+    return {
+      id: artist.id,
+      name: artist.artist_name || artist.name,
+      img:
+        artist.image_url ||
+        artist.profile_url ||
+        trackcardImage[idx % trackcardImage.length],
+      country: artist.artist_country || artist.country,
+      bio: artist.bio,
+      career_highlights: artist.Career_Highlights,
+      influences: artist.Influences,
+      featured_tracks: artistFeaturedTracks,
+    };
+  });
+  
+
+  // Helper function to get album cover URL by album_id
+  const getAlbumCoverUrl = (albumId) => {
+    const album = albums.find((a) => a.id === albumId);
+    return album?.cover_url;
+  };
+
+  // Filter tracks where top_tracks is true (1)
+  const topTracks = dbTracks
+    .filter((track) => track.top_tracks === 1 || track.top_tracks === true)
+    .map((track, idx) => ({
+      id: track.id,
+      title: track.title,
+      artist: track.artist_name,
+      img:
+        getAlbumCoverUrl(track.album_id) ||
+        topTrackcardImage[idx % topTrackcardImage.length],
+    }));
+
+  console.log("Top Track Cards from database:", topTracks);
+
+  console.log("Top Tracks from database:", topTracks);
+
+  // Derive unique countries from database, with \"All countries\" as first option
+  const uniqueCountries = [
+    ...new Set(artists.map((a) => a.country).filter(Boolean)),
+  ];
+  const countries = ["All countries", ...uniqueCountries.sort()];
+
   // --- INTERACTIVE STATE ---
   const [selectedCountry, setSelectedCountry] = useState("All countries");
   const [hoveredArtist, setHoveredArtist] = useState(null);
@@ -193,19 +234,18 @@ const ArtistPageComponent = () => {
     };
     fetchImage();
   }, []);
-  // --- FILTER ARTISTS BY COUNTRY (dummy logic) ---
-  // For demo, assign countries randomly to artists
+  // --- FILTER ARTISTS BY COUNTRY ---
   const artistCountryMap = React.useMemo(() => {
     const map = {};
-    artists.forEach((a, i) => {
-      map[a.name] = countries[i % countries.length];
+    artists.forEach((a) => {
+      map[a.name] = a.country;
     });
     return map;
-  }, []);
+  }, [artists]);
   const filteredArtists =
     selectedCountry === "All countries"
       ? artists
-      : artists.filter((a) => artistCountryMap[a.name] === selectedCountry);
+      : artists.filter((a) => a.country === selectedCountry);
 
   // --- REUSABLE COMPONENTS ---
   const Banner = ({ image, title, className = "" }) => (
@@ -313,54 +353,86 @@ const ArtistPageComponent = () => {
     );
   };
 
-  const TopTracks = ({ tracks, headerPic, onTrackClick }) => (
-    <div className="w-80 flex flex-col items-start">
-      <div className="relative w-80 h-52 rounded-[3px] mb-4">
-        <img
-          className="w-full h-full object-cover rounded-[3px] absolute top-0 left-0"
-          src={headerPic}
-          alt="Top Tracks"
-        />
-        <div className="absolute top-0 left-0 w-full h-full bg-black/25 rounded-[3px]" />
-        <div className="absolute w-full h-full flex flex-col justify-center items-center p-12 z-10">
-          <div className="text-center text-white text-2xl font-bold font-['Roboto'] leading-10">
-            Hip-Hop Chart 100
-          </div>
-          <div className="text-center text-white/50 text-base font-normal font-['Roboto'] leading-normal">
-            The hottest rap right now.
+  const TopTracks = ({ tracks, headerPic, onTrackClick }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Extract all track images for the slideshow
+    const trackImages = tracks.map((track) => track.img).filter(Boolean);
+
+    // Auto-rotate images every 4 seconds
+    useEffect(() => {
+      if (trackImages.length === 0) return;
+
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % trackImages.length);
+      }, 4000); // Change image every 4 seconds
+
+      return () => clearInterval(interval);
+    }, [trackImages.length]);
+
+    return (
+      <div className="w-80 flex flex-col items-start">
+        <div className="relative w-80 h-52 rounded-[3px] mb-4 overflow-hidden">
+          {/* Rotating background images */}
+          {trackImages.length > 0 ? (
+            trackImages.map((img, idx) => (
+              <img
+                key={idx}
+                className={`w-full h-full object-cover rounded-[3px] absolute top-0 left-0 transition-opacity duration-1000 ${
+                  idx === currentImageIndex ? "opacity-100" : "opacity-0"
+                }`}
+                src={img}
+                alt={`Track ${idx + 1}`}
+              />
+            ))
+          ) : (
+            <img
+              className="w-full h-full object-cover rounded-[3px] absolute top-0 left-0"
+              src={headerPic}
+              alt="Top Tracks"
+            />
+          )}
+          <div className="absolute top-0 left-0 w-full h-full bg-black/25 rounded-[3px]" />
+          <div className="absolute w-full h-full flex flex-col justify-center items-center p-12 z-10">
+            <div className="text-center text-white text-2xl font-bold font-['Roboto'] leading-10">
+              Hip-Hop Chart 100
+            </div>
+            <div className="text-center text-white/50 text-base font-normal font-['Roboto'] leading-normal">
+              The hottest rap right now.
+            </div>
           </div>
         </div>
-      </div>
-      <div className="mb-2 text-white/60 text-base font-medium font-['Roboto']">
-        Top tracks
-      </div>
-      <div>
-        {tracks.map((track) => (
-          <button
-            key={track.title}
-            className="w-full h-20 px-4 flex items-center mb-2 bg-transparent hover:bg-yellow-900/10 rounded transition-all duration-150 focus:outline-none"
-            onClick={() => onTrackClick(track)}
-          >
-            <div className="w-16 h-16 rounded-[3px] overflow-hidden flex-shrink-0">
-              <img
-                className="w-full h-full object-cover rounded-[3px]"
-                src={track.img}
-                alt={track.title}
-              />
-            </div>
-            <div className="flex-1 px-5 flex flex-col justify-center">
-              <div className="text-white text-base font-medium font-['Roboto']">
-                {track.title}
+        <div className="mb-2 text-white/60 text-base font-medium font-['Roboto']">
+          Top tracks
+        </div>
+        <div>
+          {tracks.map((track) => (
+            <button
+              key={track.title}
+              className="w-full h-20 px-4 flex items-center mb-2 bg-transparent hover:bg-yellow-900/10 rounded transition-all duration-150 focus:outline-none"
+              onClick={() => onTrackClick(track)}
+            >
+              <div className="w-16 h-16 rounded-[3px] overflow-hidden flex-shrink-0">
+                <img
+                  className="w-full h-full object-cover rounded-[3px]"
+                  src={track.img}
+                  alt={track.title}
+                />
               </div>
-              <div className="text-white/60 text-base font-normal font-['Roboto']">
-                {track.artist}
+              <div className="flex-1 px-5 flex flex-col justify-center">
+                <div className="text-white text-base font-medium font-['Roboto']">
+                  {track.title}
+                </div>
+                <div className="text-white/60 text-base font-normal font-['Roboto']">
+                  {track.artist}
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // --- DESKTOP COMPONENT ---
   const ArtistDesktopPage = () => (

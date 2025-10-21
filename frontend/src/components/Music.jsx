@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { useApiData } from '../context/ApiDataContext';
+import TrackCard from './TrackCard';
 
 const menuTabs = [
   { key: 'all', label: 'All' },
@@ -13,139 +15,23 @@ const menuTabs = [
   { key: 'easylistening', label: 'Easy Listening' },
 ];
 
-const tracks = [
-  {
-    id: 't1',
-    title: 'Soul Felt Anthem',
-    artist: 'Soul Felt Collective',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'featured',
-    price: '$1.29',
-    album: 'Soulful Beginnings',
-    new: false,
-    popular: true,
-    recommended: true,
-  },
-  {
-    id: 't2',
-    title: 'Heartstrings',
-    artist: 'Soul Felt Collective',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'new',
-    price: '$1.29',
-    album: 'Soulful Beginnings',
-    new: true,
-    popular: false,
-    recommended: false,
-  },
-  {
-    id: 't3',
-    title: 'Pop Vibes',
-    artist: 'Pop Star',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-    cover: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'popular',
-    price: '$1.29',
-    album: 'Pop Explosion',
-    new: false,
-    popular: true,
-    recommended: true,
-  },
-  {
-    id: 't4',
-    title: 'Smooth Jazz Night',
-    artist: 'Jazz Ensemble',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-    cover: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'new',
-    price: '$1.29',
-    album: 'Jazz Lounge',
-    new: true,
-    popular: false,
-    recommended: false,
-  },
-  {
-    id: 't5',
-    title: 'RnB Groove',
-    artist: 'RnB Sensation',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
-    cover: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'popular',
-    price: '$1.29',
-    album: 'RnB Magic',
-    new: false,
-    popular: true,
-    recommended: false,
-  },
-  {
-    id: 't6',
-    title: 'Easy Listening Escape',
-    artist: 'Chill Artist',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
-    cover: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=400&h=400&facepad=2',
-    section: 'recommended',
-    price: '$1.29',
-    album: 'Chill Zone',
-    new: false,
-    popular: false,
-    recommended: true,
-  },
-];
-
-function Wavelength({ playing }) {
-  const heights = ['h-2', 'h-3', 'h-4', 'h-5'];
-  return (
-    <div className="flex gap-1 items-end h-6 mt-2">
-      {[...Array(12)].map((_, i) => (
-        <div
-          key={i}
-          className={`w-1 rounded bg-[#aa2a46] transition-all duration-300 ${playing ? heights[i % heights.length] : 'h-2'} animate-pulse`}
-          style={{ animationDelay: `${i * 0.1}s` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function TrackCard({ track }) {
-  const audioRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-
-  const handlePlay = () => {
-    audioRef.current.play();
-    setPlaying(true);
-  };
-  const handlePause = () => {
-    audioRef.current.pause();
-    setPlaying(false);
-  };
-  return (
-    <div className="bg-[#1d1e26] rounded-xl shadow-lg p-6 flex flex-col items-center w-full max-w-xs min-w-[220px]">
-      <img src={track.cover} alt={track.title} className="w-24 h-24 rounded-full object-cover mb-2" />
-      <h4 className="text-[#aa2a46] text-xl font-bold mb-1 font-['Public_Sans'] text-center">{track.title}</h4>
-      <span className="text-[#fffced] text-base font-semibold mb-1">{track.artist}</span>
-      <span className="text-white/70 text-sm mb-2">Album: {track.album}</span>
-      <audio ref={audioRef} src={track.url} onEnded={handlePause} />
-      <div className="flex gap-4 mt-2">
-        {!playing ? (
-          <button onClick={handlePlay} className="px-4 py-1 bg-[#aa2a46] text-[#fffced] rounded-full font-bold hover:bg-[#fffced] hover:text-[#aa2a46] transition-colors">Play</button>
-        ) : (
-          <button onClick={handlePause} className="px-4 py-1 bg-[#fffced] text-[#aa2a46] rounded-full font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-colors">Stop</button>
-        )}
-      </div>
-      <Wavelength playing={playing} />
-      <div className="mt-4 w-full flex flex-col items-center">
-        <span className="text-[#aa2a46] text-lg font-bold">{track.price}</span>
-        <button className="mt-2 px-4 py-2 bg-[#aa2a46] text-[#fffced] rounded font-bold hover:bg-[#fffced] hover:text-[#aa2a46] transition-colors">Buy Track</button>
-      </div>
-    </div>
-  );
-}
-
 const Music = () => {
+  const { dbSnapshot } = useApiData();
   const [activeTabs, setActiveTabs] = useState(['all']);
+
+  // Get tracks and albums from database
+  const tracks = dbSnapshot?.tracks?.records || [];
+  const albums = dbSnapshot?.albums?.records || [];
+
+  // Helper function to get album cover URL by album_id
+  const getAlbumCoverUrl = (albumId) => {
+    const album = albums.find(a => a.id === albumId);
+    return album?.cover_url;
+  };
+
+  // Debug logging
+  console.log('Albums:', albums);
+  console.log('Tracks:', tracks);
 
   // Toggle tab selection
   const handleTabClick = (key) => {
@@ -167,6 +53,7 @@ const Music = () => {
 
   // Section definitions
   const allSections = [
+    { key: 'all', label: 'All Tracks' },
     { key: 'featured', label: 'Featured Tracks' },
     { key: 'new', label: 'New Releases' },
     { key: 'popular', label: 'Popular' },
@@ -201,17 +88,30 @@ const Music = () => {
         {/* Display selected sections */}
         {allSections.filter(section => sectionsToShow.includes(section.key)).map(section => {
           let sectionTracks;
-          if (["featured", "new", "popular", "recommended"].includes(section.key)) {
-            sectionTracks = tracks.filter(track => track[section.key] || track.section === section.key);
+          if (section.key === "all") {
+            // Show all tracks
+            sectionTracks = tracks;
+          } else if (section.key === "featured") {
+            // Featured could show popular OR recommended tracks
+            sectionTracks = tracks.filter(track => track.is_popular || track.is_recommended);
+          } else if (section.key === "new") {
+            sectionTracks = tracks.filter(track => track.is_new);
+          } else if (section.key === "popular") {
+            sectionTracks = tracks.filter(track => track.is_popular);
+          } else if (section.key === "recommended") {
+            sectionTracks = tracks.filter(track => track.is_recommended);
           } else {
-            sectionTracks = tracks.filter(track => track.artist.toLowerCase().includes(section.key) || track.section === section.key || track.album.toLowerCase().includes(section.key));
+            // Genre filtering
+            sectionTracks = tracks.filter(track => 
+              track.genre?.toLowerCase() === section.key.toLowerCase()
+            );
           }
           return sectionTracks.length > 0 ? (
             <div key={section.key} className="mb-8">
               <h2 className="text-[#aa2a46] text-3xl font-bold mb-6 font-['Public_Sans'] text-center">{section.label}</h2>
               <div className="flex flex-wrap gap-8 justify-center">
                 {sectionTracks.map(track => (
-                  <TrackCard key={track.id} track={track} />
+                  <TrackCard key={track.id} track={track} albumCoverUrl={getAlbumCoverUrl(track.album_id)} />
                 ))}
               </div>
             </div>

@@ -1,5 +1,7 @@
 // Demo merch products
 import React, { useState } from "react";
+import { useApiData } from "../context/ApiDataContext.jsx";
+
 const demoMerchProducts = [
   {
     type: "Digital Album",
@@ -51,13 +53,23 @@ const demoMerchProducts = [
   },
 ];
 
-function ArtistStoreNav({ storeName, cartCount, tabs, activeTab, setActiveTab }) {
+function ArtistStoreNav({
+  storeName,
+  cartCount,
+  tabs,
+  activeTab,
+  setActiveTab,
+}) {
   return (
     <nav className="w-full bg-[#21212b] outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 flex flex-col pb-[0.04rem]">
       <div className="flex justify-between items-center w-full py-[1rem] px-[6%]">
-        <span className="text-white text-[1.2rem] md:text[1.5rem] lg:text-[2rem] xl:text-[2rem] font-bold font-['Roboto'] ">{storeName}</span>
+        <span className="text-white text-[1.2rem] md:text[1.5rem] lg:text-[2rem] xl:text-[2rem] font-bold font-['Roboto'] ">
+          {storeName}
+        </span>
         <div className="px-[0.7rem] py-[0.5rem] bg-[#1d1e26] rounded-xs outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 flex items-center">
-          <span className="text-[#fffced] text-[0.7rem] lg:text-[1rem] xl:text-[2rem] font-medium font-['Roboto']">Cart ({cartCount})</span>
+          <span className="text-[#fffced] text-[0.7rem] lg:text-[1rem] xl:text-[2rem] font-medium font-['Roboto']">
+            Cart ({cartCount})
+          </span>
         </div>
       </div>
       <div className="flex sm:flex-col justify-center items-center gap-3 px-[6%] pb-[0.7rem]">
@@ -66,11 +78,13 @@ function ArtistStoreNav({ storeName, cartCount, tabs, activeTab, setActiveTab })
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-full font-bold text-base transition-all duration-200 shadow-sm border-2 border-[#aa2a46] focus:outline-none
-              ${activeTab === tab
-                ? 'bg-gradient-to-r from-[#aa2a46] to-[#ff6b81] text-white scale-105 shadow-lg'
-                : 'bg-[#1d1e26] text-[#fffced] hover:bg-[#aa2a46] hover:text-white'}
+              ${
+                activeTab === tab
+                  ? "bg-gradient-to-r from-[#aa2a46] to-[#ff6b81] text-white scale-105 shadow-lg"
+                  : "bg-[#1d1e26] text-[#fffced] hover:bg-[#aa2a46] hover:text-white"
+              }
             `}
-            style={{ minWidth: '120px' }}
+            style={{ minWidth: "120px" }}
           >
             <span className="text-[0.9rem] sm:text-[1.1rem] lg:text-[1.2rem] xl:text-[1.3rem] font-normal font-['Roboto'] leading-tight tracking-wide">
               {tab}
@@ -98,19 +112,44 @@ function ArtistStoreHeader({
   );
 }
 
-function ArtistMerchCard({ type, title, price, img, buttonLabel = "Add to Cart", onAddToCart }) {
+function ArtistMerchCard({
+  type,
+  title,
+  price,
+  img,
+  buttonLabel = "Add to Cart",
+  onAddToCart,
+}) {
   return (
-    <div className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow" style={{ minWidth: "220px", minHeight: "320px" }}>
+    <div
+      className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow"
+      style={{ minWidth: "220px", minHeight: "320px" }}
+    >
       <div className="flex-shrink-0 w-full h-[65%] flex items-center justify-center relative">
-        <img className="w-[95%] h-[95%] object-cover rounded-t-md" src={img} alt={title} />
+        <img
+          className="w-[95%] h-[95%] object-cover rounded-t-md"
+          src={img}
+          alt={title}
+        />
       </div>
       <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[5%] pb-[6%]">
-        <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">{type}</div>
-        <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">{title}</div>
+        <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
+          {type}
+        </div>
+        <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">
+          {title}
+        </div>
         <div className="flex justify-between items-center w-full">
-          <div className="text-white text-sm xl:text-[1.2rem]  font-bold font-['Roboto'] leading-tight">{price}</div>
-          <button className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center" onClick={onAddToCart}>
-            <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">{buttonLabel}</span>
+          <div className="text-white text-sm xl:text-[1.2rem]  font-bold font-['Roboto'] leading-tight">
+            {price}
+          </div>
+          <button
+            className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center"
+            onClick={onAddToCart}
+          >
+            <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
+              {buttonLabel}
+            </span>
           </button>
         </div>
       </div>
@@ -118,28 +157,109 @@ function ArtistMerchCard({ type, title, price, img, buttonLabel = "Add to Cart",
   );
 }
 
-
 const ArtistStore = () => {
+  const { dbSnapshot } = useApiData();
   const tabs = ["All Products", "Music", "Merchandise"];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [cart, setCart] = useState([]);
 
+  // Get albums from database
+  let albumProducts = [];
+  if (dbSnapshot && dbSnapshot.albums && dbSnapshot.albums.records) {
+    albumProducts = dbSnapshot.albums.records.map((album) => {
+      // Parse price - handle both string and number formats
+      let parsedPrice = 0;
+      if (album.album_pricing != null && album.album_pricing !== '') {
+        const priceValue = typeof album.album_pricing === 'string' 
+          ? parseFloat(album.album_pricing) 
+          : Number(album.album_pricing);
+        
+        // Check if conversion was successful
+        if (!isNaN(priceValue)) {
+          parsedPrice = priceValue / 100; // Convert cents to dollars
+        }
+      }
+      
+      return {
+        type: album.album_type === "digital" ? "Digital Album" : album.album_type === "vinyl" ? "Vinyl Record" : "Limited Edition",
+        title: album.title || "Untitled Album",
+        price: parsedPrice > 0 
+          ? `$${parsedPrice.toFixed(2)}`
+          : "$0.00",
+        img: album.cover_url || "https://placehold.co/265x265",
+        album_type: album.album_type,
+      };
+    });
+  }
+
+  // Get merchandise from database
+  let merchandiseProducts = [];
+  if (dbSnapshot && dbSnapshot.merchandise && dbSnapshot.merchandise.records) {
+    merchandiseProducts = dbSnapshot.merchandise.records.map((merch) => {
+      // Parse price - NUMERIC format (already in dollars)
+      let parsedPrice = 0;
+      if (merch.price != null && merch.price !== '') {
+        parsedPrice = typeof merch.price === 'string' 
+          ? parseFloat(merch.price) 
+          : Number(merch.price);
+      }
+      
+      return {
+        type: merch.merch_type || "Merchandise",
+        title: merch.title || "Untitled Item",
+        price: parsedPrice > 0 
+          ? `$${parsedPrice.toFixed(2)}`
+          : "$0.00",
+        img: merch.image_url || "https://placehold.co/265x265",
+        merch_type: merch.merch_type,
+      };
+    });
+  }
+
+  // Combine all products: albums, merchandise from DB, and demo products
+  const allProducts = [...albumProducts, ...merchandiseProducts, ...demoMerchProducts];
+
   // Filter products by tab
-  const filteredProducts = demoMerchProducts.filter(product => {
+  const filteredProducts = allProducts.filter((product) => {
     if (activeTab === "All Products") return true;
-    if (activeTab === "Music") return product.type === "Digital Album" || product.type === "Vinyl Record" || product.type === "Limited Edition";
-    if (activeTab === "Merchandise") return product.type === "Apparel" || product.type === "Accessories" || product.type === "Posters & Art";
+    
+    if (activeTab === "Music") {
+      // For albums from database, check album_type
+      if (product.album_type) {
+        return product.album_type === "digital" || product.album_type === "vinyl";
+      }
+      // For demo products, check type
+      return (
+        product.type === "Digital Album" ||
+        product.type === "Vinyl Record" ||
+        product.type === "Limited Edition"
+      );
+    }
+    
+    if (activeTab === "Merchandise") {
+      // For merchandise from database, check merch_type exists
+      if (product.merch_type) {
+        return true; // Show all merchandise from database
+      }
+      // For demo products, filter by type
+      return (
+        product.type === "Apparel" ||
+        product.type === "Accessories" ||
+        product.type === "Posters & Art"
+      );
+    }
+    
     return true;
   });
 
   // Add to cart
   const handleAddToCart = (product) => {
-    setCart(prev => [...prev, product]);
+    setCart((prev) => [...prev, product]);
   };
 
   // Remove from cart
   const handleRemoveFromCart = (idx) => {
-    setCart(prev => prev.filter((_, i) => i !== idx));
+    setCart((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // Helper function to determine grid columns for lg/xl
@@ -165,22 +285,48 @@ const ArtistStore = () => {
           {/* Cart display */}
           {cart.length > 0 && (
             <div className="w-full max-w-lg bg-[#21212b] rounded-md shadow-md p-4 mb-6">
-              <h3 className="text-[#aa2a46] text-lg font-bold mb-2">Your Cart</h3>
+              <h3 className="text-[#aa2a46] text-lg font-bold mb-2">
+                Your Cart
+              </h3>
               <ul className="mb-2">
                 {cart.map((item, idx) => (
-                  <li key={idx} className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20">
+                  <li
+                    key={idx}
+                    className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20"
+                  >
                     <span className="text-white text-sm">{item.title}</span>
                     <span className="text-white text-sm">{item.price}</span>
-                    <button className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs" onClick={() => handleRemoveFromCart(idx)}>Remove</button>
+                    <button
+                      className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs"
+                      onClick={() => handleRemoveFromCart(idx)}
+                    >
+                      Remove
+                    </button>
                   </li>
                 ))}
               </ul>
-              <div className="text-white font-bold">Total: {cart.reduce((sum, item) => sum + parseFloat(item.price.replace('$','')), 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</div>
+              <div className="text-white font-bold">
+                Total:{" "}
+                {cart
+                  .reduce(
+                    (sum, item) =>
+                      sum + parseFloat(item.price.replace("$", "")),
+                    0
+                  )
+                  .toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+              </div>
             </div>
           )}
           <div className={`${getMerchCardGridClass()}`}>
             {filteredProducts.map((item, idx) => (
-              <ArtistMerchCard key={idx} {...item} onAddToCart={() => handleAddToCart(item)} />
+              <ArtistMerchCard
+                key={idx}
+                {...item}
+                onAddToCart={() => handleAddToCart(item)}
+              />
             ))}
           </div>
         </div>
