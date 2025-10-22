@@ -1,7 +1,21 @@
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import React, { useState } from "react";
+import { useApiData } from "../context/ApiDataContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 export default function ResponsiveNavbar() {
+  const { websiteUser } = useApiData();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      console.log("User signed out successfully");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   const MobileTabletNavbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
   
@@ -40,11 +54,39 @@ export default function ResponsiveNavbar() {
               <Link to="/videos">Videos</Link>
               <Link to="/community">Community/News</Link>
               <Link to="/contact">Contact</Link>
+              {websiteUser?.isAdmin && (
+                <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin Dashboard</Link>
+              )}
             </ul>
             <div className="px-4 pb-4">
               <div className="border border-[#1a1312] rounded-md p-3 w-40 flex flex-col gap-2">
-                <a href="#" className="text-[#1976d2] text-base">Sign Up</a>
-                <a href="#" className="text-[#1976d2] text-base">Login</a>
+                {websiteUser ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-[#c90036] flex items-center justify-center">
+                        <span className="text-[#e6cfa7] font-bold text-sm">
+                          {websiteUser.email?.[0]?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[#e6cfa7] text-xs truncate max-w-[100px]">
+                          {websiteUser.email}
+                        </span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleSignOut}
+                      className="text-[#c90036] text-base hover:text-[#1976d2] transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/sign-up" className="text-[#1976d2] text-base">Sign Up</Link>
+                    <Link to="/login" className="text-[#1976d2] text-base">Login</Link>
+                  </>
+                )}
                 <div className="relative mt-2">
                   <input
                     type="text"
@@ -64,13 +106,11 @@ export default function ResponsiveNavbar() {
         )}
       </nav>
     );
-  }
+  };
+
   const DesktopNavbar = () => {
     return (
       <nav className="bg-[#1a0b0d] w-full flex items-center">
-        <section>
-          
-        </section>
         {/* Logo Section */}
         <div className="flex flex-col items-center justify-center px-6 py-2 bg-[#0c0504]" style={{ minWidth: 145 }}>
           <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
@@ -88,11 +128,39 @@ export default function ResponsiveNavbar() {
           <Link to="/videos">Videos</Link>
           <Link to="/community">Community/News</Link>
           <Link to="/contact">Contact</Link>
+          {websiteUser?.isAdmin && (
+            <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin</Link>
+          )}
         </ul>
         {/* Auth/Search Section */}
         <div className="flex items-center gap-6 px-6 py-2 bg-[#1a0b0d]" style={{ minWidth: 220 }}>
-          <Link to="/sign-up" className="text-[#1976d2] text-lg font-medium">Sign Up</Link>
-          <Link to="/login" className="text-[#1976d2] text-lg font-medium">Login</Link>
+          {websiteUser ? (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#c90036] flex items-center justify-center">
+                  <span className="text-[#e6cfa7] font-bold text-lg">
+                    {websiteUser.email?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[#e6cfa7] text-sm font-medium truncate max-w-[120px]">
+                    {websiteUser.email}
+                  </span>
+                  <button 
+                    onClick={handleSignOut}
+                    className="text-[#c90036] text-xs hover:text-[#1976d2] transition-colors text-left"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/sign-up" className="text-[#1976d2] text-lg font-medium">Sign Up</Link>
+              <Link to="/login" className="text-[#1976d2] text-lg font-medium">Login</Link>
+            </>
+          )}
           <div className="relative">
             <input
               type="text"
@@ -109,7 +177,7 @@ export default function ResponsiveNavbar() {
         </div>
       </nav>
     );
-  }
+  };
   
 
   return (

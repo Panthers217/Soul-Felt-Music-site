@@ -6,6 +6,7 @@ import artistRouter from './routes/artist.js';
 import albumRouter from './routes/album.js';
 import trackRouter from './routes/track.js';
 import adminRouter from './routes/admin.js';
+import authRouter from './routes/auth.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
@@ -33,6 +34,13 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Debug logging for auth routes
+app.use('/api/auth', (req, res, next) => {
+  console.log(`🔍 Auth route hit: ${req.method} ${req.originalUrl}`);
+  console.log('Headers:', { authorization: req.headers.authorization?.substring(0, 20) + '...' });
+  next();
+});
 // app.post('/api/admin/verify', async (req, res) => {
 //   const { idToken } = req.body;
 //   try {
@@ -49,6 +57,7 @@ app.use('/api/artists', artistRouter);
 // app.use('/api/artist-images', artistImageRouter);
 // app.use('/api/users', userRouter);
 app.use('/api/albums', albumRouter);
+app.use('/api/auth', authRouter);
 app.use('/api/tracks', trackRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');

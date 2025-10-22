@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useUserLogin } from "../hooks/useUserLogin.js";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase.js";
 
 const ApiDataContext = createContext();
 
@@ -13,6 +15,8 @@ export const ApiDataProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
   const [refreshSqlViewerTable, setRefreshSqlViewerTable] = useState(false);
+  const [websiteUser, setWebsiteUser] = useState(null);
+  
   const triggerRefreshSqlViewerTable = () =>
     setRefreshSqlViewerTable((prev) => !prev);
 
@@ -28,6 +32,47 @@ export const ApiDataProvider = ({ children }) => {
     console.log("Mode set to:", mode);
    
   }, [mode]);
+
+  // Check if user is signed in with Firebase and persist throughout the app
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Check if user has admin claims
+        try {
+          const tokenResult = await firebaseUser.getIdTokenResult();
+          const isAdmin = tokenResult.claims.admin === true;
+          
+          // User is signed in
+          setWebsiteUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            emailVerified: firebaseUser.emailVerified,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            isAdmin: isAdmin,
+          });
+          console.log("User is signed in:", firebaseUser.email, "Admin:", isAdmin);
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setWebsiteUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            emailVerified: firebaseUser.emailVerified,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            isAdmin: false,
+          });
+        }
+      } else {
+        // User is signed out
+        setWebsiteUser(null);
+        console.log("User is signed out");
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     axios
@@ -87,7 +132,7 @@ export const ApiDataProvider = ({ children }) => {
   }, [refreshSqlViewerTable, user]);
 
   return (
-    <ApiDataContext.Provider
+     <ApiDataContext.Provider
       value={{
         artists,
         albums,
@@ -100,6 +145,8 @@ export const ApiDataProvider = ({ children }) => {
         setMode,
         refreshSqlViewerTable,
         triggerRefreshSqlViewerTable,
+        websiteUser,
+        setWebsiteUser,
       }}
     >
       {children}
