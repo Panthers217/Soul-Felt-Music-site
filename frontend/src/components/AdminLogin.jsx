@@ -31,6 +31,17 @@ export default function AdminLogin({ onLogin }) {
     try {
       const auth = getAuth(app);
       const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      
+      // Check if user has admin claims
+      const tokenResult = await userCredential.user.getIdTokenResult();
+      if (tokenResult.claims.admin !== true) {
+        // This is not an admin user
+        await auth.signOut(); // Sign them out immediately
+        setError('Access denied. This login is for administrators only. Please use /login for regular access.');
+        setLoading(false);
+        return;
+      }
+      
       onLogin && onLogin(userCredential.user);
       
     } catch (err) {

@@ -123,6 +123,7 @@ const ArtistPageComponent = () => {
   const albums = dbSnapshot?.albums?.records || [];
 
   console.log("Albums from database:", albums);
+  console.log("artist from database:", dbArtists);
   
   // Helper function to get image for promotional track
   const getPromotionalTrackImage = (track) => {
@@ -160,6 +161,7 @@ const ArtistPageComponent = () => {
     
     return {
       id: artist.id,
+      genre:artist.genre,
       name: artist.artist_name || artist.name,
       img:
         artist.image_url ||
@@ -170,9 +172,13 @@ const ArtistPageComponent = () => {
       career_highlights: artist.Career_Highlights,
       influences: artist.Influences,
       featured_tracks: artistFeaturedTracks,
+      rating: artist.rating,
+      monthly_listeners: artist.monthly_listeners,
+      albums_released: artist.albums_released,
     };
   });
   
+  console.log("artists with genre from database:", artists);
 
   // Helper function to get album cover URL by album_id
   const getAlbumCoverUrl = (albumId) => {
