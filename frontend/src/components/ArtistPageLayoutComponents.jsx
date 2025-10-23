@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useApiData } from "../context/ApiDataContext";
+import SearchBar from "./SearchBar";
 import {
   trackcardImage,
   topTrackcardImage,
@@ -107,6 +108,44 @@ async function fetchArtistImage() {
 
 const ArtistPageComponent = () => {
   const { dbSnapshot } = useApiData();
+  
+  // --- INTERACTIVE STATE (MUST BE AT TOP) ---
+  const [selectedCountry, setSelectedCountry] = useState("All countries");
+  const [hoveredArtist, setHoveredArtist] = useState(null);
+  const [trackModal, setTrackModal] = useState({ open: false, track: null });
+  const [searchResults, setSearchResults] = useState(null);
+  const [albumImage, setAlbumImage] = useState(null);
+
+  // Custom hook for media queries
+  function useMediaQuery(query) {
+    const [matches, setMatches] = React.useState(
+      () => window.matchMedia(query).matches
+    );
+
+    React.useEffect(() => {
+      const media = window.matchMedia(query);
+      if (media.matches !== matches) setMatches(media.matches);
+      const listener = () => setMatches(media.matches);
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
+    }, [matches, query]);
+
+    return matches;
+  }
+
+  // Media queries
+  const isDesktop = useMediaQuery("(min-width: 1440px)");
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1439px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      const imageUrl = await fetchArtistImage();
+      setAlbumImage(imageUrl);
+      console.log("Fetched image URL:", imageUrl);
+    };
+    fetchImage();
+  }, []);
 
   // Get artists from database
   const dbArtists = dbSnapshot?.artists?.records || [];
@@ -124,6 +163,14 @@ const ArtistPageComponent = () => {
 
   console.log("Albums from database:", albums);
   console.log("artist from database:", dbArtists);
+  console.log("Promotional tracks from database:", promotionalTracks);
+  console.log("Promotional tracks count:", promotionalTracks.length);
+  console.log("Sample promotional track:", promotionalTracks[0]);
+  console.log("Sample promotional track ALL KEYS:", promotionalTracks[0] ? Object.keys(promotionalTracks[0]) : 'no tracks');
+  console.log("Sample promotional track featured_track field:", promotionalTracks[0]?.featured_track);
+  console.log("Sample promotional track featured field:", promotionalTracks[0]?.featured);
+  console.log("Sample promotional track featured field TYPE:", typeof promotionalTracks[0]?.featured);
+  console.log("Sample promotional track artist_id:", promotionalTracks[0]?.artist_id);
   
   // Helper function to get image for promotional track
   const getPromotionalTrackImage = (track) => {
@@ -149,15 +196,30 @@ const ArtistPageComponent = () => {
   
   // Derive artists array with name and img properties
   const artists = dbArtists.map((artist, idx) => {
-    // Filter promotional tracks for this artist where featured_track = 1
-    const artistFeaturedTracks = promotionalTracks
-      .filter(
-        (track) => track.artist_id === artist.id && (track.featured_track === 1 || track.featured_track === true)
-      )
-      .map((track) => ({
-        ...track,
-        img: getPromotionalTrackImage(track)
-      }));
+    // Filter promotional tracks for this artist where featured = 1
+    const artistPromotionalTracks = promotionalTracks.filter(
+      (track) => track.artist_id === artist.id
+    );
+    
+    const artistFeaturedTracks = artistPromotionalTracks.filter(
+      (track) => track.promote_track === 1 || track.promote_track === true
+    );
+    
+    if (idx === 0) {
+      console.log(`First artist (${artist.artist_name || artist.name}):`);
+      console.log("  - All promotional tracks for this artist:", artistPromotionalTracks.length);
+      console.log("  - Featured tracks for this artist:", artistFeaturedTracks.length);
+      console.log("  - Sample promotional track:", artistPromotionalTracks[0]);
+    }
+    
+    const mappedFeaturedTracks = artistFeaturedTracks.map((track) => ({
+      ...track,
+      img: getPromotionalTrackImage(track),
+      // Ensure promo_audio_url is included
+      promo_audio_url: track.promo_audio_url,
+      // Add artist_name for display
+      artist_name: artist.artist_name || artist.name
+    }));
     
     return {
       id: artist.id,
@@ -171,7 +233,7 @@ const ArtistPageComponent = () => {
       bio: artist.bio,
       career_highlights: artist.Career_Highlights,
       influences: artist.Influences,
-      featured_tracks: artistFeaturedTracks,
+      featured_tracks: mappedFeaturedTracks,
       rating: artist.rating,
       monthly_listeners: artist.monthly_listeners,
       albums_released: artist.albums_released,
@@ -179,6 +241,7 @@ const ArtistPageComponent = () => {
   });
   
   console.log("artists with genre from database:", artists);
+  console.log("Featured tracks for first artist:", artists[0]?.featured_tracks);
 
   // Helper function to get album cover URL by album_id
   const getAlbumCoverUrl = (albumId) => {
@@ -196,6 +259,7 @@ const ArtistPageComponent = () => {
       img:
         getAlbumCoverUrl(track.album_id) ||
         topTrackcardImage[idx % topTrackcardImage.length],
+      audio_url: track.audio_url,
     }));
 
   console.log("Top Track Cards from database:", topTracks);
@@ -208,38 +272,13 @@ const ArtistPageComponent = () => {
   ];
   const countries = ["All countries", ...uniqueCountries.sort()];
 
-  // --- INTERACTIVE STATE ---
-  const [selectedCountry, setSelectedCountry] = useState("All countries");
-  const [hoveredArtist, setHoveredArtist] = useState(null);
-  const [trackModal, setTrackModal] = useState({ open: false, track: null });
-  // Custom hook for media queries
-  function useMediaQuery(query) {
-    const [matches, setMatches] = React.useState(
-      () => window.matchMedia(query).matches
-    );
+  const handleSearchResults = React.useCallback((results) => {
+    console.log("🔍 Search results received:", results);
+    setSearchResults(results);
+  }, []);
 
-    React.useEffect(() => {
-      const media = window.matchMedia(query);
-      if (media.matches !== matches) setMatches(media.matches);
-      const listener = () => setMatches(media.matches);
-      media.addEventListener("change", listener);
-      return () => media.removeEventListener("change", listener);
-    }, [matches, query]);
-
-    return matches;
-  }
-
-  const [albumImage, setAlbumImage] = useState(null);
   console.log(albumImage);
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const imageUrl = await fetchArtistImage();
-      setAlbumImage(imageUrl);
-      console.log("Fetched image URL:", imageUrl);
-    };
-    fetchImage();
-  }, []);
   // --- FILTER ARTISTS BY COUNTRY ---
   const artistCountryMap = React.useMemo(() => {
     const map = {};
@@ -248,10 +287,37 @@ const ArtistPageComponent = () => {
     });
     return map;
   }, [artists]);
-  const filteredArtists =
-    selectedCountry === "All countries"
-      ? artists
-      : artists.filter((a) => a.country === selectedCountry);
+  
+  // Use search results if available, otherwise use all artists
+  const sourceArtists = React.useMemo(() => {
+    if (!searchResults) {
+      console.log("📋 Using all artists:", artists.length);
+      return artists;
+    }
+    
+    console.log("🔍 Search results artists:", searchResults.artists?.length || 0);
+    
+    // Get IDs from search results
+    const searchedIds = searchResults.artists?.map(a => a.id) || [];
+    console.log("🔍 Searched artist IDs:", searchedIds);
+    
+    // Filter our transformed artists array by matching IDs
+    const filtered = artists.filter(a => searchedIds.includes(a.id));
+    console.log("✅ Filtered to matching artists:", filtered.length);
+    
+    return filtered;
+  }, [searchResults, artists]);
+
+  const filteredArtists = React.useMemo(() => {
+    const filtered = sourceArtists.filter((a) => {
+      // Filter by country
+      const countryMatch = selectedCountry === "All countries" || a.country === selectedCountry;
+      return countryMatch;
+    });
+    
+    console.log("🌍 Country filter:", selectedCountry, "→", filtered.length, "artists");
+    return filtered;
+  }, [sourceArtists, selectedCountry]);
 
   // --- REUSABLE COMPONENTS ---
   const Banner = ({ image, title, className = "" }) => (
@@ -319,9 +385,11 @@ const ArtistPageComponent = () => {
             key={art.name}
             to={`/artist/${encodeURIComponent([art.name])}`}
             state={{ art, albumImage }}
-            onClick={() =>
-              sessionStorage.setItem(`album:${art.id}`, JSON.stringify(art))
-            }
+            onClick={() => {
+              console.log("Navigating to artist:", art.name);
+              console.log("Featured tracks being passed:", art.featured_tracks);
+              sessionStorage.setItem(`album:${art.id}`, JSON.stringify(art));
+            }}
             style={{ ...positions[idx], position: "absolute" }}
             className={`w-44 h-60 p-4 transition-all duration-150 ${cardClass} ${
               hovered === art.name
@@ -603,19 +671,41 @@ const ArtistPageComponent = () => {
     </div>
   );
 
-  // Media queries
-  const isDesktop = useMediaQuery("(min-width: 1440px)");
-  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1439px)");
-  const isMobile = useMediaQuery("(max-width: 767px)");
-
   // --- TRACK MODAL ---
   const TrackModal = ({ open, track, onClose }) => {
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const audioRef = React.useRef(null);
+
+    // Reset playing state when modal closes or track changes
+    React.useEffect(() => {
+      if (!open) {
+        setIsPlaying(false);
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+      }
+    }, [open, track]);
+
+    const handlePlayPause = () => {
+      if (!audioRef.current || !track?.audio_url) return;
+      
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    };
+
     if (!open || !track) return null;
+    
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
         <div className="bg-zinc-900 rounded-lg shadow-lg p-8 max-w-md w-full relative">
           <button
-            className="absolute top-2 right-2 text-white text-xl"
+            className="absolute top-2 right-2 text-white text-xl hover:text-yellow-400 transition-colors"
             onClick={onClose}
           >
             &times;
@@ -630,24 +720,77 @@ const ArtistPageComponent = () => {
               {track.title}
             </div>
             <div className="text-white/70 text-lg mb-2">{track.artist}</div>
-            <div className="text-yellow-400 text-base">
+            <div className="text-yellow-400 text-base mb-4">
               Chart position:{" "}
               {topTracks.findIndex((t) => t.title === track.title) + 1}
             </div>
-            <div className="mt-4 text-white/80 text-sm">
-              More info coming soon...
-            </div>
+            
+            {/* Play Button */}
+            {track.audio_url ? (
+              <>
+                <button
+                  onClick={handlePlayPause}
+                  className="mt-4 px-8 py-3 bg-yellow-700 hover:bg-yellow-600 text-white font-bold rounded-full transition-all duration-150 flex items-center gap-2 shadow-lg hover:shadow-yellow-700/50"
+                >
+                  {isPlaying ? (
+                    <>
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                      </svg>
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      Play
+                    </>
+                  )}
+                </button>
+                <audio
+                  ref={audioRef}
+                  src={track.audio_url}
+                  onEnded={() => setIsPlaying(false)}
+                  onPause={() => setIsPlaying(false)}
+                  onPlay={() => setIsPlaying(true)}
+                />
+              </>
+            ) : (
+              <div className="mt-4 text-white/60 text-sm">
+                Audio preview not available
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
+  // Memoize the rendered components to prevent re-creation on state changes
+  const desktopView = React.useMemo(() => <ArtistDesktopPage artisImage={albumImage} />, [albumImage, filteredArtists, hoveredArtist, selectedCountry]);
+  const tabletView = React.useMemo(() => <ArtistPageTablet artisImage={albumImage} />, [albumImage, filteredArtists, hoveredArtist, selectedCountry]);
+  const mobileView = React.useMemo(() => <ArtistMobilePage artisImage={albumImage} />, [albumImage, filteredArtists, hoveredArtist, selectedCountry]);
+
+  // Wait for data to load
+  if (!dbSnapshot) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-zinc-900 text-white">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {isDesktop && <ArtistDesktopPage artisImage={albumImage} />}
-      {isTablet && <ArtistPageTablet artisImage={albumImage} />}
-      {isMobile && <ArtistMobilePage artisImage={albumImage} />}
+    <div className="bg-zinc-900">
+      {/* SearchBar at top level - prevents re-creation on view changes */}
+      <div className="w-full max-w-7xl mx-auto px-4 pt-8 pb-4">
+        <SearchBar onSearchResults={handleSearchResults} viewMode="artists" />
+      </div>
+      
+      {isDesktop && desktopView}
+      {isTablet && tabletView}
+      {isMobile && mobileView}
       <TrackModal
         open={trackModal.open}
         track={trackModal.track}

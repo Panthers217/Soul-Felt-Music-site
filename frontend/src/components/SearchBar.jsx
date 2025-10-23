@@ -19,14 +19,17 @@ function SearchBar({ onSearchResults, viewMode }) {
       albums: [],
       artists: [],
       promotional_tracks: [],
-      promotional_videos: []
+      promotional_videos: [],
+      merchandise: []
     };
 
-    // Search artists by name first
+    // Search artists by name first (check both 'name' and 'artist_name' fields)
     if (dbSnapshot.artists?.records) {
       results.artists = dbSnapshot.artists.records.filter(artist => 
-        artist.name?.toLowerCase().includes(searchTerm)
+        artist.name?.toLowerCase().includes(searchTerm) ||
+        artist.artist_name?.toLowerCase().includes(searchTerm)
       );
+      console.log('🔍 SearchBar - Found artists:', results.artists.length);
     }
 
     // Get artist IDs from matching artists
@@ -73,6 +76,15 @@ function SearchBar({ onSearchResults, viewMode }) {
         promoVideo.title?.toLowerCase().includes(searchTerm) ||
         (promoVideo.artist_id && matchingArtistIds.includes(promoVideo.artist_id))
       );
+    }
+
+    // Search merchandise by title OR artist_id
+    if (dbSnapshot.merchandise?.records) {
+      results.merchandise = dbSnapshot.merchandise.records.filter(merch => 
+        merch.title?.toLowerCase().includes(searchTerm) ||
+        (merch.artist_id && matchingArtistIds.includes(merch.artist_id))
+      );
+      console.log('Matching merchandise:', results.merchandise.length);
     }
 
       onSearchResults(results);

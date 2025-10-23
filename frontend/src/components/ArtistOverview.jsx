@@ -56,11 +56,15 @@ function GetMusic({ artistName, musicText, buttonText, supportText, artistId }) 
 }
 // Dynamic FeaturedTracks component
 function FeaturedTracks({ tracks, artistId }) {
+  console.log("🎵 FeaturedTracks COMPONENT MOUNTED/RENDERED 🎵");
+  console.log("Featured Tracks received:", tracks);
+  console.log("Featured Tracks count:", tracks?.length);
+  console.log("First track data:", tracks?.[0]);
+  console.log("Artist ID:", artistId);
+  
   const [playingTrack, setPlayingTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const { websiteUser } = useApiData();
-
-  console.log("Featured Tracks:", tracks?.[0]?.img);
 
   // Generate or retrieve session ID for anonymous users
   const getSessionId = () => {
@@ -289,6 +293,7 @@ function ArtistOverview() {
   // Follow artist state
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  console.log("ArtistOverview: websiteUser:", websiteUser);
 
   // Check if user is following this artist on mount
   useEffect(() => {
@@ -315,6 +320,9 @@ function ArtistOverview() {
   }, [websiteUser, album?.id]);
   
   console.log("State passed to ArtistOverview", state);
+  console.log("Album data:", album);
+  console.log("Featured tracks from album:", album?.featured_tracks);
+  
   // Use artist image_url from the artists table (passed as art.img)
   const artistImageUrl = album?.img || artistPics?.cover_photo?.urls?.regular;
 
@@ -324,9 +332,12 @@ function ArtistOverview() {
   const artistBio = album?.bio || null;
   const careerHighlights = album?.career_highlights || null;
   const artistInfluences = album?.influences || null;
+  const featuredTracks = album?.featured_tracks || [];
+  
   console.log("Artist bio:", artistBio);
   console.log("Career highlights:", careerHighlights);
   console.log("Artist influences:", artistInfluences);
+  console.log("Featured tracks:", featuredTracks);
   
   // Parse career_highlights if it's a newline-separated string
   const parsedHighlights = careerHighlights
@@ -571,7 +582,7 @@ function ArtistOverview() {
         </div>
       </section>
 
-      <FeaturedTracks tracks={album.featured_tracks} artistId={album?.id} />
+      <FeaturedTracks tracks={featuredTracks} artistId={album?.id} />
 
       <GetMusic
         artistName={artistName}
