@@ -44,9 +44,10 @@ const Music = () => {
     }))
   ];
 
-  // Get tracks and albums from database
-  const tracks = dbSnapshot?.tracks?.records || [];
+  // Get promotional tracks and albums from database
+  const tracks = dbSnapshot?.promotional_tracks?.records || [];
   const albums = dbSnapshot?.albums?.records || [];
+  const artistImages = dbSnapshot?.artist_images?.records || [];
 
   // Helper function to get album cover URL by album_id
   const getAlbumCoverUrl = (albumId) => {
@@ -54,9 +55,22 @@ const Music = () => {
     return album?.cover_url;
   };
 
+  // Helper function to get artist image for promotional track
+  const getTrackImage = (track) => {
+    // Try artist_image_id first
+    if (track.artist_image_id) {
+      const artistImage = artistImages.find((img) => img.id === track.artist_image_id);
+      if (artistImage?.image_url) {
+        return artistImage.image_url;
+      }
+    }
+    // Fallback to album cover
+    return getAlbumCoverUrl(track.album_id);
+  };
+
   // Debug logging
   console.log("Albums:", albums);
-  console.log("Tracks:", tracks);
+  console.log("Promotional Tracks:", tracks);
 
   // Toggle tab selection
   const handleTabClick = (key) => {
@@ -225,7 +239,7 @@ const Music = () => {
                       <TrackCard
                         key={track.id}
                         track={track}
-                        albumCoverUrl={getAlbumCoverUrl(track.album_id)}
+                        albumCoverUrl={getTrackImage(track)}
                       />
                     ))
                   ) : (

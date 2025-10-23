@@ -72,7 +72,7 @@ function TrackCard({ track, albumCoverUrl }) {
           <p className="text-white/50 text-sm mt-1">Album: {track.album_title}</p>
         </div>
 
-        <audio ref={audioRef} src={track.audio_url} onEnded={handlePause} />
+        <audio ref={audioRef} src={track.promo_audio_url} onEnded={handlePause} />
         
         {/* Play/Pause Button */}
         <button 

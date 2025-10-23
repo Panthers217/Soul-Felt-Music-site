@@ -1,6 +1,9 @@
 // Demo merch products
 import React, { useState } from "react";
 import { useApiData } from "../context/ApiDataContext.jsx";
+import SearchBar from "./SearchBar.jsx";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext.jsx";
 
 const demoMerchProducts = [
   {
@@ -119,18 +122,37 @@ function ArtistMerchCard({
   img,
   buttonLabel = "Add to Cart",
   onAddToCart,
+  artistId,
 }) {
+  const navigate = useNavigate();
+
+  const handleImageClick = () => {
+    if (artistId) {
+      navigate(`/store/${artistId}`);
+    }
+  };
+
   return (
     <div
-      className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow"
+      className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#aa2a46]/50 hover:-translate-y-2"
       style={{ minWidth: "220px", minHeight: "320px" }}
     >
-      <div className="flex-shrink-0 w-full h-[65%] flex items-center justify-center relative">
+      <div 
+        className="flex-shrink-0 w-full h-[65%] flex items-center justify-center relative cursor-pointer group"
+        onClick={handleImageClick}
+      >
         <img
-          className="w-[95%] h-[95%] object-cover rounded-t-md"
+          className="w-[95%] h-[95%] object-cover rounded-t-md transition-transform duration-300 group-hover:scale-110"
           src={img}
           alt={title}
         />
+        {artistId && (
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+            <span className="text-white text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              View Store
+            </span>
+          </div>
+        )}
       </div>
       <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[5%] pb-[6%]">
         <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
@@ -144,7 +166,7 @@ function ArtistMerchCard({
             {price}
           </div>
           <button
-            className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center"
+            className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
             onClick={onAddToCart}
           >
             <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
@@ -159,16 +181,23 @@ function ArtistMerchCard({
 
 const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   const { dbSnapshot } = useApiData();
+  const { cart, addToCart, removeFromCart, getCartCount, getCartTotal } = useCart();
   const tabs = ["All Products", "Music", "Merchandise"];
   const [activeTab, setActiveTab] = useState(tabs[0]);
-  const [cart, setCart] = useState([]);
+  const [viewMode, setViewMode] = useState("all"); // "all", "albums", "tracks"
+  const [searchResults, setSearchResults] = useState(null);
+
+  // Use search results if available, otherwise use full data
+  const sourceAlbums = searchResults ? searchResults.albums : (dbSnapshot?.albums?.records || []);
+  const sourceTracks = searchResults ? searchResults.tracks : (dbSnapshot?.tracks?.records || []);
+  const sourceMerchandise = searchResults ? searchResults.merchandise : (dbSnapshot?.merchandise?.records || []); // Merch not included in search yet
 
   // Get albums from database, optionally filtered by artist
   let albumProducts = [];
   if (dbSnapshot && dbSnapshot.albums && dbSnapshot.albums.records) {
     const filteredAlbums = artistId 
-      ? dbSnapshot.albums.records.filter(album => album.artist_id === parseInt(artistId))
-      : dbSnapshot.albums.records;
+      ? sourceAlbums.filter(album => album.artist_id === parseInt(artistId))
+      : sourceAlbums;
     
     albumProducts = filteredAlbums.map((album) => {
       // Parse price - handle both string and number formats
@@ -192,6 +221,43 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
           : "$0.00",
         img: album.cover_url || "https://placehold.co/265x265",
         album_type: album.album_type,
+        artistId: album.artist_id,
+      };
+    });
+  }
+
+  // Get tracks from database, optionally filtered by artist
+  let trackProducts = [];
+  if (dbSnapshot && dbSnapshot.tracks && dbSnapshot.tracks.records) {
+    const filteredTracks = artistId
+      ? sourceTracks.filter(track => track.artist_image_id === parseInt(artistId))
+      : sourceTracks;
+    
+    trackProducts = filteredTracks.map((track) => {
+      // Parse price - handle both string and number formats
+      let parsedPrice = 0;
+      if (track.track_pricing != null && track.track_pricing !== '') {
+        const priceValue = typeof track.track_pricing === 'string' 
+          ? parseFloat(track.track_pricing) 
+          : Number(track.track_pricing);
+        
+        if (!isNaN(priceValue)) {
+          parsedPrice = priceValue / 100; // Convert cents to dollars
+        }
+      }
+      
+      // Get album cover from album_id
+      const album = dbSnapshot.albums.records.find(a => a.id === track.album_id);
+      
+      return {
+        type: "Track",
+        title: track.title || "Untitled Track",
+        price: parsedPrice > 0 
+          ? `$${parsedPrice.toFixed(2)}`
+          : "$0.00",
+        img: album?.cover_url || "https://placehold.co/265x265",
+        isTrack: true,
+        artistId: track.artist_image_id,
       };
     });
   }
@@ -200,8 +266,8 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   let merchandiseProducts = [];
   if (dbSnapshot && dbSnapshot.merchandise && dbSnapshot.merchandise.records) {
     const filteredMerch = artistId
-      ? dbSnapshot.merchandise.records.filter(merch => merch.artist_id === parseInt(artistId))
-      : dbSnapshot.merchandise.records;
+      ? sourceMerchandise.filter(merch => merch.artist_id === parseInt(artistId))
+      : sourceMerchandise;
     
     merchandiseProducts = filteredMerch.map((merch) => {
       // Parse price - NUMERIC format (already in dollars)
@@ -220,54 +286,70 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
           : "$0.00",
         img: merch.image_url || "https://placehold.co/265x265",
         merch_type: merch.merch_type,
+        artistId: merch.artist_id,
       };
     });
   }
 
-  // Combine all products: albums, merchandise from DB, and demo products (only if no artistId)
-  const allProducts = [...albumProducts, ...merchandiseProducts, ...(artistId ? [] : demoMerchProducts)];
+  // Combine all products: albums, tracks, merchandise from DB, and demo products (only if no artistId)
+  const allProducts = [...albumProducts, ...trackProducts, ...merchandiseProducts, ...(artistId ? [] : demoMerchProducts)];
 
-  // Filter products by tab
+  // Filter products by tab and view mode
   const filteredProducts = allProducts.filter((product) => {
-    if (activeTab === "All Products") return true;
+    // First filter by tab
+    let tabMatch = false;
     
-    if (activeTab === "Music") {
+    if (activeTab === "All Products") {
+      tabMatch = true;
+    } else if (activeTab === "Music") {
+      // For tracks
+      if (product.isTrack) {
+        tabMatch = true;
+      }
       // For albums from database, check album_type
-      if (product.album_type) {
-        return product.album_type === "digital" || product.album_type === "vinyl";
+      else if (product.album_type) {
+        tabMatch = product.album_type === "digital" || product.album_type === "vinyl";
       }
       // For demo products, check type
-      return (
-        product.type === "Digital Album" ||
-        product.type === "Vinyl Record" ||
-        product.type === "Limited Edition"
-      );
-    }
-    
-    if (activeTab === "Merchandise") {
+      else {
+        tabMatch = (
+          product.type === "Digital Album" ||
+          product.type === "Vinyl Record" ||
+          product.type === "Limited Edition"
+        );
+      }
+    } else if (activeTab === "Merchandise") {
       // For merchandise from database, check merch_type exists
       if (product.merch_type) {
-        return true; // Show all merchandise from database
+        tabMatch = true;
       }
       // For demo products, filter by type
-      return (
-        product.type === "Apparel" ||
-        product.type === "Accessories" ||
-        product.type === "Posters & Art"
-      );
+      else {
+        tabMatch = (
+          product.type === "Apparel" ||
+          product.type === "Accessories" ||
+          product.type === "Posters & Art"
+        );
+      }
+    }
+    
+    if (!tabMatch) return false;
+    
+    // Then filter by view mode (only applies when Music tab is active)
+    if (activeTab === "Music") {
+      if (viewMode === "albums") {
+        return product.album_type || product.type === "Digital Album" || product.type === "Vinyl Record" || product.type === "Limited Edition";
+      } else if (viewMode === "tracks") {
+        return product.isTrack;
+      }
     }
     
     return true;
   });
 
-  // Add to cart
+  // Add to cart using CartContext
   const handleAddToCart = (product) => {
-    setCart((prev) => [...prev, product]);
-  };
-
-  // Remove from cart
-  const handleRemoveFromCart = (idx) => {
-    setCart((prev) => prev.filter((_, i) => i !== idx));
+    addToCart(product);
   };
 
   // Helper function to determine grid columns for lg/xl
@@ -293,6 +375,50 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
             title={artistId ? `${artistName} Official Store` : "Official Music & Merchandise"}
             description={artistId ? `Support ${artistName} directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects.` : "Support Luna Starlight directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."}
           />
+          
+          {/* Search Bar */}
+          <SearchBar 
+            onSearchResults={setSearchResults}
+            viewMode="all"
+          />
+          
+          {/* View Mode Toggle - Only show when Music tab is active */}
+          {activeTab === "Music" && (
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex rounded-lg bg-[#1d1e26] p-1 border-2 border-[#aa2a46]">
+                <button
+                  onClick={() => setViewMode("all")}
+                  className={`px-6 py-2 rounded-md font-bold text-base transition-all duration-200 ${
+                    viewMode === "all"
+                      ? "bg-[#aa2a46] text-[#fffced] shadow-lg"
+                      : "text-[#aa2a46] hover:text-[#fffced]"
+                  }`}
+                >
+                  All Music
+                </button>
+                <button
+                  onClick={() => setViewMode("albums")}
+                  className={`px-6 py-2 rounded-md font-bold text-base transition-all duration-200 ${
+                    viewMode === "albums"
+                      ? "bg-[#aa2a46] text-[#fffced] shadow-lg"
+                      : "text-[#aa2a46] hover:text-[#fffced]"
+                  }`}
+                >
+                  Albums
+                </button>
+                <button
+                  onClick={() => setViewMode("tracks")}
+                  className={`px-6 py-2 rounded-md font-bold text-base transition-all duration-200 ${
+                    viewMode === "tracks"
+                      ? "bg-[#aa2a46] text-[#fffced] shadow-lg"
+                      : "text-[#aa2a46] hover:text-[#fffced]"
+                  }`}
+                >
+                  Tracks
+                </button>
+              </div>
+            </div>
+          )}
           {/* Cart display */}
           {cart.length > 0 && (
             <div className="w-full max-w-lg bg-[#21212b] rounded-md shadow-md p-4 mb-6">
@@ -300,16 +426,16 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
                 Your Cart
               </h3>
               <ul className="mb-2">
-                {cart.map((item, idx) => (
+                {cart.map((item) => (
                   <li
-                    key={idx}
+                    key={item.cartId}
                     className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20"
                   >
                     <span className="text-white text-sm">{item.title}</span>
                     <span className="text-white text-sm">{item.price}</span>
                     <button
-                      className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs"
-                      onClick={() => handleRemoveFromCart(idx)}
+                      className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs hover:bg-[#d94a6a] transition-colors"
+                      onClick={() => removeFromCart(item.cartId)}
                     >
                       Remove
                     </button>
@@ -318,16 +444,10 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
               </ul>
               <div className="text-white font-bold">
                 Total:{" "}
-                {cart
-                  .reduce(
-                    (sum, item) =>
-                      sum + parseFloat(item.price.replace("$", "")),
-                    0
-                  )
-                  .toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
+                {getCartTotal().toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}
               </div>
             </div>
           )}
