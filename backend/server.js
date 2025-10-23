@@ -7,10 +7,22 @@ import albumRouter from './routes/album.js';
 import trackRouter from './routes/track.js';
 import adminRouter from './routes/admin.js';
 import authRouter from './routes/auth.js';
+import followRouter from './routes/follow.js';
+import statsScheduleRouter, { readScheduleConfig } from './routes/statsSchedule.js';
+import genreRouter from './routes/genre.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
+import cron from 'node-cron';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 dotenv.config();
+
+const execAsync = promisify(exec);
+
+// Global variable to track active cron job
+let currentCronJob = null;
+global.scheduleNeedsUpdate = false;
 
 
 admin.initializeApp({
@@ -59,6 +71,9 @@ app.use('/api/artists', artistRouter);
 app.use('/api/albums', albumRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/tracks', trackRouter);
+app.use('/api/follow', followRouter);
+app.use('/api/admin', statsScheduleRouter);
+app.use('/api', genreRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });
@@ -86,8 +101,114 @@ app.use('/api/admin', adminRouter);
 
 
 
+/**
+ * Convert schedule config to cron expression
+ */
+function getCronExpression(config) {
+  const { type, value, day, hour } = config;
+  
+  switch (type) {
+    case 'minutes':
+      return `*/${value} * * * *`; // Every X minutes
+    case 'hours':
+      return `0 */${value} * * *`; // Every X hours
+    case 'daily':
+      return `0 ${hour} * * *`; // Daily at specified hour
+    case 'weekly':
+      return `0 ${hour} * * ${day}`; // Weekly on specified day and hour
+    case 'monthly':
+      return `0 ${hour} ${value} * *`; // Monthly on specified day and hour
+    default:
+      return '0 2 * * 0'; // Default: Sunday at 2 AM
+  }
+}
+
+/**
+ * Run stats update job
+ */
+async function runStatsUpdate() {
+  console.log('📊 Running scheduled stats update...');
+  
+  try {
+    // Step 1: Update external stats (Spotify, YouTube, etc.)
+    console.log('🌐 Fetching external API stats...');
+    const { stdout: externalOutput, stderr: externalError } = await execAsync('node scripts/updateExternalStats.js');
+    console.log(externalOutput);
+    if (externalError) console.error('External stats errors:', externalError);
+    
+    // Step 2: Calculate website plays and totals
+    console.log('🧮 Calculating monthly listeners...');
+    const { stdout: monthlyOutput, stderr: monthlyError } = await execAsync('node scripts/updateMonthlyListeners.js');
+    console.log(monthlyOutput);
+    if (monthlyError) console.error('Monthly listeners errors:', monthlyError);
+    
+    console.log('✅ Stats update completed!');
+  } catch (error) {
+    console.error('❌ Error during stats update:', error);
+  }
+}
+
+/**
+ * Initialize or update cron schedule
+ */
+async function initializeSchedule() {
+  const config = await readScheduleConfig();
+  
+  // Stop existing job if any
+  if (currentCronJob) {
+    currentCronJob.stop();
+    currentCronJob = null;
+  }
+  
+  // Only schedule if enabled
+  if (config.enabled) {
+    const cronExpression = getCronExpression(config);
+    
+    currentCronJob = cron.schedule(cronExpression, runStatsUpdate);
+    
+    const scheduleDesc = getScheduleDescription(config);
+    console.log(`⏰ Stats update scheduled: ${scheduleDesc}`);
+  } else {
+    console.log('⏸️  Stats update schedule is disabled');
+  }
+}
+
+/**
+ * Get human-readable schedule description
+ */
+function getScheduleDescription(config) {
+  const { type, value, day, hour } = config;
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  switch (type) {
+    case 'minutes':
+      return `Every ${value} minute${value !== '1' ? 's' : ''}`;
+    case 'hours':
+      return `Every ${value} hour${value !== '1' ? 's' : ''}`;
+    case 'daily':
+      return `Daily at ${hour}:00`;
+    case 'weekly':
+      return `Every ${days[parseInt(day)]} at ${hour}:00`;
+    case 'monthly':
+      return `Monthly on day ${value} at ${hour}:00`;
+    default:
+      return 'Custom schedule';
+  }
+}
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Initialize schedule on startup
+  await initializeSchedule();
+  
+  // Check for schedule updates every 10 seconds
+  setInterval(async () => {
+    if (global.scheduleNeedsUpdate) {
+      console.log('🔄 Reloading stats schedule...');
+      await initializeSchedule();
+      global.scheduleNeedsUpdate = false;
+    }
+  }, 10000);
 });

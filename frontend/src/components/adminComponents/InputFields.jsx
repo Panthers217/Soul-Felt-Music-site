@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CalendarIcon from "../modal/CalendarIcon";
 import CalendarModal from "../modal/CalendarModal";
+import axios from "axios";
 
 const InputFields = ({
   fields,
@@ -14,6 +15,43 @@ const InputFields = ({
   // Get validation errors for _id fields
   const idFieldErrors = validateIdFields(fieldValues);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [genres, setGenres] = useState([]);
+
+  // Fetch active genres on component mount
+  useEffect(() => {
+    async function fetchGenres() {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/genres/active`);
+        setGenres(response.data.genres || []);
+      } catch (error) {
+        console.error('Error fetching genres:', error);
+      }
+    }
+    fetchGenres();
+  }, []);
+
+  // Helper to check if a field is a genre field
+  const isGenreField = (field) => field.toLowerCase().includes('genre');
+
+  // Helper to parse genre value (comma-separated string to array)
+  const parseGenreValue = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    return value.split(',').map(g => g.trim()).filter(g => g);
+  };
+
+  // Helper to handle genre selection
+  const handleGenreChange = (field, selectedOptions) => {
+    const selectedGenres = Array.from(selectedOptions)
+      .filter(option => option.selected)
+      .map(option => option.value);
+    
+    // Store as comma-separated string to match database format
+    setFieldValues({
+      ...fieldValues,
+      [field]: selectedGenres.join(', ')
+    });
+  };
 
   // Helper to check if a field is release_date
   const isReleaseDate = (field) => field === "release_date";
@@ -149,6 +187,52 @@ const InputFields = ({
               <option value="true">true</option>
               <option value="false">false</option>
             </select>
+          ) : isGenreField(field) ? (
+            <div>
+              <select
+                multiple
+                className="w-full p-2 border rounded min-h-[120px]"
+                value={parseGenreValue(fieldValues[field])}
+                onChange={(e) => handleGenreChange(field, e.target.selectedOptions)}
+                required={requiredFields.includes(field)}
+                disabled={isRestrictedField(field)}
+              >
+                {genres.map(genre => (
+                  <option key={genre.id} value={genre.name}>
+                    {genre.name}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs text-gray-500 mt-1 block">
+                Hold Ctrl (Windows) or Cmd (Mac) to select multiple genres
+              </span>
+              {fieldValues[field] && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {parseGenreValue(fieldValues[field]).map((genre, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                    >
+                      {genre}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedGenres = parseGenreValue(fieldValues[field])
+                            .filter(g => g !== genre);
+                          setFieldValues({
+                            ...fieldValues,
+                            [field]: updatedGenres.join(', ')
+                          });
+                        }}
+                        className="ml-1 text-blue-600 hover:text-blue-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
             <input
               type="text"

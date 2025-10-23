@@ -73,7 +73,7 @@ function ArtistStoreNav({
         </div>
       </div>
       <div className="flex sm:flex-col justify-center items-center gap-3 px-[6%] pb-[0.7rem]">
-        {tabs.map((tab, idx) => (
+        {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -157,16 +157,20 @@ function ArtistMerchCard({
   );
 }
 
-const ArtistStore = () => {
+const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   const { dbSnapshot } = useApiData();
   const tabs = ["All Products", "Music", "Merchandise"];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [cart, setCart] = useState([]);
 
-  // Get albums from database
+  // Get albums from database, optionally filtered by artist
   let albumProducts = [];
   if (dbSnapshot && dbSnapshot.albums && dbSnapshot.albums.records) {
-    albumProducts = dbSnapshot.albums.records.map((album) => {
+    const filteredAlbums = artistId 
+      ? dbSnapshot.albums.records.filter(album => album.artist_id === parseInt(artistId))
+      : dbSnapshot.albums.records;
+    
+    albumProducts = filteredAlbums.map((album) => {
       // Parse price - handle both string and number formats
       let parsedPrice = 0;
       if (album.album_pricing != null && album.album_pricing !== '') {
@@ -192,10 +196,14 @@ const ArtistStore = () => {
     });
   }
 
-  // Get merchandise from database
+  // Get merchandise from database, optionally filtered by artist
   let merchandiseProducts = [];
   if (dbSnapshot && dbSnapshot.merchandise && dbSnapshot.merchandise.records) {
-    merchandiseProducts = dbSnapshot.merchandise.records.map((merch) => {
+    const filteredMerch = artistId
+      ? dbSnapshot.merchandise.records.filter(merch => merch.artist_id === parseInt(artistId))
+      : dbSnapshot.merchandise.records;
+    
+    merchandiseProducts = filteredMerch.map((merch) => {
       // Parse price - NUMERIC format (already in dollars)
       let parsedPrice = 0;
       if (merch.price != null && merch.price !== '') {
@@ -216,8 +224,8 @@ const ArtistStore = () => {
     });
   }
 
-  // Combine all products: albums, merchandise from DB, and demo products
-  const allProducts = [...albumProducts, ...merchandiseProducts, ...demoMerchProducts];
+  // Combine all products: albums, merchandise from DB, and demo products (only if no artistId)
+  const allProducts = [...albumProducts, ...merchandiseProducts, ...(artistId ? [] : demoMerchProducts)];
 
   // Filter products by tab
   const filteredProducts = allProducts.filter((product) => {
@@ -271,17 +279,20 @@ const ArtistStore = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-black flex flex-col items-center justify-start gap-8">
+    <>
       <div className="w-full bg-[#1a1b22] flex flex-col items-center">
         <ArtistStoreNav
-          storeName="Luna Starlight Store"
+          storeName={artistId ? `${artistName} Store` : "Luna Starlight Store"}
           cartCount={cart.length}
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
         <div className="w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
-          <ArtistStoreHeader />
+          <ArtistStoreHeader 
+            title={artistId ? `${artistName} Official Store` : "Official Music & Merchandise"}
+            description={artistId ? `Support ${artistName} directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects.` : "Support Luna Starlight directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."}
+          />
           {/* Cart display */}
           {cart.length > 0 && (
             <div className="w-full max-w-lg bg-[#21212b] rounded-md shadow-md p-4 mb-6">
@@ -331,7 +342,7 @@ const ArtistStore = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
