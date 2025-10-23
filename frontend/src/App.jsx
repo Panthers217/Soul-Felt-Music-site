@@ -25,7 +25,23 @@ import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
+import { useApiData } from './context/ApiDataContext';
+
+function ArtistStoreWrapper() {
+  const { artistId } = useParams();
+  const { dbSnapshot } = useApiData();
+  
+  // Find artist name from artists data
+  let artistName = "Artist";
+  if (dbSnapshot && dbSnapshot.artists && dbSnapshot.artists.records) {
+    const artist = dbSnapshot.artists.records.find(a => a.id === parseInt(artistId));
+    if (artist) artistName = artist.name;
+  }
+  
+  return <ArtistStore artistId={artistId} artistName={artistName} />;
+}
+
 function App() {
   const { user, loading } = useUserLogin();
   // Helper to check admin claim
@@ -66,6 +82,7 @@ function App() {
             <Route path="/" element={<Home />} />
             {/* <Route path="/store" element={<Store />} /> */}
             <Route path="/store" element={<ArtistStore />} />
+            <Route path="/store/:artistId" element={<ArtistStoreWrapper />} />
             <Route path="/music" element={<Music />} />
             <Route path="/artists" element={<ArtistPage />} />
             <Route path="/news" element={<News />} />

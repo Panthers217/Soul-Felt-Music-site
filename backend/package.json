@@ -18,6 +18,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.9.4",
+    "node-cron": "^4.2.1",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

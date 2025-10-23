@@ -13,6 +13,8 @@ import InputFields from "./adminComponents/InputFields";
 import MultipleInputFields from "./adminComponents/MultipleInputFields";
 import TableSelector from "./adminComponents/TableSelector";
 import ExistingArtist from "./adminComponents/ExistingArtist";
+import StatsScheduleSettings from "./adminComponents/StatsScheduleSettings";
+import AdminSettingsSidebar from "./AdminComponents/AdminSettingsSidebar";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -565,6 +567,7 @@ function AdminDashboard() {
   const [rows, setRows] = useState("");
   const [message, setMessage] = useState("");
   const [tableOptions, setTableOptions] = useState([]);
+  const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
   const { dbSnapshot, mode, setMode } = useApiData();
 
   useEffect(() => {
@@ -742,9 +745,25 @@ function AdminDashboard() {
 
   return (
     <>
+      {/* Settings Sidebar */}
+      <AdminSettingsSidebar 
+        isOpen={isSettingsSidebarOpen} 
+        onClose={() => setIsSettingsSidebarOpen(false)} 
+      />
+
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
-        {/* Logout button at the top */}
-        <div className="w-full flex justify-end items-center pt-6 pb-2 px-8">
+        {/* Top Navigation Bar */}
+        <div className="w-full flex justify-between items-center pt-6 pb-2 px-8">
+          {/* Settings Button */}
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-bold shadow flex items-center gap-2"
+            onClick={() => setIsSettingsSidebarOpen(true)}
+          >
+            <span className="i-lucide-settings" />
+            Settings
+          </button>
+          
+          {/* Logout button */}
           <button
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-bold shadow"
             onClick={handleLogout}
@@ -806,6 +825,7 @@ function AdminDashboard() {
           >
             <option value="upload">Upload New Artist</option>
             <option value="search">Update Existing Records</option>
+            <option value="settings">Admin Settings</option>
           </select>
         </div>
         {artistMenu === "upload" && (
@@ -831,6 +851,9 @@ function AdminDashboard() {
             dbSnapshot={dbSnapshot}
             mode={mode}
           />
+        )}
+        {artistMenu === "settings" && (
+          <StatsScheduleSettings />
         )}
       </div>
     </>

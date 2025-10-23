@@ -1,8 +1,11 @@
 // Dynamic GetMusic component
 
-import React, { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ReactPlayer from "react-player";
+import axios from "axios";
+import { useApiData } from "../context/ApiDataContext";
+import { auth } from "../firebase";
 
 /**
  * ArtistOverview.jsx
@@ -12,21 +15,26 @@ import ReactPlayer from "react-player";
  * - Tablet: md: (768px–1023px)
  * - Desktop: lg: (1024px+)
  */
-function GetMusic({ artistName, musicText, buttonText, supportText }) {
+function GetMusic({ artistName, musicText, buttonText, supportText, artistId }) {
+  const navigate = useNavigate();
   return (
     <section className="mx-auto mt-6 md:mt-10 lg:mt-12 mb-16 w-[92%] md:w-[90%] lg:w-[86%]">
       <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
         <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">
-          Get {artistName}&apos;s Music
+          Get {artistName}&apos;s Music & Merchandise
         </h2>
-        <p className="mt-3 text-sm md:text-[15px] text-white/80 xl:text-lg">
+        {/* <p className="mt-3 text-sm md:text-[15px] text-white/80 xl:text-lg">
           {musicText ||
             `Stream or purchase ${artistName}'s music on your favorite platform`}
-        </p>
+        </p> */}
 
         <div className="mt-5 md:mt-6">
-          <button className="w-full md:w-[320px] rounded-md border border-white/10 bg-white/[0.03] px-4 py-4 text-sm md:text-[15px] font-medium text-white/90 hover:bg-white/[0.06]">
-            {buttonText || "Stream & Purchase"}
+          <button 
+            onClick={() => navigate(`/store/${artistId}`)}
+            className="w-full md:w-[320px] rounded-md bg-gradient-to-r from-[#d63c65] to-[#aa2a46] px-4 py-4 text-sm md:text-[15px] font-bold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <span className="i-lucide-shopping-bag text-base" aria-hidden />
+            {buttonText || "Visit Artist Store"}
           </button>
         </div>
 
@@ -47,20 +55,61 @@ function GetMusic({ artistName, musicText, buttonText, supportText }) {
   );
 }
 // Dynamic FeaturedTracks component
-function FeaturedTracks({ tracks }) {
+function FeaturedTracks({ tracks, artistId }) {
   const [playingTrack, setPlayingTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const { websiteUser } = useApiData();
 
   console.log("Featured Tracks:", tracks?.[0]?.img);
 
+  // Generate or retrieve session ID for anonymous users
+  const getSessionId = () => {
+    let sessionId = localStorage.getItem('session_id');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('session_id', sessionId);
+    }
+    return sessionId;
+  };
+
+  // Log track play to backend
+  const logTrackPlay = async (trackId, artistId) => {
+    try {
+      const token = websiteUser ? await auth.currentUser?.getIdToken() : null;
+      const sessionId = getSessionId();
+      
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/tracks/play`,
+        {
+          trackId,
+          artistId,
+          sessionId
+        },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+      );
+      
+      console.log(`✅ Logged play for track ${trackId}`);
+    } catch (error) {
+      console.error('Failed to log track play:', error);
+      // Don't block playback if logging fails
+    }
+  };
+
   const handleTrackClick = (idx) => {
-    console.log("Clicking track:", idx, "URL:", tracks[idx]?.promo_audio_url);
+    const track = tracks[idx];
+    console.log("Clicking track:", idx, "URL:", track?.promo_audio_url);
+    
     if (playingTrack === idx) {
       setIsPlaying(false);
       setTimeout(() => setPlayingTrack(null), 100);
     } else {
       setPlayingTrack(idx);
       setIsPlaying(true);
+      
+      // Log the play
+      if (track?.id && artistId) {
+        logTrackPlay(track.id, artistId);
+      }
     }
   };
 
@@ -235,8 +284,35 @@ function ArtistOverview() {
     state?.albumImage ??
     JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //Fallback
   
+  const { websiteUser } = useApiData();
+  
   // Follow artist state
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  // Check if user is following this artist on mount
+  useEffect(() => {
+    async function checkFollowStatus() {
+      if (!websiteUser || !album?.id) return;
+      
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) return;
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/follow/artist/${album.id}/status`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsFollowing(response.data.isFollowing);
+      } catch (error) {
+        console.error('Error checking follow status:', error);
+      }
+    }
+    
+    checkFollowStatus();
+  }, [websiteUser, album?.id]);
   
   console.log("State passed to ArtistOverview", state);
   // Use artist image_url from the artists table (passed as art.img)
@@ -251,6 +327,7 @@ function ArtistOverview() {
   console.log("Artist bio:", artistBio);
   console.log("Career highlights:", careerHighlights);
   console.log("Artist influences:", artistInfluences);
+  
   // Parse career_highlights if it's a newline-separated string
   const parsedHighlights = careerHighlights
     ? careerHighlights.split("\n").filter((line) => line.trim())
@@ -281,11 +358,51 @@ function ArtistOverview() {
   console.log("Artist rating:", album);
 
   // Handle follow/unfollow artist
-  const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    // TODO: Add API call to save follow status to database
-    // Example: await followArtist(album.id, !isFollowing);
-    console.log(isFollowing ? "Unfollowed artist" : "Followed artist");
+  const handleFollowClick = async () => {
+    if (!websiteUser) {
+      alert('Please login to follow artists');
+      return;
+    }
+
+    if (followLoading) return;
+
+    setFollowLoading(true);
+    
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        alert('Please login to follow artists');
+        return;
+      }
+
+      if (isFollowing) {
+        // Unfollow
+        await axios.delete(
+          `${import.meta.env.VITE_API_URL}/api/follow/artist/${album.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsFollowing(false);
+        console.log('Unfollowed artist');
+      } else {
+        // Follow
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/api/follow/artist/${album.id}`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsFollowing(true);
+        console.log('Followed artist');
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      alert(error.response?.data?.error || 'Failed to update follow status');
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   return (
@@ -332,14 +449,20 @@ function ArtistOverview() {
             </button>
             <button 
               onClick={handleFollowClick}
-              className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${
+              disabled={followLoading}
+              className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 isFollowing 
                   ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
                   : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
               }`}
             >
               <span className="flex items-center gap-2">
-                {isFollowing ? (
+                {followLoading ? (
+                  <>
+                    <span className="i-lucide-loader-2 text-sm animate-spin" />
+                    {isFollowing ? 'Unfollowing...' : 'Following...'}
+                  </>
+                ) : isFollowing ? (
                   <>
                     <span className="i-lucide-check text-sm" />
                     Following
@@ -395,14 +518,20 @@ function ArtistOverview() {
               </button>
               <button 
                 onClick={handleFollowClick}
-                className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${
+                disabled={followLoading}
+                className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                   isFollowing 
                     ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
                     : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  {isFollowing ? (
+                  {followLoading ? (
+                    <>
+                      <span className="i-lucide-loader-2 text-sm animate-spin" />
+                      {isFollowing ? 'Unfollowing...' : 'Following...'}
+                    </>
+                  ) : isFollowing ? (
                     <>
                       <span className="i-lucide-check text-sm" />
                       Following
@@ -442,13 +571,14 @@ function ArtistOverview() {
         </div>
       </section>
 
-      <FeaturedTracks tracks={album.featured_tracks} />
+      <FeaturedTracks tracks={album.featured_tracks} artistId={album?.id} />
 
       <GetMusic
         artistName={artistName}
         musicText={album.music_text}
         buttonText={album.button_text}
         supportText={album.support_text}
+        artistId={album?.id}
       />
     </div>
   );
