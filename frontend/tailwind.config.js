@@ -7,8 +7,18 @@ export default {
   theme: {
     extend: {
        colors: {
-        'page-color-1': 'rgba(33, 33, 43, 1)', // <-- custom background color
-        'brand-text-gray': 'rgba(255, 255, 255, 0.6)',               // <-- custom text color
+        // Dynamic theme colors from CSS variables
+        'primary': 'var(--color-primary)',
+        'secondary': 'var(--color-secondary)',
+        'accent': 'var(--color-accent)',
+        'background': 'var(--color-background)',
+        'card-bg': 'var(--color-card-background)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        
+        // Legacy colors (keep for backwards compatibility)
+        'page-color-1': 'rgba(33, 33, 43, 1)',
+        'brand-text-gray': 'rgba(255, 255, 255, 0.6)',
         'brand-text-white': 'rgba(255, 255, 255, 1)', 
       },
       backgroundImage: {

@@ -14,6 +14,7 @@ import MultipleInputFields from "./adminComponents/MultipleInputFields";
 import TableSelector from "./adminComponents/TableSelector";
 import ExistingArtist from "./adminComponents/ExistingArtist";
 import StatsScheduleSettings from "./adminComponents/StatsScheduleSettings";
+import AdminSettings from "./adminComponents/AdminSettings";
 import AdminSettingsSidebar from "./AdminComponents/AdminSettingsSidebar";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -553,10 +554,7 @@ import { useNavigate } from "react-router-dom";
 // TOP-LEVEL (file scope) — not inside any other component
 // ...existing code...
 
-
 //Main exporting component
-
-
 
 function AdminDashboard() {
   const [artistMenu, setArtistMenu] = useState("upload");
@@ -746,9 +744,9 @@ function AdminDashboard() {
   return (
     <>
       {/* Settings Sidebar */}
-      <AdminSettingsSidebar 
-        isOpen={isSettingsSidebarOpen} 
-        onClose={() => setIsSettingsSidebarOpen(false)} 
+      <AdminSettingsSidebar
+        isOpen={isSettingsSidebarOpen}
+        onClose={() => setIsSettingsSidebarOpen(false)}
       />
 
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
@@ -762,7 +760,7 @@ function AdminDashboard() {
             <span className="i-lucide-settings" />
             Settings
           </button>
-          
+
           {/* Logout button */}
           <button
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-bold shadow"
@@ -816,8 +814,6 @@ function AdminDashboard() {
             {mode === "live" ? "LIVE MODE" : "DEMO MODE"}
           </div>
 
-          
-
           <select
             value={artistMenu || ""}
             onChange={(e) => setArtistMenu(e.target.value)}
@@ -825,12 +821,11 @@ function AdminDashboard() {
           >
             <option value="upload">Upload New Artist</option>
             <option value="search">Update Existing Records</option>
-            <option value="settings">Admin Settings</option>
+            <option value="stats-settings">Stats Schedule Settings</option>
+            <option value="website-settings">Website Settings</option>
           </select>
         </div>
-        {artistMenu === "upload" && (
-          <UploadNewArtist mode={mode} />
-        )}
+        {artistMenu === "upload" && <UploadNewArtist mode={mode} />}
         {artistMenu === "search" && (
           <ExistingArtist
             inputMode={inputMode}
@@ -852,9 +847,8 @@ function AdminDashboard() {
             mode={mode}
           />
         )}
-        {artistMenu === "settings" && (
-          <StatsScheduleSettings />
-        )}
+        {artistMenu === "stats-settings" && <StatsScheduleSettings />}
+        {artistMenu === "website-settings" && <AdminSettings />}
       </div>
     </>
   );

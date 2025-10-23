@@ -23,6 +23,7 @@ import ArtistStore from "./components/ArtistStore";
 import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
 import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
+import ThemeDemo from './components/ThemeDemo';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
 import { Navigate, useParams } from 'react-router-dom';
@@ -93,6 +94,7 @@ function App() {
             <Route path="/artist/:id" element={<ArtistOverview />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/theme-demo" element={<ThemeDemo />} /> {/* Theme settings demo */}
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
             <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
             {/* Add more routes as needed */}
