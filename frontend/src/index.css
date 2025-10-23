@@ -1,4 +1,13 @@
 :root {
+  /* Dynamic Theme Colors - Set by ThemeContext */
+  --color-primary: #aa2a46;
+  --color-secondary: #d63c65;
+  --color-accent: #fffced;
+  --color-background: #1a1b22;
+  --color-card-background: #21212b;
+  --color-text-primary: #fffced;
+  --color-text-secondary: #ffffff;
+  
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;

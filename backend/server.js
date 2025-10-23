@@ -10,6 +10,7 @@ import authRouter from './routes/auth.js';
 import followRouter from './routes/follow.js';
 import statsScheduleRouter, { readScheduleConfig } from './routes/statsSchedule.js';
 import genreRouter from './routes/genre.js';
+import settingsRouter from './routes/settings.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
@@ -74,6 +75,7 @@ app.use('/api/tracks', trackRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/admin', statsScheduleRouter);
 app.use('/api', genreRouter);
+app.use('/api/settings', settingsRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });
