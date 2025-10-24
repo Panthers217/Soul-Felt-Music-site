@@ -6,6 +6,7 @@ import ReactPlayer from "react-player";
 import axios from "axios";
 import { useApiData } from "../context/ApiDataContext";
 import { auth } from "../firebase";
+import NotAvailableModal from "./modal/NotAvailableModal";
 
 /**
  * ArtistOverview.jsx
@@ -64,6 +65,7 @@ function FeaturedTracks({ tracks, artistId }) {
   
   const [playingTrack, setPlayingTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const { websiteUser } = useApiData();
 
   // Generate or retrieve session ID for anonymous users
@@ -117,8 +119,16 @@ function FeaturedTracks({ tracks, artistId }) {
     }
   };
 
+  const handleBuyClick = (e, purchaseLink) => {
+    if (!purchaseLink) {
+      e.preventDefault();
+      setShowModal(true);
+    }
+  };
+
   return (
     <section className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%]">
+      <NotAvailableModal isOpen={showModal} onClose={() => setShowModal(false)} />
       <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">
@@ -214,10 +224,16 @@ function FeaturedTracks({ tracks, artistId }) {
                 )}
 
                 {/* Action Button */}
-                <button className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105">
+                <a 
+                  href={track.purchaseLink || '#'} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => handleBuyClick(e, track.purchaseLink)}
+                  className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
+                >
                   <span className="i-lucide-shopping-cart text-xs" />
                   Buy Now
-                </button>
+                </a>
               </div>
             </div>
           ))}

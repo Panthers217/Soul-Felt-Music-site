@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import NotAvailableModal from './modal/NotAvailableModal';
 
 function Wavelength({ playing }) {
   const heights = ['h-2', 'h-3', 'h-4', 'h-5'];
@@ -15,9 +16,10 @@ function Wavelength({ playing }) {
   );
 }
 
-function TrackCard({ track, albumCoverUrl }) {
+function TrackCard({ track, albumCoverUrl, purchaseLink }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handlePlay = () => {
     audioRef.current.play();
@@ -34,8 +36,16 @@ function TrackCard({ track, albumCoverUrl }) {
     return isNaN(price) ? '$0.00' : `$${(price / 100).toFixed(2)}`;
   };
 
+  const handleBuyClick = (e) => {
+    if (!purchaseLink) {
+      e.preventDefault();
+      setShowModal(true);
+    }
+  };
+
   return (
     <div className="group relative bg-gradient-to-br from-[#1d1e26] to-[#16171d] rounded-2xl shadow-2xl p-6 flex flex-col items-center w-full max-w-xs min-w-[240px] hover:scale-105 transition-all duration-300 border border-[#2a2b35] hover:border-[#aa2a46]/50 overflow-hidden">
+      <NotAvailableModal isOpen={showModal} onClose={() => setShowModal(false)} />
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#aa2a46]/0 to-[#aa2a46]/0 group-hover:from-[#aa2a46]/5 group-hover:to-[#aa2a46]/10 transition-all duration-500 rounded-2xl"></div>
       
@@ -104,9 +114,15 @@ function TrackCard({ track, albumCoverUrl }) {
             <span className="text-[#aa2a46] text-2xl font-bold">{formatPrice(track.track_pricing)}</span>
             <span className="text-white/40 text-sm">USD</span>
           </div>
-          <button className="w-full px-6 py-2.5 bg-[#fffced] text-[#aa2a46] rounded-xl font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#aa2a46]/20 border-2 border-transparent hover:border-[#fffced]">
+          <a 
+            href={purchaseLink || '#'} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            onClick={handleBuyClick}
+            className="w-full px-6 py-2.5 bg-[#fffced] text-[#aa2a46] rounded-xl font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#aa2a46]/20 border-2 border-transparent hover:border-[#fffced] text-center block"
+          >
             Buy Track
-          </button>
+          </a>
         </div>
       </div>
     </div>

@@ -239,6 +239,7 @@ const Music = () => {
                       <TrackCard
                         key={track.id}
                         track={track}
+                        purchaseLink={track.purchase_link}
                         albumCoverUrl={getTrackImage(track)}
                       />
                     ))
