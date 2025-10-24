@@ -112,6 +112,100 @@ const AdminSettings = () => {
     }));
   };
 
+  const handleResetToDefaults = async () => {
+    if (!window.confirm('⚠️ Are you sure you want to reset ALL settings to default Soul Felt Music values? This cannot be undone!')) {
+      return;
+    }
+
+    const defaultSettings = {
+      business_name: 'Soul Felt Music',
+      logo_url: null,
+      favicon_url: null,
+      primary_color: '#aa2a46',
+      secondary_color: '#d63c65',
+      accent_color: '#fffced',
+      background_color: '#1a1b22',
+      card_background: '#21212b',
+      text_primary: '#fffced',
+      text_secondary: '#ffffff',
+      contact_email: null,
+      contact_phone: null,
+      contact_address: null,
+      social_media_links: { twitter: '', instagram: '', facebook: '', youtube: '' },
+      cloudinary_cloud_name: 'webprojectimages',
+      cloudinary_audio_folder: 'SoulFeltMusic/SoulFeltMusicAudio',
+      cloudinary_image_folder: 'SoulFeltMusic/SoulFeltMusicImages',
+      cloudinary_video_folder: 'SoulFeltMusic/SoulFeltMusicVideos',
+      cloudinary_merch_folder: 'SoulFeltMusic/SoulFeltMusicMerch',
+      enable_merchandise: true,
+      enable_videos: true,
+      enable_artist_profiles: true,
+      enable_newsletter: true,
+      enable_cart: true,
+      enable_user_accounts: true,
+      enable_promotional_tracks: true,
+      enable_promotional_videos: true,
+      hero_title: 'Stream & Discover Soul Felt Music',
+      hero_subtitle: 'Play samples, discover new artists, and purchase your favorite tracks and albums.',
+      featured_section_title: 'Featured Artists',
+      about_us_text: null,
+      payment_currency: 'USD',
+      tax_rate: 0.00,
+      site_title: 'Soul Felt Music',
+      site_description: null,
+      site_keywords: null,
+      items_per_page: 20,
+      max_upload_size_mb: 50
+    };
+
+    setSaving(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('Not authenticated');
+        setSaving(false);
+        return;
+      }
+      const token = await user.getIdToken();
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(defaultSettings)
+      });
+
+      if (response.ok) {
+        const updatedSettings = await response.json();
+        setSettings(updatedSettings.settings || updatedSettings);
+        
+        // Update theme context
+        updateTheme({
+          primary_color: defaultSettings.primary_color,
+          secondary_color: defaultSettings.secondary_color,
+          accent_color: defaultSettings.accent_color,
+          background_color: defaultSettings.background_color,
+          card_background: defaultSettings.card_background,
+          text_primary: defaultSettings.text_primary,
+          text_secondary: defaultSettings.text_secondary,
+          business_name: defaultSettings.business_name,
+          logo_url: defaultSettings.logo_url
+        });
+        
+        toast.success('✅ Settings reset to defaults successfully!');
+      } else {
+        toast.error('Failed to reset settings');
+      }
+    } catch (error) {
+      console.error('Error resetting settings:', error);
+      toast.error('Error resetting settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -561,21 +655,31 @@ const AdminSettings = () => {
 
         </div>
 
-        {/* Save Button */}
-        <div className="mt-8 flex justify-end gap-4">
+        {/* Action Buttons */}
+        <div className="mt-8 flex justify-between items-center">
           <button
-            onClick={() => fetchSettings()}
-            className="px-6 py-3 bg-card-bg text-text-secondary rounded-lg font-semibold hover:bg-background transition"
-          >
-            Reset Changes
-          </button>
-          <button
-            onClick={handleSave}
+            onClick={handleResetToDefaults}
             disabled={saving}
-            className="px-8 py-3 bg-primary hover:bg-secondary text-accent rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving...' : 'Save All Settings'}
+            ⚠️ Reset to Defaults
           </button>
+          
+          <div className="flex gap-4">
+            <button
+              onClick={() => fetchSettings()}
+              className="px-6 py-3 bg-card-bg text-text-secondary rounded-lg font-semibold hover:bg-background transition"
+            >
+              Discard Changes
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-8 py-3 bg-primary hover:bg-secondary text-accent rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Saving...' : 'Save All Settings'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
