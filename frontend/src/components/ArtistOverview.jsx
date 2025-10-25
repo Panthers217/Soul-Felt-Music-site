@@ -7,6 +7,8 @@ import axios from "axios";
 import { useApiData } from "../context/ApiDataContext";
 import { auth } from "../firebase";
 import NotAvailableModal from "./modal/NotAvailableModal";
+import { Music, Instagram, Facebook, Youtube } from "lucide-react";
+import { FaSpotify, FaApple, FaTiktok, FaXTwitter } from "react-icons/fa6";
 
 /**
  * ArtistOverview.jsx
@@ -470,38 +472,61 @@ function ArtistOverview() {
             </div>
           </div>
           {/* CTA buttons */}
-          <div className="mt-5 md:mt-6 flex items-center gap-3">
-            <button className="rounded-md bg-[#d63c65] px-4 py-2 text-sm md:text-[15px] font-semibold text-white shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#d63c65]/60">
-              Biography
-            </button>
-            <button 
-              onClick={handleFollowClick}
-              disabled={followLoading}
-              className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                isFollowing 
-                  ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
-                  : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                {followLoading ? (
-                  <>
-                    <span className="i-lucide-loader-2 text-sm animate-spin" />
-                    {isFollowing ? 'Unfollowing...' : 'Following...'}
-                  </>
-                ) : isFollowing ? (
-                  <>
-                    <span className="i-lucide-check text-sm" />
-                    Following
-                  </>
-                ) : (
-                  <>
-                    <span className="i-lucide-user-plus text-sm" />
-                    Follow Artist
-                  </>
-                )}
-              </span>
-            </button>
+          <div className="mt-5 md:mt-6 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <button className="rounded-md bg-[#d63c65] px-4 py-2 text-sm md:text-[15px] font-semibold text-white shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#d63c65]/60">
+                Biography
+              </button>
+              <button 
+                onClick={handleFollowClick}
+                disabled={followLoading}
+                className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isFollowing 
+                    ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
+                    : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  {followLoading ? (
+                    <>
+                      <span className="i-lucide-loader-2 text-sm animate-spin" />
+                      {isFollowing ? 'Unfollowing...' : 'Following...'}
+                    </>
+                  ) : isFollowing ? (
+                    <>
+                      <span className="i-lucide-check text-sm" />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <span className="i-lucide-user-plus text-sm" />
+                      Follow Artist
+                    </>
+                  )}
+                </span>
+              </button>
+            </div>
+            {/* Social Media Icons */}
+            <div className="flex items-center gap-3">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
+                <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
+                <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
+                <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
+                <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
+                <FaApple className="text-white/80 group-hover:text-white" size={18} />
+              </a>
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
+                <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
+              </a>
+            </div>
           </div>
         </div>
         {/* Laptop & desktop: image wraps around info section */}
@@ -539,38 +564,61 @@ function ArtistOverview() {
               </div>
             </div>
             {/* CTA buttons */}
-            <div className="mt-5 md:mt-6 flex items-center gap-3">
-              <button className="rounded-md bg-[#d63c65] px-4 py-2 text-sm md:text-[15px] font-semibold text-white shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#d63c65]/60">
-                Biography
-              </button>
-              <button 
-                onClick={handleFollowClick}
-                disabled={followLoading}
-                className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isFollowing 
-                    ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
-                    : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  {followLoading ? (
-                    <>
-                      <span className="i-lucide-loader-2 text-sm animate-spin" />
-                      {isFollowing ? 'Unfollowing...' : 'Following...'}
-                    </>
-                  ) : isFollowing ? (
-                    <>
-                      <span className="i-lucide-check text-sm" />
-                      Following
-                    </>
-                  ) : (
-                    <>
-                      <span className="i-lucide-user-plus text-sm" />
-                      Follow Artist
-                    </>
-                  )}
-                </span>
-              </button>
+            <div className="mt-5 md:mt-6 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <button className="rounded-md bg-[#d63c65] px-4 py-2 text-sm md:text-[15px] font-semibold text-white shadow-sm hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[#d63c65]/60">
+                  Biography
+                </button>
+                <button 
+                  onClick={handleFollowClick}
+                  disabled={followLoading}
+                  className={`rounded-md border px-4 py-2 text-sm md:text-[15px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    isFollowing 
+                      ? 'border-white/20 bg-white/10 text-white hover:bg-white/15 focus:ring-white/30' 
+                      : 'border-white/10 bg-white/[0.03] text-white/90 hover:bg-white/[0.06] focus:ring-white/20'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {followLoading ? (
+                      <>
+                        <span className="i-lucide-loader-2 text-sm animate-spin" />
+                        {isFollowing ? 'Unfollowing...' : 'Following...'}
+                      </>
+                    ) : isFollowing ? (
+                      <>
+                        <span className="i-lucide-check text-sm" />
+                        Following
+                      </>
+                    ) : (
+                      <>
+                        <span className="i-lucide-user-plus text-sm" />
+                        Follow Artist
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+              {/* Social Media Icons */}
+              <div className="flex items-center gap-3">
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
+                  <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
+                  <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
+                  <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
+                  <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
+                  <FaApple className="text-white/80 group-hover:text-white" size={18} />
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
+                  <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
+                </a>
+              </div>
             </div>
           </div>
         </div>
