@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import NotAvailableModal from './modal/NotAvailableModal';
+import { useFeatures } from '../context/FeaturesContext';
+import { useCart } from '../context/CartContext';
 
 function Wavelength({ playing }) {
   const heights = ['h-2', 'h-3', 'h-4', 'h-5'];
@@ -20,6 +22,13 @@ function TrackCard({ track, albumCoverUrl, purchaseLink }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const { isEnabled } = useFeatures();
+  const { addToCart } = useCart();
+  
+  const isStripeEnabled = isEnabled('enable_stripe');
+  
+  // Debug log
+  console.log('TrackCard - Stripe enabled:', isStripeEnabled);
 
   const handlePlay = () => {
     audioRef.current.play();
@@ -37,9 +46,23 @@ function TrackCard({ track, albumCoverUrl, purchaseLink }) {
   };
 
   const handleBuyClick = (e) => {
-    if (!purchaseLink) {
+    if (isStripeEnabled) {
+      // Add to cart when Stripe is enabled
       e.preventDefault();
-      setShowModal(true);
+      const cartItem = {
+        type: 'Track',
+        title: track.title,
+        price: formatPrice(track.track_pricing),
+        img: albumCoverUrl,
+        artist_name: track.artist_name
+      };
+      addToCart(cartItem);
+    } else {
+      // Use purchaseLink when Stripe is disabled
+      if (!purchaseLink) {
+        e.preventDefault();
+        setShowModal(true);
+      }
     }
   };
 
@@ -114,15 +137,25 @@ function TrackCard({ track, albumCoverUrl, purchaseLink }) {
             <span className="text-[#aa2a46] text-2xl font-bold">{formatPrice(track.track_pricing)}</span>
             <span className="text-white/40 text-sm">USD</span>
           </div>
-          <a 
-            href={purchaseLink || '#'} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            onClick={handleBuyClick}
-            className="w-full px-6 py-2.5 bg-[#fffced] text-[#aa2a46] rounded-xl font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#aa2a46]/20 border-2 border-transparent hover:border-[#fffced] text-center block"
-          >
-            Buy Track
-          </a>
+          {isStripeEnabled ? (
+            <button
+              onClick={handleBuyClick}
+              className="w-full px-6 py-2.5 bg-[#fffced] text-[#aa2a46] rounded-xl font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#aa2a46]/20 border-2 border-transparent hover:border-[#fffced] text-center flex items-center justify-center gap-2"
+            >
+              <span className="i-lucide-shopping-cart text-sm" />
+              Add to Cart
+            </button>
+          ) : (
+            <a 
+              href={purchaseLink || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={handleBuyClick}
+              className="w-full px-6 py-2.5 bg-[#fffced] text-[#aa2a46] rounded-xl font-bold hover:bg-[#aa2a46] hover:text-[#fffced] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#aa2a46]/20 border-2 border-transparent hover:border-[#fffced] text-center block"
+            >
+              Buy Track
+            </a>
+          )}
         </div>
       </div>
     </div>

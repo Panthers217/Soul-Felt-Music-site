@@ -4,6 +4,9 @@ import { useApiData } from "../context/ApiDataContext.jsx";
 import SearchBar from "./SearchBar.jsx";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
+import { useFeatures } from "../context/FeaturesContext.jsx";
+import NotAvailableModal from "./modal/NotAvailableModal.jsx";
+import TrackCard from "./TrackCard.jsx";
 
 const demoMerchProducts = [
   {
@@ -115,6 +118,201 @@ function ArtistStoreHeader({
   );
 }
 
+// Component to display album with associated tracks
+function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCart }) {
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleImageClick = () => {
+    if (album.artistId) {
+      navigate(`/store/${album.artistId}`);
+    }
+  };
+
+  const handleButtonClick = (e) => {
+    e.stopPropagation();
+    if (isStripeEnabled) {
+      onAddToCart();
+    } else {
+      if (!album.purchaseLink) {
+        e.preventDefault();
+        setShowModal(true);
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 w-full bg-[#21212b]/50 rounded-lg p-6 border border-[#6e5049]/20">
+      <NotAvailableModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
+      
+      {/* Album Card */}
+      <div
+        className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-shrink-0 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#aa2a46]/50 hover:-translate-y-2"
+        style={{ minWidth: "220px", minHeight: "320px" }}
+      >
+        <div
+          className="flex-shrink-0 w-full h-[65%] flex items-center justify-center relative cursor-pointer group"
+          onClick={handleImageClick}
+        >
+          <img
+            className="w-[95%] h-[95%] object-cover rounded-t-md transition-transform duration-300 group-hover:scale-110"
+            src={album.img}
+            alt={album.title}
+          />
+          {album.artistId && (
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+              <span className="text-white text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                View Store
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[5%] pb-[6%]">
+          <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
+            {album.type}
+          </div>
+          <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">
+            {album.title}
+          </div>
+          <div className="flex justify-between items-center w-full">
+            <div className="text-white text-sm xl:text-[1.2rem]  font-bold font-['Roboto'] leading-tight">
+              {album.price}
+            </div>
+            {isStripeEnabled ? (
+              <button
+                className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
+                onClick={handleButtonClick}
+              >
+                <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
+                  Add to Cart
+                </span>
+              </button>
+            ) : (
+              <a
+                href={album.purchaseLink || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleButtonClick}
+                className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
+              >
+                <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
+                  Buy Now
+                </span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tracks List */}
+      {tracks.length > 0 && (
+        <div className="flex-1">
+          <h3 className="text-[#fffced] text-xl font-bold mb-4 font-['Roboto']">
+            Album Tracks ({tracks.length})
+          </h3>
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            {tracks.map((track, idx) => (
+              <TrackListItem
+                key={idx}
+                track={track}
+                albumCover={album.img}
+                trackNumber={idx + 1}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Component for individual track in album list
+function TrackListItem({ track, albumCover, trackNumber }) {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const audioRef = React.useRef(null);
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
+
+  // Always show play button, whether there's audio or not
+  const hasAudio = track.promo_audio_url;
+
+  return (
+    <div className="bg-[#1d1e26] rounded-lg p-3 flex items-center gap-4 hover:bg-[#252631] transition-all duration-200 group">
+      {/* Track Number */}
+      <div className="flex-shrink-0 w-8 text-center">
+        <span className="text-[#fffced]/60 text-sm font-bold">{trackNumber}</span>
+      </div>
+      
+      {/* Album Cover */}
+      <div className="flex-shrink-0">
+        <img
+          src={albumCover}
+          alt={track.title}
+          className="w-16 h-16 rounded-md object-cover"
+        />
+      </div>
+      
+      {/* Track Info */}
+      <div className="flex-1 min-w-0">
+        <div className="text-[#fffced] text-base font-semibold font-['Roboto'] truncate">
+          {track.title || "Untitled Track"}
+        </div>
+        <div className="text-[#aa2a46] text-sm font-medium">
+          {track.artist_name || "Unknown Artist"}
+        </div>
+      </div>
+      
+      {/* Play Button - Always visible */}
+      <div className="flex-shrink-0 flex items-center gap-2">
+        <button
+          onClick={handlePlayPause}
+          disabled={!hasAudio}
+          className={`w-10 h-10 rounded-full transition-all duration-300 flex items-center justify-center group-hover:scale-110 ${
+            hasAudio 
+              ? 'bg-[#aa2a46] hover:bg-[#d94a6a] cursor-pointer' 
+              : 'bg-gray-600 cursor-not-allowed opacity-50'
+          }`}
+          aria-label={isPlaying ? "Pause" : "Play"}
+          title={hasAudio ? (isPlaying ? "Pause" : "Play preview") : "No preview available"}
+        >
+          {isPlaying ? (
+            <div className="flex gap-1">
+              <div className="w-1 h-4 bg-white rounded-sm"></div>
+              <div className="w-1 h-4 bg-white rounded-sm"></div>
+            </div>
+          ) : (
+            <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1"></div>
+          )}
+        </button>
+        {hasAudio && (
+          <audio
+            ref={audioRef}
+            src={track.promo_audio_url}
+            onEnded={handleEnded}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ArtistMerchCard({
   type,
   title,
@@ -123,12 +321,50 @@ function ArtistMerchCard({
   buttonLabel = "Add to Cart",
   onAddToCart,
   artistId,
+  purchaseLink,
+  isStripeEnabled = true,
+  audioUrl = null,
+  isTrack = false,
 }) {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = React.useRef(null);
 
   const handleImageClick = () => {
     if (artistId) {
       navigate(`/store/${artistId}`);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+  };
+
+  const handleButtonClick = (e) => {
+    e.stopPropagation();
+    if (isStripeEnabled) {
+      // Use Add to Cart when Stripe is enabled
+      onAddToCart();
+    } else {
+      // Use purchaseLink when Stripe is disabled
+      if (!purchaseLink) {
+        e.preventDefault();
+        setShowModal(true);
+      }
+      // If purchaseLink exists, let the <a> tag handle navigation naturally
     }
   };
 
@@ -137,7 +373,11 @@ function ArtistMerchCard({
       className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#aa2a46]/50 hover:-translate-y-2"
       style={{ minWidth: "220px", minHeight: "320px" }}
     >
-      <div 
+      <NotAvailableModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
+      <div
         className="flex-shrink-0 w-full h-[65%] flex items-center justify-center relative cursor-pointer group"
         onClick={handleImageClick}
       >
@@ -161,18 +401,66 @@ function ArtistMerchCard({
         <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">
           {title}
         </div>
+        {/* Preview Button for Tracks */}
+        {isTrack && audioUrl && (
+          <div className="w-full mb-2">
+            <button
+              onClick={handlePlayPause}
+              className="w-full px-[0.7rem] py-[0.35rem] bg-[#1d1e26] border-2 border-[#aa2a46] rounded-xs flex items-center justify-center gap-2 hover:bg-[#aa2a46] transition-colors duration-200 group"
+            >
+              {isPlaying ? (
+                <>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-3 bg-[#aa2a46] group-hover:bg-white rounded-sm"></div>
+                    <div className="w-1 h-3 bg-[#aa2a46] group-hover:bg-white rounded-sm"></div>
+                  </div>
+                  <span className="text-center text-[#aa2a46] group-hover:text-white text-[0.8rem] xl:text-[1rem] font-medium font-['Roboto']">
+                    Pause Preview
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-[#aa2a46] group-hover:border-l-white border-b-[5px] border-b-transparent"></div>
+                  <span className="text-center text-[#aa2a46] group-hover:text-white text-[0.8rem] xl:text-[1rem] font-medium font-['Roboto']">
+                    Play Preview
+                  </span>
+                </>
+              )}
+            </button>
+            <audio
+              ref={audioRef}
+              src={audioUrl}
+              onEnded={handleAudioEnded}
+            />
+          </div>
+        )}
+        
         <div className="flex justify-between items-center w-full">
           <div className="text-white text-sm xl:text-[1.2rem]  font-bold font-['Roboto'] leading-tight">
             {price}
           </div>
-          <button
-            className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
-            onClick={onAddToCart}
-          >
-            <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
-              {buttonLabel}
-            </span>
-          </button>
+          {isStripeEnabled ? (
+            <button
+              className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
+              onClick={handleButtonClick}
+            >
+              <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
+                {buttonLabel}
+              </span>
+            </button>
+          ) : (
+            <a
+              href={purchaseLink || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleButtonClick}
+              className="px-[0.7rem] py-[0.35rem] bg-[#aa2a46] rounded-xs flex flex-col justify-center items-center hover:bg-[#d94a6a] transition-colors duration-200"
+            >
+              <span className="text-center text-white text-[0.8rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-[0.9rem]">
+                Buy Now
+              </span>
+            </a>
+          )}
         </div>
       </div>
     </div>
@@ -181,83 +469,123 @@ function ArtistMerchCard({
 
 const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   const { dbSnapshot } = useApiData();
-  const { cart, addToCart, removeFromCart, getCartCount, getCartTotal } = useCart();
+  const { cart, addToCart, removeFromCart, getCartCount, getCartTotal } =
+    useCart();
+  const { isEnabled } = useFeatures();
+  const navigate = useNavigate();
   const tabs = ["All Products", "Music", "Merchandise"];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [viewMode, setViewMode] = useState("all"); // "all", "albums", "tracks"
   const [searchResults, setSearchResults] = useState(null);
 
+  const isStripeEnabled = isEnabled("enable_stripe");
+
   // Use search results if available, otherwise use full data
-  const sourceAlbums = searchResults ? searchResults.albums : (dbSnapshot?.albums?.records || []);
-  const sourceTracks = searchResults ? searchResults.tracks : (dbSnapshot?.tracks?.records || []);
-  const sourceMerchandise = searchResults ? searchResults.merchandise : (dbSnapshot?.merchandise?.records || []); // Merch not included in search yet
+  const sourceAlbums = searchResults
+    ? searchResults.albums
+    : dbSnapshot?.albums?.records || [];
+  const sourceTracks = searchResults
+    ? searchResults.tracks
+    : dbSnapshot?.tracks?.records || [];
+  const sourceMerchandise = searchResults
+    ? searchResults.merchandise
+    : dbSnapshot?.merchandise?.records || []; // Merch not included in search yet
 
   // Get albums from database, optionally filtered by artist
   let albumProducts = [];
   if (dbSnapshot && dbSnapshot.albums && dbSnapshot.albums.records) {
-    const filteredAlbums = artistId 
-      ? sourceAlbums.filter(album => album.artist_id === parseInt(artistId))
+    const filteredAlbums = artistId
+      ? sourceAlbums.filter((album) => album.artist_id === parseInt(artistId))
       : sourceAlbums;
-    
+
     albumProducts = filteredAlbums.map((album) => {
       // Parse price - handle both string and number formats
       let parsedPrice = 0;
-      if (album.album_pricing != null && album.album_pricing !== '') {
-        const priceValue = typeof album.album_pricing === 'string' 
-          ? parseFloat(album.album_pricing) 
-          : Number(album.album_pricing);
-        
+      if (album.album_pricing != null && album.album_pricing !== "") {
+        const priceValue =
+          typeof album.album_pricing === "string"
+            ? parseFloat(album.album_pricing)
+            : Number(album.album_pricing);
+
         // Check if conversion was successful
         if (!isNaN(priceValue)) {
           parsedPrice = priceValue / 100; // Convert cents to dollars
         }
       }
-      
+
       return {
-        type: album.album_type === "digital" ? "Digital Album" : album.album_type === "vinyl" ? "Vinyl Record" : "Limited Edition",
+        type:
+          album.album_type === "digital"
+            ? "Digital Album"
+            : album.album_type === "vinyl"
+            ? "Vinyl Record"
+            : "Limited Edition",
         title: album.title || "Untitled Album",
-        price: parsedPrice > 0 
-          ? `$${parsedPrice.toFixed(2)}`
-          : "$0.00",
+        price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: album.cover_url || "https://placehold.co/265x265",
         album_type: album.album_type,
         artistId: album.artist_id,
+        albumId: album.id,
+        purchaseLink: album.purchase_link,
       };
     });
   }
 
   // Get tracks from database, optionally filtered by artist
   let trackProducts = [];
-  if (dbSnapshot && dbSnapshot.tracks && dbSnapshot.tracks.records) {
+  if (dbSnapshot && dbSnapshot.promotional_tracks && dbSnapshot.promotional_tracks.records) {
     const filteredTracks = artistId
-      ? sourceTracks.filter(track => track.artist_image_id === parseInt(artistId))
-      : sourceTracks;
-    
+      ? dbSnapshot.promotional_tracks.records.filter((track) => {
+          // First try direct artist_id match
+          if (
+            track.artist_id &&
+            track.artist_id === parseInt(artistId)
+          ) {
+            return true;
+          }
+          // If no direct artist_id, check through album relationship
+          if (
+            track.album_id &&
+            dbSnapshot.albums &&
+            dbSnapshot.albums.records
+          ) {
+            const album = dbSnapshot.albums.records.find(
+              (a) => a.id === track.album_id
+            );
+            return album && album.artist_id === parseInt(artistId);
+          }
+          return false;
+        })
+      : dbSnapshot.promotional_tracks.records;
+
     trackProducts = filteredTracks.map((track) => {
       // Parse price - handle both string and number formats
       let parsedPrice = 0;
-      if (track.track_pricing != null && track.track_pricing !== '') {
-        const priceValue = typeof track.track_pricing === 'string' 
-          ? parseFloat(track.track_pricing) 
-          : Number(track.track_pricing);
-        
+      if (track.track_pricing != null && track.track_pricing !== "") {
+        const priceValue =
+          typeof track.track_pricing === "string"
+            ? parseFloat(track.track_pricing)
+            : Number(track.track_pricing);
+
         if (!isNaN(priceValue)) {
           parsedPrice = priceValue / 100; // Convert cents to dollars
         }
       }
-      
+
       // Get album cover from album_id
-      const album = dbSnapshot.albums.records.find(a => a.id === track.album_id);
-      
+      const album = dbSnapshot.albums.records.find(
+        (a) => a.id === track.album_id
+      );
+
       return {
         type: "Track",
         title: track.title || "Untitled Track",
-        price: parsedPrice > 0 
-          ? `$${parsedPrice.toFixed(2)}`
-          : "$0.00",
+        price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: album?.cover_url || "https://placehold.co/265x265",
         isTrack: true,
-        artistId: track.artist_image_id,
+        artistId: track.artist_id,
+        purchaseLink: track.purchase_link,
+        audioUrl: track.promo_audio_url,
       };
     });
   }
@@ -266,39 +594,46 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   let merchandiseProducts = [];
   if (dbSnapshot && dbSnapshot.merchandise && dbSnapshot.merchandise.records) {
     const filteredMerch = artistId
-      ? sourceMerchandise.filter(merch => merch.artist_id === parseInt(artistId))
+      ? sourceMerchandise.filter(
+          (merch) => merch.artist_id === parseInt(artistId)
+        )
       : sourceMerchandise;
-    
+
     merchandiseProducts = filteredMerch.map((merch) => {
       // Parse price - NUMERIC format (already in dollars)
       let parsedPrice = 0;
-      if (merch.price != null && merch.price !== '') {
-        parsedPrice = typeof merch.price === 'string' 
-          ? parseFloat(merch.price) 
-          : Number(merch.price);
+      if (merch.price != null && merch.price !== "") {
+        parsedPrice =
+          typeof merch.price === "string"
+            ? parseFloat(merch.price)
+            : Number(merch.price);
       }
-      
+
       return {
         type: merch.merch_type || "Merchandise",
         title: merch.title || "Untitled Item",
-        price: parsedPrice > 0 
-          ? `$${parsedPrice.toFixed(2)}`
-          : "$0.00",
+        price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: merch.image_url || "https://placehold.co/265x265",
         merch_type: merch.merch_type,
         artistId: merch.artist_id,
+        purchaseLink: merch.purchase_link,
       };
     });
   }
 
   // Combine all products: albums, tracks, merchandise from DB, and demo products (only if no artistId)
-  const allProducts = [...albumProducts, ...trackProducts, ...merchandiseProducts, ...(artistId ? [] : demoMerchProducts)];
+  const allProducts = [
+    ...albumProducts,
+    ...trackProducts,
+    ...merchandiseProducts,
+    ...(artistId ? [] : demoMerchProducts),
+  ];
 
   // Filter products by tab and view mode
   const filteredProducts = allProducts.filter((product) => {
     // First filter by tab
     let tabMatch = false;
-    
+
     if (activeTab === "All Products") {
       tabMatch = true;
     } else if (activeTab === "Music") {
@@ -308,15 +643,15 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       }
       // For albums from database, check album_type
       else if (product.album_type) {
-        tabMatch = product.album_type === "digital" || product.album_type === "vinyl";
+        tabMatch =
+          product.album_type === "digital" || product.album_type === "vinyl";
       }
       // For demo products, check type
       else {
-        tabMatch = (
+        tabMatch =
           product.type === "Digital Album" ||
           product.type === "Vinyl Record" ||
-          product.type === "Limited Edition"
-        );
+          product.type === "Limited Edition";
       }
     } else if (activeTab === "Merchandise") {
       // For merchandise from database, check merch_type exists
@@ -325,25 +660,29 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       }
       // For demo products, filter by type
       else {
-        tabMatch = (
+        tabMatch =
           product.type === "Apparel" ||
           product.type === "Accessories" ||
-          product.type === "Posters & Art"
-        );
+          product.type === "Posters & Art";
       }
     }
-    
+
     if (!tabMatch) return false;
-    
+
     // Then filter by view mode (only applies when Music tab is active)
     if (activeTab === "Music") {
       if (viewMode === "albums") {
-        return product.album_type || product.type === "Digital Album" || product.type === "Vinyl Record" || product.type === "Limited Edition";
+        return (
+          product.album_type ||
+          product.type === "Digital Album" ||
+          product.type === "Vinyl Record" ||
+          product.type === "Limited Edition"
+        );
       } else if (viewMode === "tracks") {
         return product.isTrack;
       }
     }
-    
+
     return true;
   });
 
@@ -354,6 +693,13 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
 
   // Helper function to determine grid columns for lg/xl
   const getMerchCardGridClass = () => {
+    // If showing albums with tracks in Music tab, use vertical stack layout
+    const isShowingAlbumsWithTracks = (activeTab === "Music") && (viewMode === "all" || viewMode === "albums");
+    
+    if (isShowingAlbumsWithTracks) {
+      return "MerchCardDiv w-full flex flex-col gap-8";
+    }
+    
     if (filteredProducts.length <= 1) {
       return "MerchCardDiv w-full flex flex-wrap justify-center ";
     }
@@ -371,17 +717,22 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
           setActiveTab={setActiveTab}
         />
         <div className="w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
-          <ArtistStoreHeader 
-            title={artistId ? `${artistName} Official Store` : "Official Music & Merchandise"}
-            description={artistId ? `Support ${artistName} directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects.` : "Support Luna Starlight directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."}
+          <ArtistStoreHeader
+            title={
+              artistId
+                ? `${artistName} Official Store`
+                : "Official Music & Merchandise"
+            }
+            description={
+              artistId
+                ? `Support ${artistName} directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects.`
+                : "Support Luna Starlight directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."
+            }
           />
-          
+
           {/* Search Bar */}
-          <SearchBar 
-            onSearchResults={setSearchResults}
-            viewMode="all"
-          />
-          
+          <SearchBar onSearchResults={setSearchResults} viewMode="all" />
+
           {/* View Mode Toggle - Only show when Music tab is active */}
           {activeTab === "Music" && (
             <div className="flex justify-center mb-6">
@@ -419,8 +770,8 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
               </div>
             </div>
           )}
-          {/* Cart display */}
-          {cart.length > 0 && (
+          {/* Cart display - only show when Stripe is enabled */}
+          {isStripeEnabled && cart.length > 0 && (
             <div className="w-full max-w-lg bg-[#21212b] rounded-md shadow-md p-4 mb-6">
               <h3 className="text-[#aa2a46] text-lg font-bold mb-2">
                 Your Cart
@@ -442,23 +793,56 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
                   </li>
                 ))}
               </ul>
-              <div className="text-white font-bold">
+              <div className="text-white font-bold mb-4">
                 Total:{" "}
                 {getCartTotal().toLocaleString("en-US", {
                   style: "currency",
                   currency: "USD",
                 })}
               </div>
+              <button
+                onClick={() => navigate("/checkout")}
+                className="w-full py-3 bg-gradient-to-r from-[#aa2a46] to-[#d63c65] text-[#fffced] rounded-lg font-bold hover:from-[#d63c65] hover:to-[#aa2a46] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <span className="i-lucide-shopping-bag"></span>
+                Proceed to Checkout
+              </button>
             </div>
           )}
           <div className={`${getMerchCardGridClass()}`}>
-            {filteredProducts.map((item, idx) => (
-              <ArtistMerchCard
-                key={idx}
-                {...item}
-                onAddToCart={() => handleAddToCart(item)}
-              />
-            ))}
+            {filteredProducts.map((item, idx) => {
+              // Check if this is an album and we should show tracks
+              const isAlbum = item.album_type && (activeTab === "Music") && (viewMode === "all" || viewMode === "albums");
+              
+              if (isAlbum && item.albumId) {
+                // Get tracks for this album from promotional_tracks table
+                const albumTracks = (dbSnapshot?.promotional_tracks?.records || []).filter(
+                  track => track.album_id === item.albumId
+                );
+                
+                return (
+                  <AlbumWithTracks
+                    key={idx}
+                    album={item}
+                    tracks={albumTracks}
+                    dbSnapshot={dbSnapshot}
+                    isStripeEnabled={isStripeEnabled}
+                    onAddToCart={() => handleAddToCart(item)}
+                  />
+                );
+              }
+              
+              // Regular product card
+              return (
+                <ArtistMerchCard
+                  key={idx}
+                  {...item}
+                  onAddToCart={() => handleAddToCart(item)}
+                  isStripeEnabled={isStripeEnabled}
+                  purchaseLink={item.purchaseLink}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

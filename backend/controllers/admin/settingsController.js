@@ -86,7 +86,8 @@ export async function getFeatures(req, res) {
         enable_cart,
         enable_user_accounts,
         enable_promotional_tracks,
-        enable_promotional_videos
+        enable_promotional_videos,
+        enable_stripe
       FROM website_settings 
       ORDER BY id DESC 
       LIMIT 1`
@@ -102,7 +103,8 @@ export async function getFeatures(req, res) {
         enable_cart: true,
         enable_user_accounts: true,
         enable_promotional_tracks: true,
-        enable_promotional_videos: true
+        enable_promotional_videos: true,
+        enable_stripe: true
       });
     }
     
@@ -153,6 +155,7 @@ export async function updateSettings(req, res) {
       enable_user_accounts,
       enable_promotional_tracks,
       enable_promotional_videos,
+      enable_stripe,
       hero_title,
       hero_subtitle,
       featured_section_title,
@@ -200,6 +203,7 @@ export async function updateSettings(req, res) {
     if (enable_user_accounts !== undefined) { updates.push('enable_user_accounts = ?'); values.push(enable_user_accounts); }
     if (enable_promotional_tracks !== undefined) { updates.push('enable_promotional_tracks = ?'); values.push(enable_promotional_tracks); }
     if (enable_promotional_videos !== undefined) { updates.push('enable_promotional_videos = ?'); values.push(enable_promotional_videos); }
+    if (enable_stripe !== undefined) { updates.push('enable_stripe = ?'); values.push(enable_stripe); }
     if (hero_title !== undefined) { updates.push('hero_title = ?'); values.push(hero_title); }
     if (hero_subtitle !== undefined) { updates.push('hero_subtitle = ?'); values.push(hero_subtitle); }
     if (featured_section_title !== undefined) { updates.push('featured_section_title = ?'); values.push(featured_section_title); }

@@ -11,6 +11,7 @@ import followRouter from './routes/follow.js';
 import statsScheduleRouter, { readScheduleConfig } from './routes/statsSchedule.js';
 import genreRouter from './routes/genre.js';
 import settingsRouter from './routes/settings.js';
+import paymentsRouter from './routes/payments.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
@@ -44,8 +45,12 @@ admin.initializeApp({
 
 const app = express();
 
-
 app.use(cors());
+
+// Stripe webhook needs raw body - must come BEFORE bodyParser.json()
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
+// Parse JSON for all other routes
 app.use(bodyParser.json());
 
 // Debug logging for auth routes
@@ -76,6 +81,7 @@ app.use('/api/follow', followRouter);
 app.use('/api/admin', statsScheduleRouter);
 app.use('/api', genreRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/payments', paymentsRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });

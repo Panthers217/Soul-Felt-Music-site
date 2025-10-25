@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useApiData } from "../context/ApiDataContext";
+import { useCart } from "../context/CartContext";
+import { useFeatures } from "../context/FeaturesContext";
+import { useNavigate } from "react-router-dom";
 import TrackCard from "./TrackCard";
 import AlbumCard from "./AlbumCard";
 import SearchBar from "./SearchBar";
@@ -7,10 +10,15 @@ import axios from "axios";
 
 const Music = () => {
   const { dbSnapshot } = useApiData();
+  const { cart, removeFromCart, getCartTotal } = useCart();
+  const { isEnabled } = useFeatures();
+  const navigate = useNavigate();
   const [activeTabs, setActiveTabs] = useState(["all"]);
   const [genres, setGenres] = useState([]);
   const [viewMode, setViewMode] = useState("tracks"); // "tracks" or "albums"
   const [searchResults, setSearchResults] = useState(null);
+  
+  const isStripeEnabled = isEnabled('enable_stripe');
 
   // Fetch active genres from database
   useEffect(() => {
@@ -168,6 +176,47 @@ const Music = () => {
             </button>
           ))}
         </div>
+        
+        {/* Cart display - only show when Stripe is enabled */}
+        {isStripeEnabled && cart.length > 0 && (
+          <div className="w-full max-w-lg mx-auto bg-[#21212b] rounded-md shadow-md p-4 mb-6">
+            <h3 className="text-[#aa2a46] text-lg font-bold mb-2">
+              Your Cart
+            </h3>
+            <ul className="mb-2">
+              {cart.map((item) => (
+                <li
+                  key={item.cartId}
+                  className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20"
+                >
+                  <span className="text-white text-sm">{item.title}</span>
+                  <span className="text-white text-sm">{item.price}</span>
+                  <button
+                    className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs hover:bg-[#d94a6a] transition-colors"
+                    onClick={() => removeFromCart(item.cartId)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="text-white font-bold mb-4">
+              Total:{" "}
+              {getCartTotal().toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}
+            </div>
+            <button
+              onClick={() => navigate('/checkout')}
+              className="w-full py-3 bg-gradient-to-r from-[#aa2a46] to-[#d63c65] text-[#fffced] rounded-lg font-bold hover:from-[#d63c65] hover:to-[#aa2a46] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <span className="i-lucide-shopping-bag"></span>
+              Proceed to Checkout
+            </button>
+          </div>
+        )}
+        
         {/* Display selected sections */}
         {allSections
           .filter((section) => sectionsToShow.includes(section.key))

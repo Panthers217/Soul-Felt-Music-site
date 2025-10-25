@@ -2,12 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useApiData } from "../context/ApiDataContext.jsx";
 import ReactPlayer from "react-player";
 
-const VideoPlayerComponent = () => {
+const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
   const { dbSnapshot } = useApiData();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playerError, setPlayerError] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [lastInteractionTime, setLastInteractionTime] = useState(Date.now());
+  const autoAdvanceTimerRef = React.useRef(null);
+  const inactivityTimerRef = React.useRef(null);
 
   // Extract YouTube video ID from URL
   const getYouTubeVideoId = (url) => {
@@ -25,8 +31,50 @@ const VideoPlayerComponent = () => {
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   };
 
+  // Handle user interaction - stops auto-advance
+  const handleUserInteraction = () => {
+    setUserInteracted(true);
+    setLastInteractionTime(Date.now());
+    
+    // Clear existing timers
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    
+    // Start 2-minute inactivity timer
+    inactivityTimerRef.current = setTimeout(() => {
+      // Resume auto-advance if video is not playing
+      if (!isPlaying) {
+        setUserInteracted(false);
+      }
+    }, 120000); // 2 minutes
+  };
+
+  // Navigate to next video with fade transition
+  const advanceToNextVideo = () => {
+    setFadeOut(true);
+    
+    setTimeout(() => {
+      const nextIndex = (currentIndex + 1) % videos.length;
+      
+      // If we're at the last video and going to loop back, call onPlaylistEnd
+      if (currentIndex === videos.length - 1 && onPlaylistEnd) {
+        onPlaylistEnd();
+      }
+      
+      setCurrentIndex(nextIndex);
+      setPlayerError(false);
+      setFadeOut(false);
+    }, 500); // Fade duration
+  };
+
   // Handle clicking on the thumbnail/play button
   const handlePlayClick = () => {
+    handleUserInteraction();
     if (videos[currentIndex]) {
       window.open(videos[currentIndex], "_blank");
     }
@@ -34,25 +82,75 @@ const VideoPlayerComponent = () => {
 
   // Navigate to previous video
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1));
-    setPlayerError(false);
+    handleUserInteraction();
+    setFadeOut(true);
+    
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1));
+      setPlayerError(false);
+      setFadeOut(false);
+    }, 500);
   };
 
   // Navigate to next video
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === videos.length - 1 ? 0 : prev + 1));
-    setPlayerError(false);
+    handleUserInteraction();
+    advanceToNextVideo();
   };
 
   useEffect(() => {
-    if (dbSnapshot && dbSnapshot.videos && dbSnapshot.videos.records) {
-      const videoUrls = dbSnapshot.videos.records.map((v) => v.video_url);
+    // If videoUrls prop is provided, use it (for filtered videos)
+    if (videoUrls !== null) {
       setVideos(videoUrls);
+      setLoading(false);
+      setCurrentIndex(0);
+    } else if (dbSnapshot && dbSnapshot.videos && dbSnapshot.videos.records) {
+      // Otherwise, use videos from dbSnapshot (default behavior)
+      const videoUrlsFromDb = dbSnapshot.videos.records.map((v) => v.video_url);
+      setVideos(videoUrlsFromDb);
       setLoading(false);
     } else {
       setLoading(true);
     }
-  }, [dbSnapshot]);
+  }, [dbSnapshot, videoUrls]);
+
+  // Auto-advance logic - runs by default unless user has interacted
+  useEffect(() => {
+    // Clear any existing timer
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+    }
+
+    // Only auto-advance if:
+    // 1. Not loading
+    // 2. Videos are available
+    // 3. User hasn't interacted (or 2 minutes passed since interaction and video not playing)
+    // 4. Video is not currently playing
+    if (!loading && videos.length > 0 && !userInteracted && !isPlaying) {
+      autoAdvanceTimerRef.current = setTimeout(() => {
+        advanceToNextVideo();
+      }, 8000); // 8 seconds per video
+    }
+
+    // Cleanup
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+      }
+    };
+  }, [currentIndex, loading, videos.length, userInteracted, isPlaying]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+      }
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+    };
+  }, []);
 
   const currentVideo = videos[currentIndex];
   const currentThumbnail = currentVideo ? getThumbnailUrl(currentVideo) : null;
@@ -80,7 +178,9 @@ const VideoPlayerComponent = () => {
         ) : playerError && currentThumbnail ? (
           // Show thumbnail as fallback if ReactPlayer fails to load
           <div
-            className="relative w-full h-full cursor-pointer"
+            className={`relative w-full h-full cursor-pointer transition-opacity duration-500 ${
+              fadeOut ? "opacity-0" : "opacity-100"
+            }`}
             onClick={handlePlayClick}
           >
             <img
@@ -108,18 +208,31 @@ const VideoPlayerComponent = () => {
             </div>
           </div>
         ) : (
-          <ReactPlayer
-            src={currentVideo}
-            controls
-            width="100%"
-            height="100%"
-            className="react-player"
-            playing={false}
-            onError={() => {
-              console.error("ReactPlayer failed to load video");
-              setPlayerError(true);
-            }}
-          />
+          <div
+            className={`w-full h-full transition-opacity duration-500 ${
+              fadeOut ? "opacity-0" : "opacity-100"
+            }`}
+            onClick={handleUserInteraction}
+          >
+            <ReactPlayer
+              src={currentVideo}
+              controls
+              width="100%"
+              height="100%"
+              className="react-player"
+              playing={false}
+              onPlay={() => {
+                setIsPlaying(true);
+                handleUserInteraction();
+              }}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              onError={() => {
+                console.error("ReactPlayer failed to load video");
+                setPlayerError(true);
+              }}
+            />
+          </div>
         )}
 
         {/* Navigation Arrows */}
@@ -174,8 +287,13 @@ const VideoPlayerComponent = () => {
             <button
               key={index}
               onClick={() => {
-                setCurrentIndex(index);
-                setPlayerError(false);
+                handleUserInteraction();
+                setFadeOut(true);
+                setTimeout(() => {
+                  setCurrentIndex(index);
+                  setPlayerError(false);
+                  setFadeOut(false);
+                }, 500);
               }}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === currentIndex
@@ -185,6 +303,14 @@ const VideoPlayerComponent = () => {
               aria-label={`Go to video ${index + 1}`}
             />
           ))}
+        </div>
+      )}
+
+      {/* Auto-advance indicator */}
+      {!loading && videos.length > 0 && !userInteracted && !isPlaying && (
+        <div className="mt-2 text-xs text-gray-400 flex items-center gap-2">
+          <span className="animate-pulse">●</span>
+          Auto-advancing through videos
         </div>
       )}
     </div>

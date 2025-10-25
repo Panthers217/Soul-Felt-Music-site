@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFeatures } from '../context/FeaturesContext';
+import { useCart } from '../context/CartContext';
+import NotAvailableModal from './modal/NotAvailableModal';
 
-function AlbumCard({ album }) {
+function AlbumCard({ album, purchaseLink }) {
   const navigate = useNavigate();
+  const { isEnabled } = useFeatures();
+  const { addToCart } = useCart();
+  const [showModal, setShowModal] = useState(false);
+  
+  const isStripeEnabled = isEnabled('enable_stripe');
+  
+  // Debug log
+  console.log('AlbumCard - Stripe enabled:', isStripeEnabled);
 
   // Format price from cents to dollars
   const formatPrice = (cents) => {
@@ -10,10 +21,33 @@ function AlbumCard({ album }) {
     return isNaN(price) ? '$0.00' : `$${(price / 100).toFixed(2)}`;
   };
 
-  const handleAlbumClick = () => {
-    // Navigate to artist store with album's artist_id
-    if (album.artist_id) {
-      navigate(`/store/${album.artist_id}`);
+  const handleAlbumClick = (e) => {
+    // Only navigate if clicking on the card, not the button
+    if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+      if (album.artist_id) {
+        navigate(`/store/${album.artist_id}`);
+      }
+    }
+  };
+  
+  const handleButtonClick = (e) => {
+    e.stopPropagation();
+    if (isStripeEnabled) {
+      // Add to cart when Stripe is enabled
+      const cartItem = {
+        type: album.album_type === 'digital' ? 'Digital Album' : album.album_type === 'vinyl' ? 'Vinyl Record' : 'Album',
+        title: album.title || 'Untitled Album',
+        price: formatPrice(album.album_pricing),
+        img: album.cover_url || 'https://placehold.co/265x265',
+        album_type: album.album_type
+      };
+      addToCart(cartItem);
+    }  else {
+      // Use purchaseLink when Stripe is disabled
+      if (!purchaseLink) {
+        e.preventDefault();
+        setShowModal(true);
+      }
     }
   };
 
@@ -22,6 +56,7 @@ function AlbumCard({ album }) {
       onClick={handleAlbumClick}
       className="group relative bg-gradient-to-br from-[#1d1e26] to-[#16171d] rounded-2xl shadow-2xl p-6 flex flex-col items-center w-full max-w-xs min-w-[240px] hover:scale-105 transition-all duration-300 border border-[#2a2b35] hover:border-[#aa2a46]/50 overflow-hidden cursor-pointer"
     >
+      <NotAvailableModal isOpen={showModal} onClose={() => setShowModal(false)} />
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#aa2a46]/0 to-[#aa2a46]/0 group-hover:from-[#aa2a46]/5 group-hover:to-[#aa2a46]/10 transition-all duration-500 rounded-2xl"></div>
       
@@ -83,12 +118,26 @@ function AlbumCard({ album }) {
             <div className="text-[#aa2a46] text-2xl font-bold">
               {formatPrice(album.album_pricing)}
             </div>
-            <button 
-              className="w-full bg-[#aa2a46] hover:bg-[#8a1f36] text-[#fffced] font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
-            >
-              <span className="i-lucide-shopping-bag text-sm" />
-              Purchase Album
-            </button>
+            {isStripeEnabled ? (
+              <button 
+                onClick={handleButtonClick}
+                className="w-full bg-[#aa2a46] hover:bg-[#8a1f36] text-[#fffced] font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              >
+                <span className="i-lucide-shopping-cart text-sm" />
+                Add to Cart
+              </button>
+            ) : (
+              <a 
+                href={purchaseLink || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={handleButtonClick}
+                className="w-full bg-[#aa2a46] hover:bg-[#8a1f36] text-[#fffced] font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              >
+                <span className="i-lucide-shopping-bag text-sm" />
+                Purchase Album
+              </a>
+            )}
           </div>
         </div>
       </div>

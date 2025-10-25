@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useFeatures } from '../../context/FeaturesContext';
 import { auth } from '../../firebase';
 import toast from 'react-hot-toast';
 
 const AdminSettings = () => {
   const { updateTheme } = useTheme();
+  const { refreshFeatures } = useFeatures();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -83,6 +85,9 @@ const AdminSettings = () => {
           logo_url: updatedSettings.logo_url
         });
         
+        // Refresh features to update feature toggles across the app
+        refreshFeatures();
+        
         toast.success('Settings saved successfully!');
       } else {
         toast.error('Failed to save settings');
@@ -145,6 +150,7 @@ const AdminSettings = () => {
       enable_user_accounts: true,
       enable_promotional_tracks: true,
       enable_promotional_videos: true,
+      enable_stripe: true,
       hero_title: 'Stream & Discover Soul Felt Music',
       hero_subtitle: 'Play samples, discover new artists, and purchase your favorite tracks and albums.',
       featured_section_title: 'Featured Artists',
@@ -496,7 +502,8 @@ const AdminSettings = () => {
                   { key: 'enable_cart', label: 'Shopping Cart', desc: 'Cart functionality' },
                   { key: 'enable_user_accounts', label: 'User Accounts', desc: 'User registration/login' },
                   { key: 'enable_promotional_tracks', label: 'Promotional Tracks', desc: 'Show promo tracks' },
-                  { key: 'enable_promotional_videos', label: 'Promotional Videos', desc: 'Show promo videos' }
+                  { key: 'enable_promotional_videos', label: 'Promotional Videos', desc: 'Show promo videos' },
+                  { key: 'enable_stripe', label: 'Stripe Payments', desc: 'Enable Stripe checkout' }
                 ].map(feature => (
                   <div key={feature.key} className="flex items-center justify-between p-4 bg-background rounded-lg">
                     <div className="flex-1">
