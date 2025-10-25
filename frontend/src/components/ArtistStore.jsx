@@ -480,6 +480,21 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
 
   const isStripeEnabled = isEnabled("enable_stripe");
 
+  // Get artist data for background image (only for individual artist stores)
+  const artistData = artistId && dbSnapshot?.artists?.records
+    ? dbSnapshot.artists.records.find(artist => artist.id === parseInt(artistId))
+    : null;
+  const artistImageUrl = artistData?.image_url || null;
+  
+  // Debug: Log artist image URL
+  React.useEffect(() => {
+    if (artistId) {
+      console.log('Artist ID:', artistId);
+      console.log('Artist Data:', artistData);
+      console.log('Artist Image URL:', artistImageUrl);
+    }
+  }, [artistId, artistData, artistImageUrl]);
+
   // Use search results if available, otherwise use full data
   const sourceAlbums = searchResults
     ? searchResults.albums
@@ -706,17 +721,59 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
     return "MerchCardDiv w-full flex flex-wrap justify-center items-stretch gap-8 lg:grid lg:grid-cols-4 xl:grid xl:grid-cols-4 ";
   };
 
+  // Optimize background image URL for performance
+  const getOptimizedImageUrl = (url) => {
+    if (!url) return null;
+    
+    // If it's a Cloudinary URL, add optimization parameters
+    if (url.includes('cloudinary.com')) {
+      // Insert transformation parameters before the upload path
+      const optimized = url.replace(
+        '/upload/',
+        '/upload/f_auto,q_auto,w_1920,/'
+      );
+      return optimized;
+    }
+    
+    return url;
+  };
+
+  const optimizedBackgroundUrl = getOptimizedImageUrl(artistImageUrl);
+
   return (
     <>
-      <div className="w-full bg-[#1a1b22] flex flex-col items-center">
-        <ArtistStoreNav
-          storeName={artistId ? `${artistName} Store` : "Luna Starlight Store"}
-          cartCount={cart.length}
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-        <div className="w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
+      <div className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center relative overflow-hidden">
+        {/* Artist Background Image - Only visible on individual artist pages */}
+        {optimizedBackgroundUrl && (
+          <div 
+            className="fixed inset-0 opacity-60 pointer-events-none z-0"
+            style={{
+              backgroundImage: `url(${optimizedBackgroundUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
+            }}
+          >
+            {/* Multi-layer gradient overlays for modern effect */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1a1b22]/80 via-[#1a1b22]/50 to-[#1a1b22]/80"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1a1b22]/70 via-transparent to-[#1a1b22]/70"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1b22]/70 via-transparent to-transparent"></div>
+          </div>
+        )}
+        
+        {/* Content layer with relative positioning */}
+        <div className="relative z-10 w-full">
+          <ArtistStoreNav
+            storeName={artistId ? `${artistName} Store` : "Luna Starlight Store"}
+            cartCount={cart.length}
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+        
+        <div className="relative z-10 w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
           <ArtistStoreHeader
             title={
               artistId

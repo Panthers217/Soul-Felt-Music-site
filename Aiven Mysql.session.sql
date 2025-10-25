@@ -1,4 +1,6 @@
-
-
-
-UPDATE videos SET activate = 1;
+ALTER TABLE artists
+ADD COLUMN spotify_url VARCHAR(255),
+ADD COLUMN instagram_url VARCHAR(255),
+ADD COLUMN facebook_url VARCHAR(255),
+ADD COLUMN youtube_url VARCHAR(255),
+ADD COLUMN twitter_url VARCHAR(255);
