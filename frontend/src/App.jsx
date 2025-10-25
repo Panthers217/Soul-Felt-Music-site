@@ -20,6 +20,8 @@ import ArtistPage from "./pages/ArtistPage"; // Assuming you have this page
 import ResponsiveNavbar from "./components/ResponsiveNavbar";
 import ArtistOverview from "./components/ArtistOverview";
 import ArtistStore from "./components/ArtistStore";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
 import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
@@ -84,6 +86,8 @@ function App() {
             {/* <Route path="/store" element={<Store />} /> */}
             <Route path="/store" element={<ArtistStore />} />
             <Route path="/store/:artistId" element={<ArtistStoreWrapper />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/music" element={<Music />} />
             <Route path="/artists" element={<ArtistPage />} />
             <Route path="/news" element={<News />} />

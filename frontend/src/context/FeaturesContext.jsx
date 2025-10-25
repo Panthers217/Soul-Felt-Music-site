@@ -19,19 +19,26 @@ export const FeaturesProvider = ({ children }) => {
     enable_cart: true,
     enable_user_accounts: true,
     enable_promotional_tracks: true,
-    enable_promotional_videos: true
+    enable_promotional_videos: true,
+    enable_stripe: true
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFeatures();
   }, []);
+  
+  // Debug: Log when features state changes
+  useEffect(() => {
+    console.log('Features state updated:', features);
+  }, [features]);
 
   const fetchFeatures = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/settings/features`);
       if (response.ok) {
         const data = await response.json();
+        console.log('Features fetched:', data);
         setFeatures(data);
       }
     } catch (error) {
@@ -43,11 +50,17 @@ export const FeaturesProvider = ({ children }) => {
   };
 
   const isEnabled = (featureName) => {
-    return features[featureName] ?? true; // Default to true if not found
+    const enabled = features[featureName] ?? true; // Default to true if not found
+    console.log(`isEnabled(${featureName}):`, enabled, 'from features:', features);
+    return enabled;
+  };
+  
+  const refreshFeatures = () => {
+    fetchFeatures();
   };
 
   return (
-    <FeaturesContext.Provider value={{ features, isEnabled, loading }}>
+    <FeaturesContext.Provider value={{ features, isEnabled, loading, refreshFeatures }}>
       {children}
     </FeaturesContext.Provider>
   );

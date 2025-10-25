@@ -1,2 +1,4 @@
 
-ALTER TABLE albums ADD COLUMN purchase_link VARCHAR(255);
+
+
+UPDATE videos SET activate = 1;
