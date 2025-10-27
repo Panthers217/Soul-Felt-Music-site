@@ -7,9 +7,94 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Contact = () => {
+    
+  const [contactInfo, setContactInfo] = useState({
+    contact_email: 'hello@soulfeltmusic.com',
+    contact_phone: '+1 (555) 123-4567',
+    contact_address: '123 Music Row, Nashville, TN 37203, United States',
+    office_hours_weekday: '9:00 AM - 6:00 PM',
+    office_hours_saturday: '10:00 AM - 4:00 PM',
+    office_hours_sunday: 'Closed',
+    office_hours_timezone: 'EST'
+  });
+
+  // Form state
+  const [activeTab, setActiveTab] = useState('general');
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+
+  // Fetch contact info from API
+  useEffect(() => {
+    async function fetchContactInfo() {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings/contact`);
+        setContactInfo(response.data);
+      } catch (err) {
+        console.error('Error fetching contact info:', err);
+        // Keep default values if fetch fails
+      }
+    }
+    
+    fetchContactInfo();
+  }, []);
+
+  // Handle form changes
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    // Clear status when user types
+    if (submitStatus.message) {
+      setSubmitStatus({ type: '', message: '' });
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSubmitStatus({ type: '', message: '' });
+
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/contact/submit`, {
+        name: form.name,
+        email: form.email,
+        subject: form.subject,
+        message: form.message,
+        inquiry_type: activeTab
+      });
+
+      setSubmitStatus({ 
+        type: 'success', 
+        message: 'Message sent successfully! We\'ll get back to you soon.' 
+      });
+      // Reset form
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus({ 
+        type: 'error', 
+        message: error.response?.data?.error || 'Failed to send message. Please try again.' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Parse address into array of lines
+  const getAddressLines = () => {
+    if (!contactInfo.contact_address) return [];
+    return contactInfo.contact_address.split(',').map(line => line.trim());
+  };
+
+  // Parse email into array (could be multiple emails separated by comma or newline)
+  const getEmails = () => {
+    if (!contactInfo.contact_email) return [];
+    return contactInfo.contact_email.split(/[,\n]/).map(email => email.trim()).filter(Boolean);
+  };
 
 // Inquiry tab options
 const inquiryTabs = [
@@ -37,44 +122,94 @@ function ContactMobile() {
                         <div className="relative left-0  w-full flex flex-col gap-12">
                             <div className="w-full px-6 pt-6 pb-7 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-7">
                                 <div className="w-full pb-1 border border-white/10 rounded flex justify-center gap-4">
-                                    <div className="px-5 pt-1 pb-5 border border-[#aa2a46] rounded flex flex-col items-start">
-                                        <div className="w-14 text-center text-[#aa2a46] text-sm font-medium font-['Public_Sans'] leading-snug">General Inquiry</div>
-                                    </div>
-                                    <div className="pl-3 pr-3 pt-1 pb-5 border border-transparent rounded flex flex-col items-start">
-                                        <div className="w-20 text-center text-white/60 text-sm font-medium font-['Public_Sans'] leading-snug">Artist Submissions</div>
-                                    </div>
-                                    <div className="pl-4 pr-4 pt-1 pb-5 border border-transparent rounded flex flex-col items-start">
-                                        <div className="w-12 text-center text-white/60 text-sm font-medium font-['Public_Sans'] leading-snug">Press & Media</div>
-                                    </div>
+                                    {inquiryTabs.map(tab => (
+                                        <button
+                                            key={tab.value}
+                                            className={`px-5 pt-1 pb-5 border rounded flex flex-col items-start ${
+                                                activeTab === tab.value 
+                                                    ? 'border-[#aa2a46]' 
+                                                    : 'border-transparent'
+                                            }`}
+                                            onClick={() => setActiveTab(tab.value)}
+                                        >
+                                            <div className={`text-center text-sm font-medium font-['Public_Sans'] leading-snug ${
+                                                activeTab === tab.value 
+                                                    ? 'text-[#aa2a46]' 
+                                                    : 'text-white/60'
+                                            }`}>{tab.label}</div>
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="w-full flex flex-col gap-6">
+                                <form onSubmit={handleSubmit} className="w-full flex flex-col gap-6">
                                     <div className="w-full flex flex-col gap-4">
                                         <div className="w-full max-w-[310px] h-16 relative">
-                                            <div className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10" />
-                                            <div className="absolute left-4 top-9 text-black text-sm font-normal font-['Public_Sans'] leading-tight">Enter your full name</div>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={form.name}
+                                                onChange={handleChange}
+                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                                placeholder="Enter your full name"
+                                                required
+                                            />
                                             <div className="absolute left-0 top-0 text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">Full Name *</div>
                                         </div>
                                         <div className="w-full max-w-[310px] h-16 relative">
-                                            <div className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10" />
-                                            <div className="absolute left-4 top-9 text-black text-sm font-normal font-['Public_Sans'] leading-tight">Enter your email</div>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={form.email}
+                                                onChange={handleChange}
+                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                                placeholder="Enter your email"
+                                                required
+                                            />
                                             <div className="absolute left-0 top-0 text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">Email Address *</div>
                                         </div>
                                     </div>
                                     <div className="w-full max-w-[310px] h-16 relative">
-                                        <div className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10" />
-                                        <div className="absolute left-4 top-9 text-black text-sm font-normal font-['Public_Sans'] leading-tight">What's this about?</div>
+                                        <input
+                                            type="text"
+                                            name="subject"
+                                            value={form.subject}
+                                            onChange={handleChange}
+                                            className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                            placeholder="What's this about?"
+                                            required
+                                        />
                                         <div className="absolute left-0 top-0 text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">Subject *</div>
                                     </div>
                                     <div className="w-full flex flex-col gap-2 pb-2">
                                         <div className="text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">Message *</div>
-                                        <div className="w-full max-w-[310px] h-36 bg-[#060200] rounded-md border border-white/10" />
+                                        <textarea
+                                            name="message"
+                                            value={form.message}
+                                            onChange={handleChange}
+                                            className="w-full max-w-[310px] h-36 bg-[#060200] rounded-md border border-white/10 p-3 text-white"
+                                            required
+                                        />
                                     </div>
-                                    <div className="w-full flex justify-center">
-                                        <div className="w-1/2 py-3 bg-[#aa2a46] rounded-md flex flex-col items-center">
-                                            <div className="text-center text-[#fffced] text-sm font-medium font-['Public_Sans'] leading-snug">Send Message</div>
+                                    {submitStatus.message && (
+                                        <div className={`text-center text-sm ${
+                                            submitStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
+                                        }`}>
+                                            {submitStatus.message}
                                         </div>
+                                    )}
+                                    <div className="w-full flex justify-center">
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className={`w-1/2 py-3 bg-[#aa2a46] rounded-md flex flex-col items-center ${
+                                                loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#8a223a]'
+                                            }`}
+                                        >
+                                            <div className="text-center text-[#fffced] text-sm font-medium font-['Public_Sans'] leading-snug">
+                                                {loading ? 'Sending...' : 'Send Message'}
+                                            </div>
+                                        </button>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                             <div className="w-full flex flex-col gap-7 pt-0.5">
                                 <div className="w-full px-5 pt-5 pb-5 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-5">
@@ -86,8 +221,9 @@ function ContactMobile() {
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <div className="text-[#fffced] text-sm font-medium font-['Public_Sans'] leading-snug">Email</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">hello@soulfeltmusic.com</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">press@soulfeltmusic.com</div>
+                                                {getEmails().map((email, idx) => (
+                                                  <div key={idx} className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">{email}</div>
+                                                ))}
                                             </div>
                                         </div>
                                         <div className="w-full flex gap-4 items-start">
@@ -96,7 +232,7 @@ function ContactMobile() {
                                             </div>
                                             <div className="flex flex-col gap-0.5">
                                                 <div className="text-[#fffced] text-sm font-medium font-['Public_Sans'] leading-snug">Phone</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">+1 (555) 123-4567</div>
+                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">{contactInfo.contact_phone}</div>
                                                 <div className="text-white/50 text-[0.7rem] font-normal font-['Public_Sans'] leading-none">Mon-Fri, 9AM-6PM EST</div>
                                             </div>
                                         </div>
@@ -107,9 +243,9 @@ function ContactMobile() {
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <div className="text-[#fffced] text-sm font-medium font-['Public_Sans'] leading-snug">Address</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">123 Music Row</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">Nashville, TN 37203</div>
-                                                <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">United States</div>
+                                                {getAddressLines().map((line, idx) => (
+                                                  <div key={idx} className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">{line}</div>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -119,18 +255,18 @@ function ContactMobile() {
                                     <div className="w-full flex flex-col gap-2">
                                         <div className="flex justify-between items-start pb-1">
                                             <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">Monday - Friday</div>
-                                            <div className="text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">9:00 AM - 6:00 PM</div>
+                                            <div className="text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">{contactInfo.office_hours_weekday}</div>
                                         </div>
                                         <div className="flex justify-between items-start pb-1">
                                             <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">Saturday</div>
-                                            <div className="text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">10:00 AM - 4:00 PM</div>
+                                            <div className="text-[#fffced] text-xs font-medium font-['Public_Sans'] leading-5">{contactInfo.office_hours_saturday}</div>
                                         </div>
                                         <div className="flex justify-between items-start pb-1">
                                             <div className="text-white/70 text-xs font-normal font-['Public_Sans'] leading-5">Sunday</div>
-                                            <div className="text-white/50 text-xs font-normal font-['Public_Sans'] leading-5">Closed</div>
+                                            <div className="text-white/50 text-xs font-normal font-['Public_Sans'] leading-5">{contactInfo.office_hours_sunday}</div>
                                         </div>
                                         <div className="w-full pt-4 border border-white/10 rounded flex flex-col items-start">
-                                            <div className="text-white/60 text-[0.7rem] font-normal font-['Public_Sans'] leading-none">All times are Eastern Standard Time (EST)</div>
+                                            <div className="text-white/60 text-[0.7rem] font-normal font-['Public_Sans'] leading-none">All times are {contactInfo.office_hours_timezone}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -161,19 +297,6 @@ function ContactMobile() {
 }
 
 function ContactTablet() {
-        // Interactive state
-        const [activeTab, setActiveTab] = useState('general');
-        const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
-        const [submitted, setSubmitted] = useState(false);
-
-        function handleTab(tab) { setActiveTab(tab); }
-        function handleChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
-        function handleSubmit(e) {
-            e.preventDefault();
-            setSubmitted(true);
-            setTimeout(() => setSubmitted(false), 2000);
-        }
-
         return (
             <div className="w-full min-h-screen bg-black flex flex-col items-center justify-start overflow-hidden">
                 <div className="w-full bg-white flex flex-col items-center justify-start overflow-hidden">
@@ -190,12 +313,12 @@ function ContactTablet() {
                                     {/* Contact Form */}
                                     <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-12 flex flex-col gap-12">
                                         {/* Tabs */}
-                                        <div className="flex flex-row gap-6 pb-2 border-b border-white/10">
+                                        <div className="flex flex-row gap-4 pb-1 border-b border-white/10">
                                             {inquiryTabs.map(tab => (
                                                 <button
                                                     key={tab.value}
-                                                    className={`px-3 pb-7 text-2xl font-medium font-['Public_Sans'] transition border-b-2 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46]'}`}
-                                                    onClick={() => handleTab(tab.value)}
+                                                    className={`px-2 pb-5 text-lg font-medium font-['Public_Sans'] transition border-b-2 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46]'}`}
+                                                    onClick={() => setActiveTab(tab.value)}
                                                 >{tab.label}</button>
                                             ))}
                                         </div>
@@ -219,8 +342,16 @@ function ContactTablet() {
                                                 <label className="block text-[#fffced] text-xl font-medium font-['Public_Sans']">Message *</label>
                                                 <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[12rem] bg-[#060200] rounded-md border border-white/10 text-black text-xl font-normal font-['Public_Sans'] px-6 py-3" required />
                                             </div>
-                                            <button type="submit" className="w-full py-6 bg-[#aa2a46] rounded-md text-[#fffced] text-2xl font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition">Send Message</button>
-                                            {submitted && <div className="text-center text-[#aa2a46] mt-2">Message sent! We'll get back to you soon.</div>}
+                                            <button type="submit" className="w-full py-6 bg-[#aa2a46] rounded-md text-[#fffced] text-2xl font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition" disabled={loading}>
+                                                {loading ? 'Sending...' : 'Send Message'}
+                                            </button>
+                                            {submitStatus.message && (
+                                                <div className={`text-center text-lg mt-2 ${
+                                                    submitStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
+                                                }`}>
+                                                    {submitStatus.message}
+                                                </div>
+                                            )}
                                         </form>
                                     </div>
                                     {/* Contact Details */}
@@ -237,8 +368,9 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-2xl font-medium font-['Public_Sans']">Email</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">hello@soulfeltmusic.com</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">press@soulfeltmusic.com</div>
+                                                        {getEmails().map((email, idx) => (
+                                                          <div key={idx} className="text-white/70 text-xl font-normal font-['Public_Sans']">{email}</div>
+                                                        ))}
                                                     </div>
                                                 </div>
                                                 {/* Phone */}
@@ -249,7 +381,7 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-2xl font-medium font-['Public_Sans']">Phone</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">+1 (555) 123-4567</div>
+                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">{contactInfo.contact_phone}</div>
                                                         <div className="text-white/50 text-lg font-normal font-['Public_Sans']">Mon-Fri, 9AM-6PM EST</div>
                                                     </div>
                                                 </div>
@@ -261,9 +393,9 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-2xl font-medium font-['Public_Sans']">Address</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">123 Music Row</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">Nashville, TN 37203</div>
-                                                        <div className="text-white/70 text-xl font-normal font-['Public_Sans']">United States</div>
+                                                        {getAddressLines().map((line, idx) => (
+                                                          <div key={idx} className="text-white/70 text-xl font-normal font-['Public_Sans']">{line}</div>
+                                                        ))}
                                                     </div>
                                                 </div>
                                             </div>
@@ -274,18 +406,18 @@ function ContactTablet() {
                                             <div className="flex flex-col gap-3">
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-xl font-normal font-['Public_Sans']">Monday - Friday</span>
-                                                    <span className="text-[#fffced] text-xl font-medium font-['Public_Sans']">9:00 AM - 6:00 PM</span>
+                                                    <span className="text-[#fffced] text-xl font-medium font-['Public_Sans']">{contactInfo.office_hours_weekday}</span>
                                                 </div>
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-xl font-normal font-['Public_Sans']">Saturday</span>
-                                                    <span className="text-[#fffced] text-xl font-medium font-['Public_Sans']">10:00 AM - 4:00 PM</span>
+                                                    <span className="text-[#fffced] text-xl font-medium font-['Public_Sans']">{contactInfo.office_hours_saturday}</span>
                                                 </div>
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-xl font-normal font-['Public_Sans']">Sunday</span>
-                                                    <span className="text-white/50 text-xl font-normal font-['Public_Sans']">Closed</span>
+                                                    <span className="text-white/50 text-xl font-normal font-['Public_Sans']">{contactInfo.office_hours_sunday}</span>
                                                 </div>
                                                 <div className="pt-6 border-t border-white/10">
-                                                    <span className="text-white/60 text-lg font-normal font-['Public_Sans']">All times are Eastern Standard Time (EST)</span>
+                                                    <span className="text-white/60 text-lg font-normal font-['Public_Sans']">All times are {contactInfo.office_hours_timezone}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -336,31 +468,86 @@ function ContactTablet() {
                                     <div className="bg-[#1d1e26] rounded-lg shadow-lg p-[2vw] flex flex-col gap-6 min-w-[32vw] max-w-[40vw]">
                                         {/* Tabs */}
                                         <div className="flex flex-row gap-3 pb-1 border-b border-white/10">
-                                            <div className="px-2 pb-4 border-b-2 border-[#aa2a46] text-[#aa2a46] text-base font-medium font-['Public_Sans']">General Inquiry</div>
-                                            <div className="px-2 pb-4 text-white/60 text-base font-medium font-['Public_Sans']">Artist Submissions</div>
-                                            <div className="px-2 pb-4 text-white/60 text-base font-medium font-['Public_Sans']">Press & Media</div>
+                                            {inquiryTabs.map(tab => (
+                                                <button
+                                                    key={tab.value}
+                                                    className={`px-2 pb-4 text-base font-medium font-['Public_Sans'] border-b-2 ${
+                                                        activeTab === tab.value 
+                                                            ? 'border-[#aa2a46] text-[#aa2a46]' 
+                                                            : 'border-transparent text-white/60 hover:text-[#aa2a46]'
+                                                    }`}
+                                                    onClick={() => setActiveTab(tab.value)}
+                                                >
+                                                    {tab.label}
+                                                </button>
+                                            ))}
                                         </div>
                                         {/* Form Fields */}
-                                        <form className="flex flex-col gap-5">
+                                        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                                             <div className="flex flex-row gap-3">
                                                 <div className="relative w-1/2">
                                                     <label className="block text-[#fffced] text-sm font-medium font-['Public_Sans'] mb-1">Full Name *</label>
-                                                    <input type="text" placeholder="Enter your full name" className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-black text-base font-normal font-['Public_Sans'] px-3" />
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={form.name}
+                                                        onChange={handleChange}
+                                                        placeholder="Enter your full name"
+                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                        required
+                                                    />
                                                 </div>
                                                 <div className="relative w-1/2">
                                                     <label className="block text-[#fffced] text-sm font-medium font-['Public_Sans'] mb-1">Email Address *</label>
-                                                    <input type="email" placeholder="Enter your email" className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-black text-base font-normal font-['Public_Sans'] px-3" />
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        value={form.email}
+                                                        onChange={handleChange}
+                                                        placeholder="Enter your email"
+                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                        required
+                                                    />
                                                 </div>
                                             </div>
                                             <div className="relative w-full">
                                                 <label className="block text-[#fffced] text-sm font-medium font-['Public_Sans'] mb-1">Subject *</label>
-                                                <input type="text" placeholder="What's this about?" className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-black text-base font-normal font-['Public_Sans'] px-3" />
+                                                <input
+                                                    type="text"
+                                                    name="subject"
+                                                    value={form.subject}
+                                                    onChange={handleChange}
+                                                    placeholder="What's this about?"
+                                                    className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                    required
+                                                />
                                             </div>
                                             <div className="flex flex-col gap-2">
                                                 <label className="block text-[#fffced] text-sm font-medium font-['Public_Sans']">Message *</label>
-                                                <textarea className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-black text-base font-normal font-['Public_Sans'] px-3 py-2" />
+                                                <textarea
+                                                    name="message"
+                                                    value={form.message}
+                                                    onChange={handleChange}
+                                                    className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3 py-2"
+                                                    required
+                                                />
                                             </div>
-                                            <button type="submit" className="w-full py-3 bg-[#aa2a46] rounded-md text-[#fffced] text-base font-medium font-['Public_Sans']">Send Message</button>
+                                            {submitStatus.message && (
+                                                <div className={`text-center text-sm ${
+                                                    submitStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
+                                                }`}>
+                                                    {submitStatus.message}
+                                                </div>
+                                            )}
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className={`w-full py-3 bg-[#aa2a46] rounded-md text-[#fffced] text-base font-medium font-['Public_Sans'] ${
+                                                    loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#8a223a]'
+                                                }`}
+                                            >
+                                                {loading ? 'Sending...' : 'Send Message'}
+                                            </button>
                                         </form>
                                     </div>
                                     {/* Contact Details */}
@@ -377,8 +564,9 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-base font-medium font-['Public_Sans']">Email</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">hello@soulfeltmusic.com</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">press@soulfeltmusic.com</div>
+                                                        {getEmails().map((email, idx) => (
+                                                          <div key={idx} className="text-white/70 text-sm font-normal font-['Public_Sans']">{email}</div>
+                                                        ))}
                                                     </div>
                                                 </div>
                                                 {/* Phone */}
@@ -389,7 +577,7 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-base font-medium font-['Public_Sans']">Phone</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">+1 (555) 123-4567</div>
+                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">{contactInfo.contact_phone}</div>
                                                         <div className="text-white/50 text-xs font-normal font-['Public_Sans']">Mon-Fri, 9AM-6PM EST</div>
                                                     </div>
                                                 </div>
@@ -401,9 +589,9 @@ function ContactTablet() {
                                                     </div>
                                                     <div>
                                                         <div className="text-[#fffced] text-base font-medium font-['Public_Sans']">Address</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">123 Music Row</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">Nashville, TN 37203</div>
-                                                        <div className="text-white/70 text-sm font-normal font-['Public_Sans']">United States</div>
+                                                        {getAddressLines().map((line, idx) => (
+                                                          <div key={idx} className="text-white/70 text-sm font-normal font-['Public_Sans']">{line}</div>
+                                                        ))}
                                                     </div>
                                                 </div>
                                             </div>
@@ -414,18 +602,18 @@ function ContactTablet() {
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-sm font-normal font-['Public_Sans']">Monday - Friday</span>
-                                                    <span className="text-[#fffced] text-sm font-medium font-['Public_Sans']">9:00 AM - 6:00 PM</span>
+                                                    <span className="text-[#fffced] text-sm font-medium font-['Public_Sans']">{contactInfo.office_hours_weekday}</span>
                                                 </div>
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-sm font-normal font-['Public_Sans']">Saturday</span>
-                                                    <span className="text-[#fffced] text-sm font-medium font-['Public_Sans']">10:00 AM - 4:00 PM</span>
+                                                    <span className="text-[#fffced] text-sm font-medium font-['Public_Sans']">{contactInfo.office_hours_saturday}</span>
                                                 </div>
                                                 <div className="flex flex-row justify-between">
                                                     <span className="text-white/70 text-sm font-normal font-['Public_Sans']">Sunday</span>
-                                                    <span className="text-white/50 text-sm font-normal font-['Public_Sans']">Closed</span>
+                                                    <span className="text-white/50 text-sm font-normal font-['Public_Sans']">{contactInfo.office_hours_sunday}</span>
                                                 </div>
                                                 <div className="pt-3 border-t border-white/10">
-                                                    <span className="text-white/60 text-xs font-normal font-['Public_Sans']">All times are Eastern Standard Time (EST)</span>
+                                                    <span className="text-white/60 text-xs font-normal font-['Public_Sans']">All times are {contactInfo.office_hours_timezone}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -459,19 +647,6 @@ function ContactTablet() {
     }
 
 function ContactDesktop() {
-    // Interactive state
-    const [activeTab, setActiveTab] = useState('general');
-    const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
-    const [submitted, setSubmitted] = useState(false);
-
-    function handleTab(tab) { setActiveTab(tab); }
-    function handleChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
-    function handleSubmit(e) {
-        e.preventDefault();
-        setSubmitted(true);
-        setTimeout(() => setSubmitted(false), 2000);
-    }
-
     return (
         <div className="w-full min-h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
             <div className="w-full bg-white flex flex-col items-center justify-center gap-6 overflow-hidden">
@@ -517,8 +692,16 @@ function ContactDesktop() {
                                             <label className="block text-[#fffced] text-base font-medium font-['Public_Sans']">Message *</label>
                                             <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-black text-lg font-normal font-['Public_Sans'] px-4 py-2" required />
                                         </div>
-                                        <button type="submit" className="w-full py-3 bg-[#aa2a46] rounded-md text-[#fffced] text-base font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition">Send Message</button>
-                                        {submitted && <div className="text-center text-[#aa2a46] mt-2">Message sent! We'll get back to you soon.</div>}
+                                            <button type="submit" className="w-full py-3 bg-[#aa2a46] rounded-md text-[#fffced] text-base font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition" disabled={loading}>
+                                                {loading ? 'Sending...' : 'Send Message'}
+                                            </button>
+                                            {submitStatus.message && (
+                                                <div className={`text-center text-base mt-2 ${
+                                                    submitStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
+                                                }`}>
+                                                    {submitStatus.message}
+                                                </div>
+                                            )}
                                     </form>
                                 </div>
                                 {/* Contact Details */}
@@ -535,8 +718,9 @@ function ContactDesktop() {
                                                 </div>
                                                 <div>
                                                     <div className="text-[#fffced] text-lg font-medium font-['Public_Sans']">Email</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">hello@soulfeltmusic.com</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">press@soulfeltmusic.com</div>
+                                                    {getEmails().map((email, idx) => (
+                                                      <div key={idx} className="text-white/70 text-base font-normal font-['Public_Sans']">{email}</div>
+                                                    ))}
                                                 </div>
                                             </div>
                                             {/* Phone */}
@@ -547,7 +731,7 @@ function ContactDesktop() {
                                                 </div>
                                                 <div>
                                                     <div className="text-[#fffced] text-lg font-medium font-['Public_Sans']">Phone</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">+1 (555) 123-4567</div>
+                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">{contactInfo.contact_phone}</div>
                                                     <div className="text-white/50 text-sm font-normal font-['Public_Sans']">Mon-Fri, 9AM-6PM EST</div>
                                                 </div>
                                             </div>
@@ -559,9 +743,9 @@ function ContactDesktop() {
                                                 </div>
                                                 <div>
                                                     <div className="text-[#fffced] text-lg font-medium font-['Public_Sans']">Address</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">123 Music Row</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">Nashville, TN 37203</div>
-                                                    <div className="text-white/70 text-base font-normal font-['Public_Sans']">United States</div>
+                                                    {getAddressLines().map((line, idx) => (
+                                                      <div key={idx} className="text-white/70 text-base font-normal font-['Public_Sans']">{line}</div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
@@ -572,18 +756,18 @@ function ContactDesktop() {
                                         <div className="flex flex-col gap-2">
                                             <div className="flex flex-row justify-between">
                                                 <span className="text-white/70 text-base font-normal font-['Public_Sans']">Monday - Friday</span>
-                                                <span className="text-[#fffced] text-base font-medium font-['Public_Sans']">9:00 AM - 6:00 PM</span>
+                                                <span className="text-[#fffced] text-base font-medium font-['Public_Sans']">{contactInfo.office_hours_weekday}</span>
                                             </div>
                                             <div className="flex flex-row justify-between">
                                                 <span className="text-white/70 text-base font-normal font-['Public_Sans']">Saturday</span>
-                                                <span className="text-[#fffced] text-base font-medium font-['Public_Sans']">10:00 AM - 4:00 PM</span>
+                                                <span className="text-[#fffced] text-base font-medium font-['Public_Sans']">{contactInfo.office_hours_saturday}</span>
                                             </div>
                                             <div className="flex flex-row justify-between">
                                                 <span className="text-white/70 text-base font-normal font-['Public_Sans']">Sunday</span>
-                                                <span className="text-white/50 text-base font-normal font-['Public_Sans']">Closed</span>
+                                                <span className="text-white/50 text-base font-normal font-['Public_Sans']">{contactInfo.office_hours_sunday}</span>
                                             </div>
                                             <div className="pt-4 border-t border-white/10">
-                                                <span className="text-white/60 text-sm font-normal font-['Public_Sans']">All times are Eastern Standard Time (EST)</span>
+                                                <span className="text-white/60 text-sm font-normal font-['Public_Sans']">All times are {contactInfo.office_hours_timezone}</span>
                                             </div>
                                         </div>
                                     </div>

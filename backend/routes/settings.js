@@ -5,6 +5,7 @@ import {
   getSettings,
   getTheme,
   getFeatures,
+  getContactInfo,
   updateSettings
 } from '../controllers/admin/settingsController.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 // Public routes (no authentication required)
 router.get('/theme', getTheme);
 router.get('/features', getFeatures);
+router.get('/contact', getContactInfo);
 
 // Admin routes (authentication required)
 router.get('/', requireAdmin, getSettings);

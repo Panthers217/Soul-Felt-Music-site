@@ -11,10 +11,48 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('branding');
+  
+  // Custom time picker state for office hours
+  const [customTimeMode, setCustomTimeMode] = useState({
+    weekday: false,
+    saturday: false,
+    sunday: false
+  });
+  
+  // Time picker states for each day
+  const [weekdayTime, setWeekdayTime] = useState({
+    startHour: '9', startMinute: '00', startPeriod: 'AM',
+    endHour: '6', endMinute: '00', endPeriod: 'PM'
+  });
+  const [saturdayTime, setSaturdayTime] = useState({
+    startHour: '10', startMinute: '00', startPeriod: 'AM',
+    endHour: '4', endMinute: '00', endPeriod: 'PM'
+  });
+  const [sundayTime, setSundayTime] = useState({
+    startHour: '10', startMinute: '00', startPeriod: 'AM',
+    endHour: '2', endMinute: '00', endPeriod: 'PM'
+  });
 
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  // Initialize time picker values when settings load or custom mode is activated
+  useEffect(() => {
+    if (settings) {
+      // Initialize weekday time
+      const weekdayParsed = parseTimeString(settings.office_hours_weekday);
+      if (weekdayParsed) setWeekdayTime(weekdayParsed);
+      
+      // Initialize saturday time
+      const saturdayParsed = parseTimeString(settings.office_hours_saturday);
+      if (saturdayParsed) setSaturdayTime(saturdayParsed);
+      
+      // Initialize sunday time
+      const sundayParsed = parseTimeString(settings.office_hours_sunday);
+      if (sundayParsed) setSundayTime(sundayParsed);
+    }
+  }, [settings?.office_hours_weekday, settings?.office_hours_saturday, settings?.office_hours_sunday]);
 
   const fetchSettings = async () => {
     try {
@@ -117,6 +155,136 @@ const AdminSettings = () => {
     }));
   };
 
+  // Generate hour options (1-12)
+  const generateHours = () => {
+    return Array.from({ length: 12 }, (_, i) => i + 1);
+  };
+
+  // Generate minute options (00, 15, 30, 45)
+  const generateMinutes = () => {
+    return ['00', '15', '30', '45'];
+  };
+
+  // Parse time string to components
+  const parseTimeString = (timeString) => {
+    if (!timeString || timeString === 'Closed' || timeString === '24/7') return null;
+    const match = timeString.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+    if (!match) return null;
+    return {
+      startHour: match[1],
+      startMinute: match[2],
+      startPeriod: match[3],
+      endHour: match[4],
+      endMinute: match[5],
+      endPeriod: match[6]
+    };
+  };
+
+  // Build time string from components
+  const buildTimeString = (startHour, startMinute, startPeriod, endHour, endMinute, endPeriod) => {
+    return `${startHour}:${startMinute} ${startPeriod} - ${endHour}:${endMinute} ${endPeriod}`;
+  };
+
+  // Get the time state and setter for a specific day
+  const getTimeState = (day) => {
+    if (day === 'weekday') return [weekdayTime, setWeekdayTime];
+    if (day === 'saturday') return [saturdayTime, setSaturdayTime];
+    if (day === 'sunday') return [sundayTime, setSundayTime];
+  };
+
+  // Render custom time picker
+  const renderCustomTimePicker = (day, fieldName) => {
+    const [timeState, setTimeState] = getTimeState(day);
+
+    const applyCustomTime = () => {
+      const timeString = buildTimeString(
+        timeState.startHour, timeState.startMinute, timeState.startPeriod,
+        timeState.endHour, timeState.endMinute, timeState.endPeriod
+      );
+      handleInputChange(fieldName, timeString);
+      setCustomTimeMode(prev => ({ ...prev, [day]: false }));
+    };
+
+    return (
+      <div className="bg-card-background p-4 rounded-lg border border-primary/30 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Start Time */}
+          <div>
+            <label className="block text-accent text-sm font-medium mb-2">Start Time</label>
+            <div className="flex gap-2">
+              <select 
+                value={timeState.startHour} 
+                onChange={(e) => setTimeState({ ...timeState, startHour: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                {generateHours().map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
+              <select 
+                value={timeState.startMinute} 
+                onChange={(e) => setTimeState({ ...timeState, startMinute: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                {generateMinutes().map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <select 
+                value={timeState.startPeriod} 
+                onChange={(e) => setTimeState({ ...timeState, startPeriod: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+          {/* End Time */}
+          <div>
+            <label className="block text-accent text-sm font-medium mb-2">End Time</label>
+            <div className="flex gap-2">
+              <select 
+                value={timeState.endHour} 
+                onChange={(e) => setTimeState({ ...timeState, endHour: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                {generateHours().map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
+              <select 
+                value={timeState.endMinute} 
+                onChange={(e) => setTimeState({ ...timeState, endMinute: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                {generateMinutes().map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <select 
+                value={timeState.endPeriod} 
+                onChange={(e) => setTimeState({ ...timeState, endPeriod: e.target.value })} 
+                className="flex-1 px-2 py-2 bg-background text-text-primary border border-primary/50 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={applyCustomTime}
+            className="px-4 py-2 bg-primary text-accent rounded hover:bg-primary/80 transition text-sm font-medium"
+          >
+            Apply
+          </button>
+          <button
+            type="button"
+            onClick={() => setCustomTimeMode(prev => ({ ...prev, [day]: false }))}
+            className="px-4 py-2 bg-background text-text-primary border border-primary/50 rounded hover:bg-background/80 transition text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const handleResetToDefaults = async () => {
     if (!window.confirm('⚠️ Are you sure you want to reset ALL settings to default Soul Felt Music values? This cannot be undone!')) {
       return;
@@ -136,6 +304,10 @@ const AdminSettings = () => {
       contact_email: null,
       contact_phone: null,
       contact_address: null,
+      office_hours_weekday: '9:00 AM - 6:00 PM',
+      office_hours_saturday: '10:00 AM - 4:00 PM',
+      office_hours_sunday: 'Closed',
+      office_hours_timezone: 'EST',
       social_media_links: { twitter: '', instagram: '', facebook: '', youtube: '' },
       cloudinary_cloud_name: 'webprojectimages',
       cloudinary_audio_folder: 'SoulFeltMusic/SoulFeltMusicAudio',
@@ -232,6 +404,7 @@ const AdminSettings = () => {
     { id: 'branding', label: '🎨 Branding', icon: '🎨' },
     { id: 'theme', label: '🌈 Theme Colors', icon: '🌈' },
     { id: 'contact', label: '📞 Contact Info', icon: '📞' },
+    { id: 'email', label: '📧 Email Settings', icon: '📧' },
     { id: 'cloudinary', label: '☁️ Cloudinary', icon: '☁️' },
     { id: 'features', label: '🔧 Features', icon: '🔧' },
     { id: 'homepage', label: '🏠 Homepage', icon: '🏠' },
@@ -408,6 +581,167 @@ const AdminSettings = () => {
               </div>
 
               <div className="border-t border-background pt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">Office Hours</h3>
+                
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Monday - Friday</label>
+                  {!customTimeMode.weekday ? (
+                    <div>
+                      <select
+                        value={settings.office_hours_weekday || ''}
+                        onChange={(e) => {
+                          if (e.target.value === 'custom') {
+                            setCustomTimeMode(prev => ({ ...prev, weekday: true }));
+                          } else {
+                            handleInputChange('office_hours_weekday', e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="Closed">Closed</option>
+                        <option value="8:00 AM - 5:00 PM">8:00 AM - 5:00 PM</option>
+                        <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+                        <option value="9:00 AM - 6:00 PM">9:00 AM - 6:00 PM</option>
+                        <option value="10:00 AM - 6:00 PM">10:00 AM - 6:00 PM</option>
+                        <option value="8:00 AM - 8:00 PM">8:00 AM - 8:00 PM</option>
+                        <option value="9:00 AM - 8:00 PM">9:00 AM - 8:00 PM</option>
+                        <option value="24/7">24/7</option>
+                        {settings.office_hours_weekday && 
+                         !['Closed', '8:00 AM - 5:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '10:00 AM - 6:00 PM', '8:00 AM - 8:00 PM', '9:00 AM - 8:00 PM', '24/7'].includes(settings.office_hours_weekday) && (
+                          <option value={settings.office_hours_weekday}>{settings.office_hours_weekday}</option>
+                        )}
+                        <option value="custom">Custom Time...</option>
+                      </select>
+                      {settings.office_hours_weekday && 
+                       !['Closed', '8:00 AM - 5:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '10:00 AM - 6:00 PM', '8:00 AM - 8:00 PM', '9:00 AM - 8:00 PM', '24/7'].includes(settings.office_hours_weekday) && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomTimeMode(prev => ({ ...prev, weekday: true }))}
+                          className="mt-2 text-sm text-primary hover:underline"
+                        >
+                          Edit custom time
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    renderCustomTimePicker('weekday', 'office_hours_weekday')
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Saturday</label>
+                  {!customTimeMode.saturday ? (
+                    <div>
+                      <select
+                        value={settings.office_hours_saturday || ''}
+                        onChange={(e) => {
+                          if (e.target.value === 'custom') {
+                            setCustomTimeMode(prev => ({ ...prev, saturday: true }));
+                          } else {
+                            handleInputChange('office_hours_saturday', e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="Closed">Closed</option>
+                        <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
+                        <option value="9:00 AM - 1:00 PM">9:00 AM - 1:00 PM</option>
+                        <option value="10:00 AM - 2:00 PM">10:00 AM - 2:00 PM</option>
+                        <option value="10:00 AM - 4:00 PM">10:00 AM - 4:00 PM</option>
+                        <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+                        <option value="9:00 AM - 6:00 PM">9:00 AM - 6:00 PM</option>
+                        <option value="24/7">24/7</option>
+                        {settings.office_hours_saturday && 
+                         !['Closed', '8:00 AM - 12:00 PM', '9:00 AM - 1:00 PM', '10:00 AM - 2:00 PM', '10:00 AM - 4:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '24/7'].includes(settings.office_hours_saturday) && (
+                          <option value={settings.office_hours_saturday}>{settings.office_hours_saturday}</option>
+                        )}
+                        <option value="custom">Custom Time...</option>
+                      </select>
+                      {settings.office_hours_saturday && 
+                       !['Closed', '8:00 AM - 12:00 PM', '9:00 AM - 1:00 PM', '10:00 AM - 2:00 PM', '10:00 AM - 4:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '24/7'].includes(settings.office_hours_saturday) && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomTimeMode(prev => ({ ...prev, saturday: true }))}
+                          className="mt-2 text-sm text-primary hover:underline"
+                        >
+                          Edit custom time
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    renderCustomTimePicker('saturday', 'office_hours_saturday')
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Sunday</label>
+                  {!customTimeMode.sunday ? (
+                    <div>
+                      <select
+                        value={settings.office_hours_sunday || ''}
+                        onChange={(e) => {
+                          if (e.target.value === 'custom') {
+                            setCustomTimeMode(prev => ({ ...prev, sunday: true }));
+                          } else {
+                            handleInputChange('office_hours_sunday', e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="Closed">Closed</option>
+                        <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
+                        <option value="9:00 AM - 1:00 PM">9:00 AM - 1:00 PM</option>
+                        <option value="10:00 AM - 2:00 PM">10:00 AM - 2:00 PM</option>
+                        <option value="10:00 AM - 4:00 PM">10:00 AM - 4:00 PM</option>
+                        <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+                        <option value="9:00 AM - 6:00 PM">9:00 AM - 6:00 PM</option>
+                        <option value="24/7">24/7</option>
+                        {settings.office_hours_sunday && 
+                         !['Closed', '8:00 AM - 12:00 PM', '9:00 AM - 1:00 PM', '10:00 AM - 2:00 PM', '10:00 AM - 4:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '24/7'].includes(settings.office_hours_sunday) && (
+                          <option value={settings.office_hours_sunday}>{settings.office_hours_sunday}</option>
+                        )}
+                        <option value="custom">Custom Time...</option>
+                      </select>
+                      {settings.office_hours_sunday && 
+                       !['Closed', '8:00 AM - 12:00 PM', '9:00 AM - 1:00 PM', '10:00 AM - 2:00 PM', '10:00 AM - 4:00 PM', '9:00 AM - 5:00 PM', '9:00 AM - 6:00 PM', '24/7'].includes(settings.office_hours_sunday) && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomTimeMode(prev => ({ ...prev, sunday: true }))}
+                          className="mt-2 text-sm text-primary hover:underline"
+                        >
+                          Edit custom time
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    renderCustomTimePicker('sunday', 'office_hours_sunday')
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Timezone</label>
+                  <select
+                    value={settings.office_hours_timezone || ''}
+                    onChange={(e) => handleInputChange('office_hours_timezone', e.target.value)}
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="EST">Eastern Standard Time (EST)</option>
+                    <option value="CST">Central Standard Time (CST)</option>
+                    <option value="MST">Mountain Standard Time (MST)</option>
+                    <option value="PST">Pacific Standard Time (PST)</option>
+                    <option value="AKST">Alaska Standard Time (AKST)</option>
+                    <option value="HST">Hawaii Standard Time (HST)</option>
+                    <option value="GMT">Greenwich Mean Time (GMT)</option>
+                    <option value="UTC">Coordinated Universal Time (UTC)</option>
+                    <option value="CET">Central European Time (CET)</option>
+                    <option value="IST">India Standard Time (IST)</option>
+                    <option value="JST">Japan Standard Time (JST)</option>
+                    <option value="AEST">Australian Eastern Standard Time (AEST)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="border-t border-background pt-6">
                 <h3 className="text-xl font-semibold text-accent mb-4">Social Media</h3>
                 
                 {['twitter', 'instagram', 'facebook', 'youtube'].map(platform => (
@@ -422,6 +756,159 @@ const AdminSettings = () => {
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Email Settings Tab */}
+          {activeTab === 'email' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-primary mb-4">Email Configuration</h2>
+              <p className="text-text-secondary mb-6">Configure SMTP settings for contact form submissions</p>
+              
+              <div className="border-t border-background pt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">SMTP Server Settings</h3>
+                
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">SMTP Host</label>
+                  <input
+                    type="text"
+                    value={settings.smtp_host || ''}
+                    onChange={(e) => handleInputChange('smtp_host', e.target.value)}
+                    placeholder="smtp.gmail.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">e.g., smtp.gmail.com, smtp.sendgrid.net</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">SMTP Port</label>
+                  <input
+                    type="number"
+                    value={settings.smtp_port || ''}
+                    onChange={(e) => handleInputChange('smtp_port', parseInt(e.target.value))}
+                    placeholder="587"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Common ports: 587 (TLS), 465 (SSL), 25 (unencrypted)</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={settings.smtp_secure || false}
+                      onChange={(e) => handleInputChange('smtp_secure', e.target.checked)}
+                      className="w-5 h-5 text-primary bg-background border-primary rounded focus:ring-2 focus:ring-primary"
+                    />
+                    <span className="text-accent font-medium">Use SSL/TLS</span>
+                  </label>
+                  <p className="text-sm text-text-secondary mt-1 ml-7">Enable for port 465, disable for port 587</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">SMTP Username</label>
+                  <input
+                    type="text"
+                    value={settings.smtp_user || ''}
+                    onChange={(e) => handleInputChange('smtp_user', e.target.value)}
+                    placeholder="your-email@gmail.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Your email address or SMTP username</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">SMTP Password</label>
+                  <input
+                    type="password"
+                    value={settings.smtp_password || ''}
+                    onChange={(e) => handleInputChange('smtp_password', e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">For Gmail, use an App Password (not your regular password)</p>
+                </div>
+              </div>
+
+              <div className="border-t border-background pt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">Recipient Emails</h3>
+                <p className="text-text-secondary mb-4">Set different email addresses for each inquiry type</p>
+                
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">General Inquiry Recipient</label>
+                  <input
+                    type="email"
+                    value={settings.contact_form_recipient || ''}
+                    onChange={(e) => handleInputChange('contact_form_recipient', e.target.value)}
+                    placeholder="info@soulfeltmusic.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Receives general contact form submissions</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Artist Submission Recipient</label>
+                  <input
+                    type="email"
+                    value={settings.artist_submission_recipient || ''}
+                    onChange={(e) => handleInputChange('artist_submission_recipient', e.target.value)}
+                    placeholder="artists@soulfeltmusic.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Receives artist submission inquiries</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Press & Media Recipient</label>
+                  <input
+                    type="email"
+                    value={settings.press_media_recipient || ''}
+                    onChange={(e) => handleInputChange('press_media_recipient', e.target.value)}
+                    placeholder="press@soulfeltmusic.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Receives press and media inquiries</p>
+                </div>
+              </div>
+
+              <div className="border-t border-background pt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">Email Options</h3>
+                
+                <div className="mb-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={settings.contact_form_auto_reply || false}
+                      onChange={(e) => handleInputChange('contact_form_auto_reply', e.target.checked)}
+                      className="w-5 h-5 text-primary bg-background border-primary rounded focus:ring-2 focus:ring-primary"
+                    />
+                    <span className="text-accent font-medium">Send Auto-Reply to Customers</span>
+                  </label>
+                  <p className="text-sm text-text-secondary mt-1 ml-7">Automatically send a confirmation email to form submitters</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">Email Subject Prefix</label>
+                  <input
+                    type="text"
+                    value={settings.contact_form_subject_prefix || ''}
+                    onChange={(e) => handleInputChange('contact_form_subject_prefix', e.target.value)}
+                    placeholder="[Soul Felt Music]"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">Prefix added to email subjects (e.g., [Soul Felt Music] New Contact Form)</p>
+                </div>
+              </div>
+
+              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mt-6">
+                <h4 className="text-accent font-semibold mb-2">📝 Setup Instructions</h4>
+                <ul className="text-sm text-text-secondary space-y-2 ml-4 list-disc">
+                  <li><strong>Gmail:</strong> Enable 2FA, then create an App Password at myaccount.google.com/apppasswords</li>
+                  <li><strong>SendGrid:</strong> Use "apikey" as username and your API key as password</li>
+                  <li><strong>Other providers:</strong> Check your email provider's SMTP documentation</li>
+                  <li>Test your settings by submitting a contact form after saving</li>
+                </ul>
               </div>
             </div>
           )}

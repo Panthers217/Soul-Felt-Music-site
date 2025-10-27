@@ -16,10 +16,14 @@ CREATE TABLE IF NOT EXISTS website_settings (
   text_primary VARCHAR(7) DEFAULT '#fffced',
   text_secondary VARCHAR(7) DEFAULT '#ffffff',
   
-    -- Contact Info
+  -- Contact Info
   contact_email VARCHAR(255),
   contact_phone VARCHAR(50),
   contact_address TEXT,
+  office_hours_weekday VARCHAR(100) DEFAULT '9:00 AM - 6:00 PM',
+  office_hours_saturday VARCHAR(100) DEFAULT '10:00 AM - 4:00 PM',
+  office_hours_sunday VARCHAR(100) DEFAULT 'Closed',
+  office_hours_timezone VARCHAR(50) DEFAULT 'EST',
   social_media_links JSON, -- {"twitter": "", "instagram": "", "facebook": "", "youtube": ""}
   
   -- Cloudinary Configuration
