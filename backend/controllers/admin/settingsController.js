@@ -72,6 +72,46 @@ export async function getTheme(req, res) {
 }
 
 /**
+ * Get contact information (public endpoint)
+ * @route GET /api/settings/contact
+ */
+export async function getContactInfo(req, res) {
+  try {
+    const [settings] = await pool.query(
+      `SELECT 
+        contact_email,
+        contact_phone,
+        contact_address,
+        office_hours_weekday,
+        office_hours_saturday,
+        office_hours_sunday,
+        office_hours_timezone
+      FROM website_settings 
+      ORDER BY id DESC 
+      LIMIT 1`
+    );
+    
+    if (settings.length === 0) {
+      // Return defaults
+      return res.json({
+        contact_email: 'hello@soulfeltmusic.com',
+        contact_phone: '+1 (555) 123-4567',
+        contact_address: '123 Music Row, Nashville, TN 37203, United States',
+        office_hours_weekday: '9:00 AM - 6:00 PM',
+        office_hours_saturday: '10:00 AM - 4:00 PM',
+        office_hours_sunday: 'Closed',
+        office_hours_timezone: 'EST'
+      });
+    }
+    
+    res.json(settings[0]);
+  } catch (error) {
+    console.error('Error fetching contact info:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
  * Get feature toggles (public endpoint)
  * @route GET /api/settings/features
  */
@@ -141,6 +181,20 @@ export async function updateSettings(req, res) {
       contact_email,
       contact_phone,
       contact_address,
+      office_hours_weekday,
+      office_hours_saturday,
+      office_hours_sunday,
+      office_hours_timezone,
+      smtp_host,
+      smtp_port,
+      smtp_secure,
+      smtp_user,
+      smtp_password,
+      contact_form_recipient,
+      artist_submission_recipient,
+      press_media_recipient,
+      contact_form_auto_reply,
+      contact_form_subject_prefix,
       social_media_links,
       cloudinary_cloud_name,
       cloudinary_audio_folder,
@@ -186,6 +240,20 @@ export async function updateSettings(req, res) {
     if (contact_email !== undefined) { updates.push('contact_email = ?'); values.push(contact_email); }
     if (contact_phone !== undefined) { updates.push('contact_phone = ?'); values.push(contact_phone); }
     if (contact_address !== undefined) { updates.push('contact_address = ?'); values.push(contact_address); }
+    if (office_hours_weekday !== undefined) { updates.push('office_hours_weekday = ?'); values.push(office_hours_weekday); }
+    if (office_hours_saturday !== undefined) { updates.push('office_hours_saturday = ?'); values.push(office_hours_saturday); }
+    if (office_hours_sunday !== undefined) { updates.push('office_hours_sunday = ?'); values.push(office_hours_sunday); }
+    if (office_hours_timezone !== undefined) { updates.push('office_hours_timezone = ?'); values.push(office_hours_timezone); }
+    if (smtp_host !== undefined) { updates.push('smtp_host = ?'); values.push(smtp_host); }
+    if (smtp_port !== undefined) { updates.push('smtp_port = ?'); values.push(smtp_port); }
+    if (smtp_secure !== undefined) { updates.push('smtp_secure = ?'); values.push(smtp_secure); }
+    if (smtp_user !== undefined) { updates.push('smtp_user = ?'); values.push(smtp_user); }
+    if (smtp_password !== undefined) { updates.push('smtp_password = ?'); values.push(smtp_password); }
+    if (contact_form_recipient !== undefined) { updates.push('contact_form_recipient = ?'); values.push(contact_form_recipient); }
+    if (artist_submission_recipient !== undefined) { updates.push('artist_submission_recipient = ?'); values.push(artist_submission_recipient); }
+    if (press_media_recipient !== undefined) { updates.push('press_media_recipient = ?'); values.push(press_media_recipient); }
+    if (contact_form_auto_reply !== undefined) { updates.push('contact_form_auto_reply = ?'); values.push(contact_form_auto_reply); }
+    if (contact_form_subject_prefix !== undefined) { updates.push('contact_form_subject_prefix = ?'); values.push(contact_form_subject_prefix); }
     if (social_media_links !== undefined) { 
       updates.push('social_media_links = ?'); 
       values.push(JSON.stringify(social_media_links)); 
