@@ -237,6 +237,14 @@ const ArtistPageComponent = () => {
       rating: artist.rating,
       monthly_listeners: artist.monthly_listeners,
       albums_released: artist.albums_released,
+      // Social media URLs
+      spotify_url: artist.spotify_url,
+      instagram_url: artist.instagram_url,
+      twitter_url: artist.twitter_url,
+      youtube_url: artist.youtube_url,
+      apple_music_url: artist.apple_music_url,
+      tiktok_url: artist.tiktok_url,
+      facebook_url: artist.facebook_url,
     };
   });
   

@@ -15,6 +15,7 @@ import TableSelector from "./adminComponents/TableSelector";
 import ExistingArtist from "./adminComponents/ExistingArtist";
 import StatsScheduleSettings from "./adminComponents/StatsScheduleSettings";
 import AdminSettings from "./adminComponents/AdminSettings";
+import EventManagement from "./adminComponents/EventManagement";
 import AdminSettingsSidebar from "./AdminComponents/AdminSettingsSidebar";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -821,6 +822,7 @@ function AdminDashboard() {
           >
             <option value="upload">Upload New Artist</option>
             <option value="search">Update Existing Records</option>
+            <option value="events">Community Events</option>
             <option value="stats-settings">Stats Schedule Settings</option>
             <option value="website-settings">Website Settings</option>
           </select>
@@ -847,6 +849,7 @@ function AdminDashboard() {
             mode={mode}
           />
         )}
+        {artistMenu === "events" && <EventManagement />}
         {artistMenu === "stats-settings" && <StatsScheduleSettings />}
         {artistMenu === "website-settings" && <AdminSettings />}
       </div>
