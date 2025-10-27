@@ -13,7 +13,13 @@ import {
   insertRecord
 } from '../controllers/admin/adminController.js';
 
-// Middleware to require admin
+import {
+  getAllEventsAdmin,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  toggleEventStatus
+} from '../controllers/eventController.js';
 
 
 
@@ -57,6 +63,11 @@ router.delete('/records/:table/:id', requireAdmin, deleteRecord);
 // POST insert a new record into a table
 router.post('/records/:table/', requireAdmin, upload.any(), insertRecord);
 
-
+// Event management routes (admin only)
+router.get('/events', requireAdmin, getAllEventsAdmin); // Get all events including inactive
+router.post('/events', requireAdmin, upload.any(), createEvent); // Create new event with file upload
+router.put('/events/:id', requireAdmin, upload.any(), updateEvent); // Update event with file upload
+router.delete('/events/:id', requireAdmin, deleteEvent); // Delete event
+router.patch('/events/:id/toggle', requireAdmin, toggleEventStatus); // Toggle active status
 
 export default router;

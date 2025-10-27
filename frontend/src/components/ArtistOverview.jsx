@@ -345,6 +345,20 @@ function ArtistOverview() {
   const artistImageUrl = album?.img || artistPics?.cover_photo?.urls?.regular;
 
   const artistName = album?.name ?? "Unknown Artist";
+  
+  // Extract social media URLs from artist data
+  const socialMedia = {
+    spotify: album?.spotify_url,
+    instagram: album?.instagram_url,
+    twitter: album?.twitter_url,
+    youtube: album?.youtube_url,
+    appleMusic: album?.apple_music_url,
+    tiktok: album?.tiktok_url,
+    facebook: album?.facebook_url
+  };
+  
+  // Check if artist has any social media links
+  const hasSocialMedia = Object.values(socialMedia).some(url => url);
 
   // Extract bio, career_highlights, and influences from the passed artist data
   const artistBio = album?.bio || null;
@@ -500,33 +514,47 @@ function ArtistOverview() {
                   ) : (
                     <>
                       <span className="i-lucide-user-plus text-sm" />
-                      Follow Artist
+                      Follow Artist On Website
                     </>
                   )}
                 </span>
               </button>
             </div>
             {/* Social Media Icons */}
-            <div className="flex items-center gap-3">
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
-                <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
-                <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
-                <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
-                <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
-                <FaApple className="text-white/80 group-hover:text-white" size={18} />
-              </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
-                <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
-              </a>
-            </div>
+            {hasSocialMedia && (
+              <div className="flex items-center gap-3">
+                {socialMedia.spotify && (
+                  <a href={socialMedia.spotify} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
+                    <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
+                  </a>
+                )}
+                {socialMedia.instagram && (
+                  <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
+                    <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
+                  </a>
+                )}
+                {socialMedia.twitter && (
+                  <a href={socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
+                    <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
+                  </a>
+                )}
+                {socialMedia.youtube && (
+                  <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
+                    <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
+                  </a>
+                )}
+                {socialMedia.appleMusic && (
+                  <a href={socialMedia.appleMusic} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
+                    <FaApple className="text-white/80 group-hover:text-white" size={18} />
+                  </a>
+                )}
+                {socialMedia.tiktok && (
+                  <a href={socialMedia.tiktok} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
+                    <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {/* Laptop & desktop: image wraps around info section */}
@@ -599,26 +627,40 @@ function ArtistOverview() {
                 </button>
               </div>
               {/* Social Media Icons */}
-              <div className="flex items-center gap-3">
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
-                  <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
-                  <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
-                  <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
-                  <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
-                  <FaApple className="text-white/80 group-hover:text-white" size={18} />
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
-                  <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
-                </a>
-              </div>
+              {hasSocialMedia && (
+                <div className="flex items-center gap-3">
+                  {socialMedia.spotify && (
+                    <a href={socialMedia.spotify} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/50 transition-all duration-200 hover:scale-110 group" title="Spotify">
+                      <FaSpotify className="text-white/80 group-hover:text-[#1DB954]" size={18} />
+                    </a>
+                  )}
+                  {socialMedia.instagram && (
+                    <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-gradient-to-br hover:from-[#f9ce34]/20 hover:via-[#ee2a7b]/20 hover:to-[#6228d7]/20 border border-white/10 hover:border-[#ee2a7b]/50 transition-all duration-200 hover:scale-110 group" title="Instagram">
+                      <Instagram className="text-white/80 group-hover:text-[#ee2a7b]" size={18} />
+                    </a>
+                  )}
+                  {socialMedia.twitter && (
+                    <a href={socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="X (Twitter)">
+                      <FaXTwitter className="text-white/80 group-hover:text-white" size={18} />
+                    </a>
+                  )}
+                  {socialMedia.youtube && (
+                    <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000]/20 border border-white/10 hover:border-[#FF0000]/50 transition-all duration-200 hover:scale-110 group" title="YouTube">
+                      <Youtube className="text-white/80 group-hover:text-[#FF0000]" size={18} />
+                    </a>
+                  )}
+                  {socialMedia.appleMusic && (
+                    <a href={socialMedia.appleMusic} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-black/20 border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-110 group" title="Apple Music">
+                      <FaApple className="text-white/80 group-hover:text-white" size={18} />
+                    </a>
+                  )}
+                  {socialMedia.tiktok && (
+                    <a href={socialMedia.tiktok} target="_blank" rel="noopener noreferrer" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#00f2ea]/20 border border-white/10 hover:border-[#00f2ea]/50 transition-all duration-200 hover:scale-110 group" title="TikTok">
+                      <FaTiktok className="text-white/80 group-hover:text-[#00f2ea]" size={18} />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
