@@ -25,6 +25,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import SignUp from "./components/SignUp"; // Assuming you have a SignUp component
 import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
+import NewsletterCampaigns from './components/adminComponents/NewsletterCampaigns';
 import ThemeDemo from './components/ThemeDemo';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
@@ -54,6 +55,8 @@ function App() {
   function AdminDashboardRoute() {
     const [isAdminUser, setIsAdminUser] = React.useState(null);
     const [checking, setChecking] = React.useState(true);
+    const location = window.location;
+    
     React.useEffect(() => {
       let mounted = true;
       async function checkAdmin() {
@@ -69,8 +72,15 @@ function App() {
       checkAdmin();
       return () => { mounted = false; };
     }, [user]);
+    
     if (loading || checking || isAdminUser === null) return null;
     if (!user || !isAdminUser) return <Navigate to="/" replace />;
+    
+    // Route to appropriate admin component
+    if (location.pathname === '/admin/newsletter') {
+      return <NewsletterCampaigns />;
+    }
+    
     return <AdminDashboard />;
   }
 
@@ -101,6 +111,7 @@ function App() {
             <Route path="/theme-demo" element={<ThemeDemo />} /> {/* Theme settings demo */}
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
             <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
+            <Route path="/admin/newsletter" element={<AdminDashboardRoute />} /> {/* Protected newsletter campaigns route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>

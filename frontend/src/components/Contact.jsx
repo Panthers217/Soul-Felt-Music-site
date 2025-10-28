@@ -1,33 +1,8 @@
 // src/components/Contact.js
 
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaYoutube,
-  FaLinkedinIn,
-  FaTiktok,
-  FaSpotify,
-  FaSoundcloud,
-  FaDiscord,
-  FaTwitch,
-  FaRedditAlien,
-  FaPinterest,
-  FaSnapchatGhost,
-  FaTelegram,
-  FaWhatsapp,
-  FaGithub,
-  FaBandcamp,
-  FaDeezer,
-  FaApple,
-  FaAmazon,
-  FaPatreon,
-  FaLink,
-} from "react-icons/fa";
-import { SiTidal, SiNapster } from "react-icons/si";
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import SocialMediaLinks from './SocialMediaLinks';
 
 // Inquiry tab options
 const inquiryTabs = [
@@ -48,65 +23,18 @@ const Contact = () => {
     office_hours_timezone: 'EST'
   });
 
-  const [socialMediaLinks, setSocialMediaLinks] = useState([]);
-
-  // Icon mapping for social media platforms
-  const socialMediaIcons = {
-    facebook: FaFacebookF,
-    twitter: FaTwitter,
-    instagram: FaInstagram,
-    youtube: FaYoutube,
-    tiktok: FaTiktok,
-    spotify: FaSpotify,
-    soundcloud: FaSoundcloud,
-    bandcamp: FaBandcamp,
-    applemusic: FaApple,
-    tidal: SiTidal,
-    deezer: FaDeezer,
-    amazonmusic: FaAmazon,
-    napster: SiNapster,
-    linkedin: FaLinkedinIn,
-    discord: FaDiscord,
-    twitch: FaTwitch,
-    reddit: FaRedditAlien,
-    pinterest: FaPinterest,
-    snapchat: FaSnapchatGhost,
-    telegram: FaTelegram,
-    whatsapp: FaWhatsapp,
-    github: FaGithub,
-    patreon: FaPatreon,
-  };
-
   // Form state
   const [activeTab, setActiveTab] = useState('general');
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
-  // Fetch contact info and social media links from API
+  // Fetch contact info from API
   useEffect(() => {
     async function fetchContactInfo() {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings/contact`);
         setContactInfo(response.data);
-        
-        // Parse social media links and filter only enabled ones
-        if (response.data.social_media_links) {
-          const links = typeof response.data.social_media_links === 'string' 
-            ? JSON.parse(response.data.social_media_links)
-            : response.data.social_media_links;
-          
-          const enabledLinks = Object.entries(links)
-            .filter(([key, value]) => value.enabled && value.url)
-            .map(([key, value]) => ({
-              platform: key,
-              url: value.url,
-              name: value.name || key,
-              icon: value.icon || key
-            }));
-          
-          setSocialMediaLinks(enabledLinks);
-        }
       } catch (err) {
         console.error('Error fetching contact info:', err);
         // Keep default values if fetch fails
@@ -338,28 +266,14 @@ const Contact = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {socialMediaLinks.length > 0 && (
-                                  <div className="w-full px-5 pt-5 pb-5 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-5 justify-center items-start">
-                                      <div className="text-[#fffced] text-lg font-medium font-['Roboto'] leading-7">Follow Us</div>
-                                      <div className="w-full flex gap-4 justify-center items-start flex-wrap">
-                                          {socialMediaLinks.map((link) => {
-                                            const IconComponent = socialMediaIcons[link.platform] || FaLink;
-                                            return (
-                                              <a 
-                                                key={link.platform}
-                                                href={link.url} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer" 
-                                                className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
-                                                title={link.name}
-                                              >
-                                                <IconComponent size={18} />
-                                              </a>
-                                            );
-                                          })}
-                                      </div>
-                                  </div>
-                                )}
+                                <div className="w-full px-5 pt-5 pb-5 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-5 justify-center items-start">
+                                    <div className="text-[#fffced] text-lg font-medium font-['Roboto'] leading-7">Follow Us</div>
+                                    <SocialMediaLinks 
+                                      iconSize={18}
+                                      containerClassName="w-full flex gap-4 justify-center items-start flex-wrap"
+                                      iconClassName="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -496,28 +410,14 @@ const Contact = () => {
                                             </div>
                                         </div>
                                         {/* Follow Us */}
-                                        {socialMediaLinks.length > 0 && (
-                                          <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-9 flex flex-col gap-9">
-                                              <div className="text-[#fffced] text-3xl font-medium font-['Roboto']">Follow Us</div>
-                                              <div className="flex flex-row gap-6 items-center flex-wrap">
-                                                  {socialMediaLinks.map((link) => {
-                                                    const IconComponent = socialMediaIcons[link.platform] || FaLink;
-                                                    return (
-                                                      <a 
-                                                        key={link.platform}
-                                                        href={link.url} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer" 
-                                                        className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
-                                                        title={link.name}
-                                                      >
-                                                        <IconComponent size={18} />
-                                                      </a>
-                                                    );
-                                                  })}
-                                              </div>
-                                          </div>
-                                        )}
+                                        <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-9 flex flex-col gap-9">
+                                            <div className="text-[#fffced] text-3xl font-medium font-['Roboto']">Follow Us</div>
+                                            <SocialMediaLinks 
+                                              iconSize={18}
+                                              containerClassName="flex flex-row gap-6 items-center flex-wrap"
+                                              iconClassName="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -697,28 +597,14 @@ const Contact = () => {
                                             </div>
                                         </div>
                                         {/* Follow Us */}
-                                        {socialMediaLinks.length > 0 && (
-                                          <div className="bg-[#1d1e26] rounded-lg shadow-lg p-4 flex flex-col gap-5">
-                                              <div className="text-[#fffced] text-xl font-medium font-['Roboto']">Follow Us</div>
-                                              <div className="flex flex-row gap-3 items-center flex-wrap">
-                                                  {socialMediaLinks.map((link) => {
-                                                    const IconComponent = socialMediaIcons[link.platform] || FaLink;
-                                                    return (
-                                                      <a 
-                                                        key={link.platform}
-                                                        href={link.url} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer" 
-                                                        className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
-                                                        title={link.name}
-                                                      >
-                                                        <IconComponent size={18} />
-                                                      </a>
-                                                    );
-                                                  })}
-                                              </div>
-                                          </div>
-                                        )}
+                                        <div className="bg-[#1d1e26] rounded-lg shadow-lg p-4 flex flex-col gap-5">
+                                            <div className="text-[#fffced] text-xl font-medium font-['Roboto']">Follow Us</div>
+                                            <SocialMediaLinks 
+                                              iconSize={18}
+                                              containerClassName="flex flex-row gap-3 items-center flex-wrap"
+                                              iconClassName="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -856,28 +742,14 @@ const Contact = () => {
                                         </div>
                                     </div>
                                     {/* Follow Us */}
-                                    {socialMediaLinks.length > 0 && (
-                                      <div className="bg-[#1d1e26] rounded-lg shadow-lg p-6 flex flex-col gap-7">
-                                          <div className="text-[#fffced] text-2xl font-medium font-['Roboto']">Follow Us</div>
-                                          <div className="flex flex-row gap-4 items-center flex-wrap">
-                                              {socialMediaLinks.map((link) => {
-                                                const IconComponent = socialMediaIcons[link.platform] || FaLink;
-                                                return (
-                                                  <a 
-                                                    key={link.platform}
-                                                    href={link.url} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
-                                                    className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
-                                                    title={link.name}
-                                                  >
-                                                    <IconComponent size={18} />
-                                                  </a>
-                                                );
-                                              })}
-                                          </div>
-                                      </div>
-                                    )}
+                                    <div className="bg-[#1d1e26] rounded-lg shadow-lg p-6 flex flex-col gap-7">
+                                        <div className="text-[#fffced] text-2xl font-medium font-['Roboto']">Follow Us</div>
+                                        <SocialMediaLinks 
+                                          iconSize={18}
+                                          containerClassName="flex flex-row gap-4 items-center flex-wrap"
+                                          iconClassName="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
