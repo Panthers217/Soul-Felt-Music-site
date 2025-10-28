@@ -55,7 +55,10 @@ export default function ResponsiveNavbar() {
               <Link to="/community">Community/News</Link>
               <Link to="/contact">Contact</Link>
               {websiteUser?.isAdmin && (
-                <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin Dashboard</Link>
+                <>
+                  <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin Dashboard</Link>
+                  <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold">📧 Newsletter</Link>
+                </>
               )}
             </ul>
             <div className="px-4 pb-4">
@@ -129,7 +132,10 @@ export default function ResponsiveNavbar() {
           <Link to="/community">Community/News</Link>
           <Link to="/contact">Contact</Link>
           {websiteUser?.isAdmin && (
-            <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin</Link>
+            <>
+              <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin</Link>
+              <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold">📧 Newsletter</Link>
+            </>
           )}
         </ul>
         {/* Auth/Search Section */}

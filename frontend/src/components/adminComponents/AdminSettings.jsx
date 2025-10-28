@@ -1413,14 +1413,130 @@ const AdminSettings = () => {
                 Email Configuration
               </h2>
               <p className="text-text-secondary mb-6">
-                Configure SMTP settings for contact form submissions
+                Configure email service provider and settings
               </p>
 
+              {/* Email Provider Selection */}
+              <div className="border-t border-background pt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">
+                  Email Service Provider
+                </h3>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">
+                    Select Provider
+                  </label>
+                  <select
+                    value={settings.email_provider || "smtp"}
+                    onChange={(e) =>
+                      handleInputChange("email_provider", e.target.value)
+                    }
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="smtp">SMTP (Gmail, Outlook, Custom)</option>
+                    <option value="resend">Resend</option>
+                    <option value="sendgrid">SendGrid</option>
+                    <option value="mailgun">Mailgun</option>
+                    <option value="postmark">Postmark</option>
+                    <option value="ses-smtp">Amazon SES (SMTP)</option>
+                  </select>
+                  <p className="text-sm text-text-secondary mt-1">
+                    Choose your email service provider
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">
+                    Sender Name
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.email_from_name || ""}
+                    onChange={(e) =>
+                      handleInputChange("email_from_name", e.target.value)
+                    }
+                    placeholder="Soul Felt Music"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">
+                    Name displayed in "From" field
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-accent font-medium mb-2">
+                    Reply-To Email
+                  </label>
+                  <input
+                    type="email"
+                    value={settings.email_reply_to || ""}
+                    onChange={(e) =>
+                      handleInputChange("email_reply_to", e.target.value)
+                    }
+                    placeholder="contact@soulfeltmusic.com"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-sm text-text-secondary mt-1">
+                    Email address for replies (optional)
+                  </p>
+                </div>
+              </div>
+
+              {/* API Key for API-based providers */}
+              {settings.email_provider && 
+               settings.email_provider !== "smtp" && 
+               settings.email_provider !== "ses-smtp" && (
+                <div className="border-t border-background pt-6">
+                  <h3 className="text-xl font-semibold text-accent mb-4">
+                    API Configuration
+                  </h3>
+
+                  <div className="mb-4">
+                    <label className="block text-accent font-medium mb-2">
+                      API Key
+                    </label>
+                    <input
+                      type="password"
+                      value={settings.email_api_key || ""}
+                      onChange={(e) =>
+                        handleInputChange("email_api_key", e.target.value)
+                      }
+                      placeholder="Enter your API key"
+                      className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-sm text-text-secondary mt-1">
+                      {settings.email_provider === "resend" && "Get your API key from https://resend.com/api-keys"}
+                      {settings.email_provider === "sendgrid" && "Get your API key from SendGrid dashboard"}
+                      {settings.email_provider === "mailgun" && "Get your API key from Mailgun dashboard"}
+                      {settings.email_provider === "postmark" && "Get your API key from Postmark account settings"}
+                    </p>
+                  </div>
+
+                  {settings.email_provider === "resend" && (
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                      <p className="text-sm text-blue-300">
+                        <strong>Resend Setup:</strong><br/>
+                        1. Sign up at <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">resend.com</a><br/>
+                        2. Verify your domain in the Resend dashboard<br/>
+                        3. Create an API key<br/>
+                        4. Use a verified domain email in "SMTP Username" field below
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SMTP Settings - shown for SMTP and SES-SMTP */}
+              {(!settings.email_provider || 
+                settings.email_provider === "smtp" || 
+                settings.email_provider === "ses-smtp" ||
+                settings.email_provider === "mailgun") && (
               <div className="border-t border-background pt-6">
                 <h3 className="text-xl font-semibold text-accent mb-4">
                   SMTP Server Settings
                 </h3>
 
+                {settings.email_provider === "smtp" && (
                 <div className="mb-4">
                   <label className="block text-accent font-medium mb-2">
                     SMTP Host
@@ -1438,7 +1554,9 @@ const AdminSettings = () => {
                     e.g., smtp.gmail.com, smtp.sendgrid.net
                   </p>
                 </div>
+                )}
 
+                {settings.email_provider === "smtp" && (
                 <div className="mb-4">
                   <label className="block text-accent font-medium mb-2">
                     SMTP Port
@@ -1456,7 +1574,9 @@ const AdminSettings = () => {
                     Common ports: 587 (TLS), 465 (SSL), 25 (unencrypted)
                   </p>
                 </div>
+                )}
 
+                {settings.email_provider === "smtp" && (
                 <div className="mb-4">
                   <label className="flex items-center space-x-2">
                     <input
@@ -1473,10 +1593,11 @@ const AdminSettings = () => {
                     Enable for port 465, disable for port 587
                   </p>
                 </div>
+                )}
 
                 <div className="mb-4">
                   <label className="block text-accent font-medium mb-2">
-                    SMTP Username
+                    {settings.email_provider === "mailgun" ? "Mailgun Domain Username" : "SMTP Username"}
                   </label>
                   <input
                     type="text"
@@ -1484,17 +1605,26 @@ const AdminSettings = () => {
                     onChange={(e) =>
                       handleInputChange("smtp_user", e.target.value)
                     }
-                    placeholder="your-email@gmail.com"
+                    placeholder={
+                      settings.email_provider === "resend" 
+                        ? "verified@yourdomain.com" 
+                        : settings.email_provider === "mailgun"
+                        ? "postmaster@your-domain.com"
+                        : "your-email@gmail.com"
+                    }
                     className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <p className="text-sm text-text-secondary mt-1">
-                    Your email address or SMTP username
+                    {settings.email_provider === "resend" && "Must be a verified domain email"}
+                    {settings.email_provider === "mailgun" && "Your Mailgun SMTP username (e.g., postmaster@yourdomain.com)"}
+                    {(!settings.email_provider || settings.email_provider === "smtp") && "Your email address or SMTP username"}
+                    {settings.email_provider === "ses-smtp" && "AWS SES SMTP username"}
                   </p>
                 </div>
 
                 <div className="mb-4">
                   <label className="block text-accent font-medium mb-2">
-                    SMTP Password
+                    {settings.email_provider === "mailgun" ? "API Key" : "SMTP Password"}
                   </label>
                   <input
                     type="password"
@@ -1506,10 +1636,14 @@ const AdminSettings = () => {
                     className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <p className="text-sm text-text-secondary mt-1">
-                    For Gmail, use an App Password (not your regular password)
+                    {settings.email_provider === "resend" && "Your Resend API key"}
+                    {settings.email_provider === "mailgun" && "Your Mailgun API key"}
+                    {settings.email_provider === "ses-smtp" && "AWS SES SMTP password"}
+                    {(!settings.email_provider || settings.email_provider === "smtp") && "For Gmail, use an App Password (not your regular password)"}
                   </p>
                 </div>
               </div>
+              )}
 
               <div className="border-t border-background pt-6">
                 <h3 className="text-xl font-semibold text-accent mb-4">

@@ -14,6 +14,8 @@ import settingsRouter from './routes/settings.js';
 import paymentsRouter from './routes/payments.js';
 import eventsRouter from './routes/events.js';
 import contactRouter from './routes/contact.js';
+import newsletterRouter from './routes/newsletter.js';
+import newsletterCampaignsRouter from './routes/newsletter-campaigns.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
@@ -47,7 +49,14 @@ admin.initializeApp({
 
 const app = express();
 
-app.use(cors());
+// Configure CORS to allow all origins (for development)
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Stripe webhook needs raw body - must come BEFORE bodyParser.json()
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
@@ -86,6 +95,8 @@ app.use('/api/settings', settingsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/contact', contactRouter);
+app.use('/api/newsletter', newsletterRouter);
+app.use('/api/newsletter', newsletterCampaignsRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });
