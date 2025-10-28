@@ -10,7 +10,8 @@ ADD COLUMN contact_form_recipient VARCHAR(255),
 ADD COLUMN artist_submission_recipient VARCHAR(255),
 ADD COLUMN press_media_recipient VARCHAR(255),
 ADD COLUMN contact_form_auto_reply BOOLEAN DEFAULT true,
-ADD COLUMN contact_form_subject_prefix VARCHAR(100) DEFAULT '[Soul Felt Music]';
+ADD COLUMN contact_form_subject_prefix VARCHAR(100) DEFAULT '[Soul Felt Music]',
+ADD COLUMN auto_reply_message TEXT;
 
 -- Update existing row with default values if exists
 UPDATE website_settings 

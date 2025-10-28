@@ -85,7 +85,8 @@ export async function getContactInfo(req, res) {
         office_hours_weekday,
         office_hours_saturday,
         office_hours_sunday,
-        office_hours_timezone
+        office_hours_timezone,
+        social_media_links
       FROM website_settings 
       ORDER BY id DESC 
       LIMIT 1`
@@ -100,8 +101,14 @@ export async function getContactInfo(req, res) {
         office_hours_weekday: '9:00 AM - 6:00 PM',
         office_hours_saturday: '10:00 AM - 4:00 PM',
         office_hours_sunday: 'Closed',
-        office_hours_timezone: 'EST'
+        office_hours_timezone: 'EST',
+        social_media_links: {}
       });
+    }
+    
+    // Parse social_media_links JSON if it exists
+    if (settings[0].social_media_links && typeof settings[0].social_media_links === 'string') {
+      settings[0].social_media_links = JSON.parse(settings[0].social_media_links);
     }
     
     res.json(settings[0]);
@@ -195,6 +202,7 @@ export async function updateSettings(req, res) {
       press_media_recipient,
       contact_form_auto_reply,
       contact_form_subject_prefix,
+      auto_reply_message,
       social_media_links,
       cloudinary_cloud_name,
       cloudinary_audio_folder,
@@ -254,6 +262,7 @@ export async function updateSettings(req, res) {
     if (press_media_recipient !== undefined) { updates.push('press_media_recipient = ?'); values.push(press_media_recipient); }
     if (contact_form_auto_reply !== undefined) { updates.push('contact_form_auto_reply = ?'); values.push(contact_form_auto_reply); }
     if (contact_form_subject_prefix !== undefined) { updates.push('contact_form_subject_prefix = ?'); values.push(contact_form_subject_prefix); }
+    if (auto_reply_message !== undefined) { updates.push('auto_reply_message = ?'); values.push(auto_reply_message); }
     if (social_media_links !== undefined) { 
       updates.push('social_media_links = ?'); 
       values.push(JSON.stringify(social_media_links)); 
