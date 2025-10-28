@@ -132,10 +132,21 @@ export async function submitContactForm(req, res) {
       // Send auto-reply to customer if enabled
       if (config.contact_form_auto_reply) {
         const autoReplySubject = `Thank you for contacting ${config.business_name || 'us'}`;
+        
+        // Use custom message if available, otherwise use default
+        let customMessage = config.auto_reply_message || 
+          'We have received your {inquiry_type} and will get back to you as soon as possible.';
+        
+        // Replace variables in custom message
+        customMessage = customMessage
+          .replace(/{name}/g, name)
+          .replace(/{inquiry_type}/g, inquiryLabels[inquiry_type].toLowerCase())
+          .replace(/{business_name}/g, config.business_name || 'us');
+        
         const autoReplyBody = `
           <h2>Thank you for your message!</h2>
           <p>Dear ${name},</p>
-          <p>We have received your ${inquiryLabels[inquiry_type].toLowerCase()} and will get back to you as soon as possible.</p>
+          <p>${customMessage.replace(/\n/g, '<br>')}</p>
           <p><strong>Your message:</strong></p>
           <p style="background: #f5f5f5; padding: 15px; border-left: 4px solid #aa2a46;">
             ${message.replace(/\n/g, '<br>')}

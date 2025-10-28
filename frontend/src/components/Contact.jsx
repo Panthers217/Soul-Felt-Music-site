@@ -5,10 +5,36 @@ import {
   FaTwitter,
   FaInstagram,
   FaYoutube,
+  FaLinkedinIn,
+  FaTiktok,
+  FaSpotify,
+  FaSoundcloud,
+  FaDiscord,
+  FaTwitch,
+  FaRedditAlien,
+  FaPinterest,
+  FaSnapchatGhost,
+  FaTelegram,
+  FaWhatsapp,
+  FaGithub,
+  FaBandcamp,
+  FaDeezer,
+  FaApple,
+  FaAmazon,
+  FaPatreon,
+  FaLink,
 } from "react-icons/fa";
+import { SiTidal, SiNapster } from "react-icons/si";
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
+// Inquiry tab options
+const inquiryTabs = [
+    { label: 'General Inquiry', value: 'general' },
+    { label: 'Artist Submissions', value: 'artist' },
+    { label: 'Press & Media', value: 'press' },
+];
 
 const Contact = () => {
     
@@ -22,18 +48,65 @@ const Contact = () => {
     office_hours_timezone: 'EST'
   });
 
+  const [socialMediaLinks, setSocialMediaLinks] = useState([]);
+
+  // Icon mapping for social media platforms
+  const socialMediaIcons = {
+    facebook: FaFacebookF,
+    twitter: FaTwitter,
+    instagram: FaInstagram,
+    youtube: FaYoutube,
+    tiktok: FaTiktok,
+    spotify: FaSpotify,
+    soundcloud: FaSoundcloud,
+    bandcamp: FaBandcamp,
+    applemusic: FaApple,
+    tidal: SiTidal,
+    deezer: FaDeezer,
+    amazonmusic: FaAmazon,
+    napster: SiNapster,
+    linkedin: FaLinkedinIn,
+    discord: FaDiscord,
+    twitch: FaTwitch,
+    reddit: FaRedditAlien,
+    pinterest: FaPinterest,
+    snapchat: FaSnapchatGhost,
+    telegram: FaTelegram,
+    whatsapp: FaWhatsapp,
+    github: FaGithub,
+    patreon: FaPatreon,
+  };
+
   // Form state
   const [activeTab, setActiveTab] = useState('general');
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
-  // Fetch contact info from API
+  // Fetch contact info and social media links from API
   useEffect(() => {
     async function fetchContactInfo() {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings/contact`);
         setContactInfo(response.data);
+        
+        // Parse social media links and filter only enabled ones
+        if (response.data.social_media_links) {
+          const links = typeof response.data.social_media_links === 'string' 
+            ? JSON.parse(response.data.social_media_links)
+            : response.data.social_media_links;
+          
+          const enabledLinks = Object.entries(links)
+            .filter(([key, value]) => value.enabled && value.url)
+            .map(([key, value]) => ({
+              platform: key,
+              url: value.url,
+              name: value.name || key,
+              icon: value.icon || key
+            }));
+          
+          setSocialMediaLinks(enabledLinks);
+        }
       } catch (err) {
         console.error('Error fetching contact info:', err);
         // Keep default values if fetch fails
@@ -96,14 +169,8 @@ const Contact = () => {
     return contactInfo.contact_email.split(/[,\n]/).map(email => email.trim()).filter(Boolean);
   };
 
-// Inquiry tab options
-const inquiryTabs = [
-    { label: 'General Inquiry', value: 'general' },
-    { label: 'Artist Submissions', value: 'artist' },
-    { label: 'Press & Media', value: 'press' },
-];
-
-function ContactMobile() {
+  // Render functions
+  const renderContactMobile = () => {
     return (
         <div
             data-layer="Contact Mobile Responsive"
@@ -121,18 +188,19 @@ function ContactMobile() {
                         </div>
                         <div className="relative left-0  w-full flex flex-col gap-12">
                             <div className="w-full px-6 pt-6 pb-7 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-7">
-                                <div className="w-full pb-1 border border-white/10 rounded flex justify-center gap-4">
+                                <div className="w-full pb-1 border border-white/10 rounded flex justify-center gap-2">
                                     {inquiryTabs.map(tab => (
                                         <button
                                             key={tab.value}
-                                            className={`px-5 pt-1 pb-5 border rounded flex flex-col items-start ${
+                                            type="button"
+                                            className={`px-3 pt-1 pb-5 border rounded flex flex-col items-center justify-center transition-all duration-200 hover:scale-105 ${
                                                 activeTab === tab.value 
-                                                    ? 'border-[#aa2a46]' 
-                                                    : 'border-transparent'
+                                                    ? 'border-[#aa2a46] bg-[#aa2a46]/10' 
+                                                    : 'border-white/20 hover:border-[#aa2a46]/50'
                                             }`}
                                             onClick={() => setActiveTab(tab.value)}
                                         >
-                                            <div className={`text-center text-sm font-medium font-['Public_Sans'] leading-snug ${
+                                            <div className={`text-center text-xs font-medium font-['Public_Sans'] leading-snug whitespace-nowrap ${
                                                 activeTab === tab.value 
                                                     ? 'text-[#aa2a46]' 
                                                     : 'text-white/60'
@@ -148,7 +216,7 @@ function ContactMobile() {
                                                 name="name"
                                                 value={form.name}
                                                 onChange={handleChange}
-                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white placeholder:text-gray-500"
                                                 placeholder="Enter your full name"
                                                 required
                                             />
@@ -160,7 +228,7 @@ function ContactMobile() {
                                                 name="email"
                                                 value={form.email}
                                                 onChange={handleChange}
-                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                                className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white placeholder:text-gray-500"
                                                 placeholder="Enter your email"
                                                 required
                                             />
@@ -173,7 +241,7 @@ function ContactMobile() {
                                             name="subject"
                                             value={form.subject}
                                             onChange={handleChange}
-                                            className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white"
+                                            className="absolute left-0 top-6 w-full h-11 bg-[#060200] rounded-md border border-white/10 px-4 text-white placeholder:text-gray-500"
                                             placeholder="What's this about?"
                                             required
                                         />
@@ -185,7 +253,7 @@ function ContactMobile() {
                                             name="message"
                                             value={form.message}
                                             onChange={handleChange}
-                                            className="w-full max-w-[310px] h-36 bg-[#060200] rounded-md border border-white/10 p-3 text-white"
+                                            className="w-full max-w-[310px] h-36 bg-[#060200] rounded-md border border-white/10 p-3 text-white placeholder:text-gray-500"
                                             required
                                         />
                                     </div>
@@ -270,23 +338,28 @@ function ContactMobile() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full px-5 pt-5 pb-5 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-5 justify-center items-start">
-                                    <div className="text-[#fffced] text-lg font-medium font-['Roboto'] leading-7">Follow Us</div>
-                                    <div className="w-full flex gap-4 justify-center items-start">
-                                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                            <FaFacebookF size={18} />
-                                        </a>
-                                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                            <FaInstagram size={18} />
-                                        </a>
-                                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                            <FaYoutube size={18} />
-                                        </a>
-                                        <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                            <FaTwitter size={18} />
-                                        </a>
-                                    </div>
-                                </div>
+                                {socialMediaLinks.length > 0 && (
+                                  <div className="w-full px-5 pt-5 pb-5 bg-[#1d1e26] rounded-lg shadow-md flex flex-col gap-5 justify-center items-start">
+                                      <div className="text-[#fffced] text-lg font-medium font-['Roboto'] leading-7">Follow Us</div>
+                                      <div className="w-full flex gap-4 justify-center items-start flex-wrap">
+                                          {socialMediaLinks.map((link) => {
+                                            const IconComponent = socialMediaIcons[link.platform] || FaLink;
+                                            return (
+                                              <a 
+                                                key={link.platform}
+                                                href={link.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                                title={link.name}
+                                              >
+                                                <IconComponent size={18} />
+                                              </a>
+                                            );
+                                          })}
+                                      </div>
+                                  </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -294,9 +367,9 @@ function ContactMobile() {
             </div>
         </div>
     );
-}
+  };
 
-function ContactTablet() {
+  const renderContactTablet = () => {
         return (
             <div className="w-full min-h-screen bg-black flex flex-col items-center justify-start overflow-hidden">
                 <div className="w-full bg-white flex flex-col items-center justify-start overflow-hidden">
@@ -313,11 +386,12 @@ function ContactTablet() {
                                     {/* Contact Form */}
                                     <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-12 flex flex-col gap-12">
                                         {/* Tabs */}
-                                        <div className="flex flex-row gap-4 pb-1 border-b border-white/10">
+                                        <div className="flex flex-row gap-6 pb-2 border-b border-white/10">
                                             {inquiryTabs.map(tab => (
                                                 <button
                                                     key={tab.value}
-                                                    className={`px-2 pb-5 text-lg font-medium font-['Public_Sans'] transition border-b-2 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46]'}`}
+                                                    type="button"
+                                                    className={`px-3 pb-7 text-xl font-medium font-['Public_Sans'] transition-all duration-200 border-b-2 hover:scale-105 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46] hover:border-[#aa2a46]/50'}`}
                                                     onClick={() => setActiveTab(tab.value)}
                                                 >{tab.label}</button>
                                             ))}
@@ -327,20 +401,20 @@ function ContactTablet() {
                                             <div className="flex flex-col gap-6">
                                                 <div className="relative w-full">
                                                     <label className="block text-[#fffced] text-xl font-medium font-['Public_Sans'] mb-1">Full Name *</label>
-                                                    <input name="name" type="text" value={form.name} onChange={handleChange} placeholder="Enter your full name" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-black text-xl font-normal font-['Public_Sans'] px-6" required />
+                                                    <input name="name" type="text" value={form.name} onChange={handleChange} placeholder="Enter your full name" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-xl font-normal font-['Public_Sans'] px-6" required />
                                                 </div>
                                                 <div className="relative w-full">
                                                     <label className="block text-[#fffced] text-xl font-medium font-['Public_Sans'] mb-1">Email Address *</label>
-                                                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-black text-xl font-normal font-['Public_Sans'] px-6" required />
+                                                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-xl font-normal font-['Public_Sans'] px-6" required />
                                                 </div>
                                             </div>
                                             <div className="relative w-full">
                                                 <label className="block text-[#fffced] text-xl font-medium font-['Public_Sans'] mb-1">Subject *</label>
-                                                <input name="subject" type="text" value={form.subject} onChange={handleChange} placeholder="What's this about?" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-black text-xl font-normal font-['Public_Sans'] px-6" required />
+                                                <input name="subject" type="text" value={form.subject} onChange={handleChange} placeholder="What's this about?" className="w-full h-16 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-xl font-normal font-['Public_Sans'] px-6" required />
                                             </div>
                                             <div className="flex flex-col gap-3">
                                                 <label className="block text-[#fffced] text-xl font-medium font-['Public_Sans']">Message *</label>
-                                                <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[12rem] bg-[#060200] rounded-md border border-white/10 text-black text-xl font-normal font-['Public_Sans'] px-6 py-3" required />
+                                                <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[12rem] bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-xl font-normal font-['Public_Sans'] px-6 py-3" required />
                                             </div>
                                             <button type="submit" className="w-full py-6 bg-[#aa2a46] rounded-md text-[#fffced] text-2xl font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition" disabled={loading}>
                                                 {loading ? 'Sending...' : 'Send Message'}
@@ -422,24 +496,28 @@ function ContactTablet() {
                                             </div>
                                         </div>
                                         {/* Follow Us */}
-                                        <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-9 flex flex-col gap-9">
-                                            <div className="text-[#fffced] text-3xl font-medium font-['Roboto']">Follow Us</div>
-                                            <div className="flex flex-row gap-6 items-center">
-                                                {/* Social Media Icons */}
-                                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaFacebookF size={18} />
-                                                </a>
-                                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaInstagram size={18} />
-                                                </a>
-                                                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaYoutube size={18} />
-                                                </a>
-                                                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaTwitter size={18} />
-                                                </a>
-                                            </div>
-                                        </div>
+                                        {socialMediaLinks.length > 0 && (
+                                          <div className="w-full bg-[#1d1e26] rounded-xl shadow-lg p-9 flex flex-col gap-9">
+                                              <div className="text-[#fffced] text-3xl font-medium font-['Roboto']">Follow Us</div>
+                                              <div className="flex flex-row gap-6 items-center flex-wrap">
+                                                  {socialMediaLinks.map((link) => {
+                                                    const IconComponent = socialMediaIcons[link.platform] || FaLink;
+                                                    return (
+                                                      <a 
+                                                        key={link.platform}
+                                                        href={link.url} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                                        title={link.name}
+                                                      >
+                                                        <IconComponent size={18} />
+                                                      </a>
+                                                    );
+                                                  })}
+                                              </div>
+                                          </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -448,9 +526,9 @@ function ContactTablet() {
                 </div>
             </div>
         );
-    }
+    };
 
-  function ContactLaptop() {
+  const renderContactLaptop = () => {
         return (
             <div className="w-full min-h-screen bg-white flex flex-col items-center  overflow-hidden">
                 <div className="w-full bg-white flex flex-col items-center justify-center gap-6 overflow-hidden">
@@ -471,10 +549,11 @@ function ContactTablet() {
                                             {inquiryTabs.map(tab => (
                                                 <button
                                                     key={tab.value}
-                                                    className={`px-2 pb-4 text-base font-medium font-['Public_Sans'] border-b-2 ${
+                                                    type="button"
+                                                    className={`px-2 pb-4 text-sm font-medium font-['Public_Sans'] border-b-2 transition-all duration-200 hover:scale-105 ${
                                                         activeTab === tab.value 
                                                             ? 'border-[#aa2a46] text-[#aa2a46]' 
-                                                            : 'border-transparent text-white/60 hover:text-[#aa2a46]'
+                                                            : 'border-transparent text-white/60 hover:text-[#aa2a46] hover:border-[#aa2a46]/50'
                                                     }`}
                                                     onClick={() => setActiveTab(tab.value)}
                                                 >
@@ -493,7 +572,7 @@ function ContactTablet() {
                                                         value={form.name}
                                                         onChange={handleChange}
                                                         placeholder="Enter your full name"
-                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-base font-normal font-['Public_Sans'] px-3"
                                                         required
                                                     />
                                                 </div>
@@ -505,7 +584,7 @@ function ContactTablet() {
                                                         value={form.email}
                                                         onChange={handleChange}
                                                         placeholder="Enter your email"
-                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                        className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-base font-normal font-['Public_Sans'] px-3"
                                                         required
                                                     />
                                                 </div>
@@ -518,7 +597,7 @@ function ContactTablet() {
                                                     value={form.subject}
                                                     onChange={handleChange}
                                                     placeholder="What's this about?"
-                                                    className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3"
+                                                    className="w-full h-12 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-base font-normal font-['Public_Sans'] px-3"
                                                     required
                                                 />
                                             </div>
@@ -528,7 +607,7 @@ function ContactTablet() {
                                                     name="message"
                                                     value={form.message}
                                                     onChange={handleChange}
-                                                    className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-white text-base font-normal font-['Public_Sans'] px-3 py-2"
+                                                    className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-base font-normal font-['Public_Sans'] px-3 py-2"
                                                     required
                                                 />
                                             </div>
@@ -618,24 +697,28 @@ function ContactTablet() {
                                             </div>
                                         </div>
                                         {/* Follow Us */}
-                                        <div className="bg-[#1d1e26] rounded-lg shadow-lg p-4 flex flex-col gap-5">
-                                            <div className="text-[#fffced] text-xl font-medium font-['Roboto']">Follow Us</div>
-                                            <div className="flex flex-row gap-3 items-center">
-                                                {/* Social Media Icons */}
-                                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaFacebookF size={18} />
-                                                </a>
-                                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaInstagram size={18} />
-                                                </a>
-                                                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaYoutube size={18} />
-                                                </a>
-                                                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                    <FaTwitter size={18} />
-                                                </a>
-                                            </div>
-                                        </div>
+                                        {socialMediaLinks.length > 0 && (
+                                          <div className="bg-[#1d1e26] rounded-lg shadow-lg p-4 flex flex-col gap-5">
+                                              <div className="text-[#fffced] text-xl font-medium font-['Roboto']">Follow Us</div>
+                                              <div className="flex flex-row gap-3 items-center flex-wrap">
+                                                  {socialMediaLinks.map((link) => {
+                                                    const IconComponent = socialMediaIcons[link.platform] || FaLink;
+                                                    return (
+                                                      <a 
+                                                        key={link.platform}
+                                                        href={link.url} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                                        title={link.name}
+                                                      >
+                                                        <IconComponent size={18} />
+                                                      </a>
+                                                    );
+                                                  })}
+                                              </div>
+                                          </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -644,9 +727,9 @@ function ContactTablet() {
                 </div>
             </div>
         );
-    }
+    };
 
-function ContactDesktop() {
+  const renderContactDesktop = () => {
     return (
         <div className="w-full min-h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
             <div className="w-full bg-white flex flex-col items-center justify-center gap-6 overflow-hidden">
@@ -667,8 +750,9 @@ function ContactDesktop() {
                                         {inquiryTabs.map(tab => (
                                             <button
                                                 key={tab.value}
-                                                className={`px-2 pb-5 text-lg font-medium font-['Public_Sans'] transition border-b-2 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46]'}`}
-                                                onClick={() => handleTab(tab.value)}
+                                                type="button"
+                                                className={`px-2 pb-5 text-base font-medium font-['Public_Sans'] transition-all duration-200 border-b-2 hover:scale-105 ${activeTab === tab.value ? 'border-[#aa2a46] text-[#aa2a46]' : 'border-transparent text-white/60 hover:text-[#aa2a46] hover:border-[#aa2a46]/50'}`}
+                                                onClick={() => setActiveTab(tab.value)}
                                             >{tab.label}</button>
                                         ))}
                                     </div>
@@ -677,20 +761,20 @@ function ContactDesktop() {
                                         <div className="flex flex-row gap-4">
                                             <div className="relative w-1/2">
                                                 <label className="block text-[#fffced] text-base font-medium font-['Public_Sans'] mb-1">Full Name *</label>
-                                                <input name="name" type="text" value={form.name} onChange={handleChange} placeholder="Enter your full name" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-black text-lg font-normal font-['Public_Sans'] px-4" required />
+                                                <input name="name" type="text" value={form.name} onChange={handleChange} placeholder="Enter your full name" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-lg font-normal font-['Public_Sans'] px-4" required />
                                             </div>
                                             <div className="relative w-1/2">
                                                 <label className="block text-[#fffced] text-base font-medium font-['Public_Sans'] mb-1">Email Address *</label>
-                                                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-black text-lg font-normal font-['Public_Sans'] px-4" required />
+                                                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-lg font-normal font-['Public_Sans'] px-4" required />
                                             </div>
                                         </div>
                                         <div className="relative w-full">
                                             <label className="block text-[#fffced] text-base font-medium font-['Public_Sans'] mb-1">Subject *</label>
-                                            <input name="subject" type="text" value={form.subject} onChange={handleChange} placeholder="What's this about?" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-black text-lg font-normal font-['Public_Sans'] px-4" required />
+                                            <input name="subject" type="text" value={form.subject} onChange={handleChange} placeholder="What's this about?" className="w-full h-14 bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-lg font-normal font-['Public_Sans'] px-4" required />
                                         </div>
                                         <div className="flex flex-col gap-2">
                                             <label className="block text-[#fffced] text-base font-medium font-['Public_Sans']">Message *</label>
-                                            <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-black text-lg font-normal font-['Public_Sans'] px-4 py-2" required />
+                                            <textarea name="message" value={form.message} onChange={handleChange} className="w-full min-h-[8rem] bg-[#060200] rounded-md border border-white/10 text-white placeholder:text-gray-500 text-lg font-normal font-['Public_Sans'] px-4 py-2" required />
                                         </div>
                                             <button type="submit" className="w-full py-3 bg-[#aa2a46] rounded-md text-[#fffced] text-base font-medium font-['Public_Sans'] hover:bg-[#fffced] hover:text-[#aa2a46] transition" disabled={loading}>
                                                 {loading ? 'Sending...' : 'Send Message'}
@@ -772,24 +856,28 @@ function ContactDesktop() {
                                         </div>
                                     </div>
                                     {/* Follow Us */}
-                                    <div className="bg-[#1d1e26] rounded-lg shadow-lg p-6 flex flex-col gap-7">
-                                        <div className="text-[#fffced] text-2xl font-medium font-['Roboto']">Follow Us</div>
-                                        <div className="flex flex-row gap-4 items-center">
-                                            {/* Social Media Icons */}
-                                            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                <FaFacebookF size={18} />
-                                            </a>
-                                            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                <FaInstagram size={18} />
-                                            </a>
-                                            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                <FaYoutube size={18} />
-                                            </a>
-                                            <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition">
-                                                <FaTwitter size={18} />
-                                            </a>
-                                        </div>
-                                    </div>
+                                    {socialMediaLinks.length > 0 && (
+                                      <div className="bg-[#1d1e26] rounded-lg shadow-lg p-6 flex flex-col gap-7">
+                                          <div className="text-[#fffced] text-2xl font-medium font-['Roboto']">Follow Us</div>
+                                          <div className="flex flex-row gap-4 items-center flex-wrap">
+                                              {socialMediaLinks.map((link) => {
+                                                const IconComponent = socialMediaIcons[link.platform] || FaLink;
+                                                return (
+                                                  <a 
+                                                    key={link.platform}
+                                                    href={link.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    className="w-6 h-6 flex items-center justify-center bg-white/10 rounded-full text-[#fffced] hover:bg-[#aa2a46] transition"
+                                                    title={link.name}
+                                                  >
+                                                    <IconComponent size={18} />
+                                                  </a>
+                                                );
+                                              })}
+                                          </div>
+                                      </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -798,21 +886,21 @@ function ContactDesktop() {
             </div>
         </div>
     );
-}
+  };
 
   return (
     <section>
         <div className='Mobile block md:hidden lg:hidden xl:hidden'>
-            <ContactMobile/>
+            {renderContactMobile()}
         </div>
         <div className='Tablet hidden md:block lg:hidden xl:hidden'>
-            <ContactTablet/>
+            {renderContactTablet()}
         </div>
         <div className='Desktop hidden md:hidden lg:block xl:block'>
-            <ContactDesktop/>
+            {renderContactDesktop()}
         </div>
         <div className="Laptop hidden md:hidden lg:hidden xl:hidden">
-            <ContactLaptop/>
+            {renderContactLaptop()}
         </div>
         
     </section>
