@@ -58,6 +58,7 @@ export default function ResponsiveNavbar() {
                 <>
                   <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin Dashboard</Link>
                   <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold">📧 Newsletter</Link>
+                  <Link to="/admin/faq" className="text-[#f7c900] font-semibold">❓ FAQ Management</Link>
                 </>
               )}
             </ul>
@@ -135,6 +136,7 @@ export default function ResponsiveNavbar() {
             <>
               <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin</Link>
               <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold">📧 Newsletter</Link>
+              <Link to="/admin/faq" className="text-[#f7c900] font-semibold">❓ FAQ</Link>
             </>
           )}
         </ul>

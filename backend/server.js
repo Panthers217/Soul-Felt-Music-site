@@ -16,6 +16,7 @@ import eventsRouter from './routes/events.js';
 import contactRouter from './routes/contact.js';
 import newsletterRouter from './routes/newsletter.js';
 import newsletterCampaignsRouter from './routes/newsletter-campaigns.js';
+import faqRouter from './routes/faq.js';
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { getTables } from './controllers/admin/adminController.js';
@@ -97,6 +98,7 @@ app.use('/api/events', eventsRouter);
 app.use('/api/contact', contactRouter);
 app.use('/api/newsletter', newsletterRouter);
 app.use('/api/newsletter', newsletterCampaignsRouter);
+app.use('/api/faq', faqRouter);
 app.get('/', (req, res) => {
   res.send('Soul Felt Music API is running');
 });

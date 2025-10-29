@@ -502,7 +502,7 @@ export async function updateRecord(req, res) {
     const filteredUpdates = filterEmptyFields(
       Object.fromEntries(
         Object.entries(updates).filter(
-          ([field]) => field !== 'id'
+          ([field]) => field !== 'id' && field !== 'created_at' && field !== 'updated_at'
         )
       )
     );

@@ -26,6 +26,8 @@ import SignUp from "./components/SignUp"; // Assuming you have a SignUp componen
 import Login from "./components/Login"; // Assuming you have a Login component
 import UploadNewArtist from './components/adminComponents/UploadNewArtist';
 import NewsletterCampaigns from './components/adminComponents/NewsletterCampaigns';
+import FaqManagement from './components/adminComponents/FaqManagement';
+import Faq from './pages/Faq';
 import ThemeDemo from './components/ThemeDemo';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
@@ -80,6 +82,9 @@ function App() {
     if (location.pathname === '/admin/newsletter') {
       return <NewsletterCampaigns />;
     }
+    if (location.pathname === '/admin/faq') {
+      return <FaqManagement />;
+    }
     
     return <AdminDashboard />;
   }
@@ -103,6 +108,7 @@ function App() {
             <Route path="/news" element={<News />} />
             <Route path="/videos" element={<Videos />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<Faq />} />
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
             <Route path="/artist/:id" element={<ArtistOverview />} />
@@ -112,6 +118,7 @@ function App() {
             <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin login route */}
             <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
             <Route path="/admin/newsletter" element={<AdminDashboardRoute />} /> {/* Protected newsletter campaigns route */}
+            <Route path="/admin/faq" element={<AdminDashboardRoute />} /> {/* Protected FAQ management route */}
             {/* Add more routes as needed */}
           </Routes>
         </main>
