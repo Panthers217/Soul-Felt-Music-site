@@ -28,6 +28,7 @@ import UploadNewArtist from './components/adminComponents/UploadNewArtist';
 import NewsletterCampaigns from './components/adminComponents/NewsletterCampaigns';
 import FaqManagement from './components/adminComponents/FaqManagement';
 import Faq from './pages/Faq';
+import Terms from './pages/Terms';
 import ThemeDemo from './components/ThemeDemo';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
@@ -109,6 +110,7 @@ function App() {
             <Route path="/videos" element={<Videos />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
             <Route path="/artist/:id" element={<ArtistOverview />} />

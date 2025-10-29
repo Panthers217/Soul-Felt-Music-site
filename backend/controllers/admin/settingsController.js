@@ -119,6 +119,29 @@ export async function getContactInfo(req, res) {
 }
 
 /**
+ * Get terms of service (public endpoint)
+ * @route GET /api/settings/terms
+ */
+export async function getTerms(req, res) {
+  try {
+    const [settings] = await pool.query(
+      `SELECT terms_of_service FROM website_settings ORDER BY id DESC LIMIT 1`
+    );
+    
+    if (settings.length === 0 || !settings[0].terms_of_service) {
+      return res.json({ 
+        terms_of_service: '<h1>Terms of Service</h1><p>Terms content not yet configured.</p>' 
+      });
+    }
+    
+    res.json({ terms_of_service: settings[0].terms_of_service });
+  } catch (error) {
+    console.error('Error fetching terms:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
  * Get feature toggles (public endpoint)
  * @route GET /api/settings/features
  */
@@ -228,7 +251,8 @@ export async function updateSettings(req, res) {
       site_description,
       site_keywords,
       items_per_page,
-      max_upload_size_mb
+      max_upload_size_mb,
+      terms_of_service
     } = req.body;
 
     // Build dynamic update query
@@ -292,6 +316,7 @@ export async function updateSettings(req, res) {
     if (site_keywords !== undefined) { updates.push('site_keywords = ?'); values.push(site_keywords); }
     if (items_per_page !== undefined) { updates.push('items_per_page = ?'); values.push(items_per_page); }
     if (max_upload_size_mb !== undefined) { updates.push('max_upload_size_mb = ?'); values.push(max_upload_size_mb); }
+    if (terms_of_service !== undefined) { updates.push('terms_of_service = ?'); values.push(terms_of_service); }
 
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
