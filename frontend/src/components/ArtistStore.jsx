@@ -1,8 +1,8 @@
 // Demo merch products
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useApiData } from "../context/ApiDataContext.jsx";
 import SearchBar from "./SearchBar.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { useFeatures } from "../context/FeaturesContext.jsx";
 import NotAvailableModal from "./modal/NotAvailableModal.jsx";
@@ -119,7 +119,7 @@ function ArtistStoreHeader({
 }
 
 // Component to display album with associated tracks
-function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCart }) {
+function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCart, isHighlighted, albumRef }) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
@@ -142,7 +142,14 @@ function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCa
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full bg-[#21212b]/50 rounded-lg p-6 border border-[#6e5049]/20">
+    <div 
+      ref={albumRef}
+      className={`flex flex-col lg:flex-row gap-6 w-full bg-[#21212b]/50 rounded-lg p-6 border transition-all duration-500 ${
+        isHighlighted 
+          ? 'border-[#aa2a46] border-2 shadow-lg shadow-[#aa2a46]/50' 
+          : 'border-[#6e5049]/20'
+      }`}
+    >
       <NotAvailableModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -473,6 +480,9 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
     useCart();
   const { isEnabled } = useFeatures();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightedAlbumId = searchParams.get('albumId');
+  const albumRefs = useRef({});
   const tabs = ["All Products", "Music", "Merchandise"];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [viewMode, setViewMode] = useState("all"); // "all", "albums", "tracks"
@@ -494,6 +504,19 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       console.log('Artist Image URL:', artistImageUrl);
     }
   }, [artistId, artistData, artistImageUrl]);
+
+  // Scroll to highlighted album when component loads
+  useEffect(() => {
+    if (highlightedAlbumId && albumRefs.current[highlightedAlbumId]) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        albumRefs.current[highlightedAlbumId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 300);
+    }
+  }, [highlightedAlbumId, dbSnapshot]);
 
   // Use search results if available, otherwise use full data
   const sourceAlbums = searchResults
@@ -877,6 +900,8 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
                   track => track.album_id === item.albumId
                 );
                 
+                const isHighlighted = highlightedAlbumId && item.albumId === parseInt(highlightedAlbumId);
+                
                 return (
                   <AlbumWithTracks
                     key={idx}
@@ -885,6 +910,8 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
                     dbSnapshot={dbSnapshot}
                     isStripeEnabled={isStripeEnabled}
                     onAddToCart={() => handleAddToCart(item)}
+                    isHighlighted={isHighlighted}
+                    albumRef={isHighlighted ? (el) => albumRefs.current[item.albumId] = el : null}
                   />
                 );
               }

@@ -114,6 +114,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
             <Route path="/artist/:id" element={<ArtistOverview />} />
+            <Route path="/artist/:artist-name/:id" element={<ArtistOverview />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/theme-demo" element={<ThemeDemo />} /> {/* Theme settings demo */}
