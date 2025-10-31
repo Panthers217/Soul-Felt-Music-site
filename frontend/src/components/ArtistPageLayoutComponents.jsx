@@ -477,10 +477,10 @@ const ArtistPageComponent = () => {
           <div className="absolute top-0 left-0 w-full h-full bg-black/25 rounded-[3px]" />
           <div className="absolute w-full h-full flex flex-col justify-center items-center p-12 z-10">
             <div className="text-center text-white text-2xl font-bold font-['Roboto'] leading-10">
-              Hip-Hop Chart 100
+              Top Tracks
             </div>
             <div className="text-center text-white/50 text-base font-normal font-['Roboto'] leading-normal">
-              The hottest rap right now.
+              Discover what's trending now.
             </div>
           </div>
         </div>

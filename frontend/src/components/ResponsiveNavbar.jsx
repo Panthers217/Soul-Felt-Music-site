@@ -114,7 +114,7 @@ export default function ResponsiveNavbar() {
 
   const DesktopNavbar = () => {
     return (
-      <nav className="bg-[#1a0b0d] w-full flex items-center">
+      <nav className="bg-[#1a0b0d] w-full flex items-center flex-wrap">
         {/* Logo Section */}
         <div className="flex flex-col items-center justify-center px-6 py-2 bg-[#0c0504]" style={{ minWidth: 145 }}>
           <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>

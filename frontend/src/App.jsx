@@ -30,6 +30,7 @@ import FaqManagement from './components/adminComponents/FaqManagement';
 import Faq from './pages/Faq';
 import Terms from './pages/Terms';
 import ThemeDemo from './components/ThemeDemo';
+import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
 import { Navigate, useParams } from 'react-router-dom';
@@ -93,6 +94,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        <ScrollToTop />
         <Toaster />
         {/* <NavBar /> */}
         <ResponsiveNavbar />
