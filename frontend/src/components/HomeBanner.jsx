@@ -12,7 +12,7 @@ import { useApiData } from "../context/ApiDataContext.jsx";
 
 const DemoBannerMobile = ({ albumImages, fadeOut }) => {
   return (
-    <div data-layer="Frame 32" className="Frame32  w-[425px] h-auto aspect-[425/630] minMobile:aspect-[320/475]  relative bg-[#101516]">
+    <div data-layer="Frame 32" className="Frame32  w-[20rem] h-auto aspect-[425/630] minMobile:aspect-[320/475]  relative bg-[#101516]">
        {/* welcome logo */}
 
       <div data-layer="WelcomeSvg" className="Welcomesvg z-10 w-full h-48 left-0 top-[0%] minMobile:ml-[11%]  absolute">
@@ -56,25 +56,23 @@ const DemoBannerMobile = ({ albumImages, fadeOut }) => {
 
 
 const DemoBannerTablet = ({ albumImages, fadeOut }) => {
+  console.log("🖥️ DemoBannerTablet is rendering");
   return (
-    <div className="relative w-full max-w-[900px] aspect-[900/700] mx-auto bg-[#101516] flex flex-col items-center justify-center overflow-hidden rounded-[2vw]">
+    <div className="relative w-full max-w-[1440px] mt-[-30%] aspect-[1/1] mx-auto bg-[#101516] flex flex-col items-center justify-center  rounded-[1.4vw]">
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-full bg-white rounded-[2vw] z-0" />
+      <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" />
       {/* Inner dark frame */}
-      <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[2vw] z-0" />
-     
-      {/* Welcome logo */}
-      <div className="absolute  left-[5%] top-0 w-[40vw] max-w-[443px] h-[60%] z-10 pointer-events-none">
+      <div className="absolute inset-0 w-full h-[max-content] bg-[#101516] rounded-[1.4vw] z-0" />
+      {/* Welcome SVG */}
+      <div className="relative left-0 top-[30%] w-[50vw] max-w-[606px] h-[60%] z-10 pointer-events-none">
         <img
           className="w-full h-full object-contain"
           src={heroWelcomePic}
           alt="Welcome"
         />
       </div>
-
-
       {/* Hero Image */}
-      <div className="absolute left-none top-[22%] w-[59%] max-w-[530px] h-[63%] max-h-[442px] z-0">
+      <div className="absolute left-[0%] top-[45%] pl-[10%] w-[100%]  h-[63.5%] max-h-[442px] z-20">
         {/* <img
           className="w-full h-full object-cover rounded-[1vw] shadow-lg border border-black"
           src={heroPic1}
@@ -83,21 +81,21 @@ const DemoBannerTablet = ({ albumImages, fadeOut }) => {
          <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
       </div>
       {/* Main Content */}
-      <div className="absolute w-full h-full flex flex-col justify-center items-center z-50 pt-[12%] pb-[4%] px-[8%] pointer-events-none">
-        <div className={`mainTitle absolute text-center text-[#fffced] font-bold font-['Roboto'] leading-[1.1] text-[clamp(2rem,5vw,3.5rem)] mb-[12%] transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
+      <div className="relative w-full h-full flex flex-col justify-center items-center z-50 pt-[10%] pb-[3%] px-[12%] pointer-events-none">
+        <div className={`mainTitle text-center text-[#fffced] font-bold font-['Roboto'] leading-[1.1] text-[clamp(2.5rem,6vw,5rem)] mb-[4vw] transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
           Experience the Soul of Music
         </div>
-        <div className="  w-full flex flex-row justify-center items-center gap-[3vw] mt-[3%] pointer-events-auto">
-          <Link to="/music" className="flex-0 px-[2vw] py-[1vw] bg-[#aa2a46] hover:bg-[#8b1f35] hover:scale-105 hover:shadow-lg active:scale-100 rounded-[0.7vw] shadow-md text-[#fffced] text-[clamp(1rem,2vw,1.5rem)] font-medium font-['Roboto'] transition-all duration-200">
+        <div className="w-full flex flex-row justify-center items-center gap-[2vw] mb-[15%] pointer-events-auto">
+          <Link to="/music" className="flex-0 px-[2vw] py-[1vw] bg-[#aa2a46] hover:bg-[#8b1f35] hover:scale-105 hover:shadow-lg active:scale-100 rounded-[0.7vw] shadow-md text-[#fffced] text-[clamp(1.2rem,2vw,2rem)] font-medium font-['Roboto'] transition-all duration-200">
             Explore Music
           </Link>
-          <Link to="/sign-up" className="flex-0 px-[2vw] py-[1vw] bg-green-600 hover:bg-green-700 hover:scale-105 hover:shadow-lg active:scale-100 rounded-[0.7vw] shadow-md outline outline-1 outline-green-500/20 text-[#fffced] text-[clamp(1rem,2vw,1.5rem)] font-medium font-['Roboto'] transition-all duration-200">
+          <Link to="/sign-up" className="flex-0 px-[2vw] py-[1vw] bg-green-600 hover:bg-green-700 hover:scale-105 hover:shadow-lg active:scale-100 rounded-[0.7vw] shadow-md outline outline-1 outline-green-500/20 text-[#fffced] text-[clamp(1.2rem,2vw,2rem)] font-medium font-['Roboto'] transition-all duration-200">
             Join Now
           </Link>
         </div>
 
          {/* page indicator */}
-        <div className=" absolute mt-[50%] w-full flex flex-row justify-center items-center gap-[1vw]">
+        <div className="absolute bottom-[13%] w-full flex flex-row justify-center items-center gap-[1vw]">
           {/* <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#fffced]/30 rounded-full" />
           <div className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] bg-[#aa2a46] rounded-full" /> */}
@@ -110,11 +108,11 @@ const DemoBannerTablet = ({ albumImages, fadeOut }) => {
 };
 const DemoBannerLaptop = ({albumImages, fadeOut}) => {
   return (
-    <div className="relative w-full max-w-[1440px] aspect-[1440/700] mx-auto bg-[#101516] flex flex-col items-center justify-center overflow-hidden rounded-[1.4vw]">
+    <div className="relative w-full max-w-[1440px] aspect-[1440/700] mx-auto bg-[#101516] flex flex-col items-center justify-center  rounded-[1.4vw]">
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-full bg-white rounded-[1.4vw] z-0" />
+      <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" />
       {/* Inner dark frame */}
-      <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[1.4vw] z-0" />
+      <div className="absolute inset-0 w-full h-[max-content] bg-[#101516] rounded-[1.4vw] z-0" />
       {/* Welcome SVG */}
       <div className="absolute left-0 top-0 w-[30vw] max-w-[606px] h-[60%] z-10 pointer-events-none">
         <img
@@ -130,14 +128,14 @@ const DemoBannerLaptop = ({albumImages, fadeOut}) => {
           src={heroPic1}
           alt="Hero"
         /> */}
-          <FadeCarousel images={[heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
+         <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
       </div>
       {/* Main Content */}
       <div className="relative w-full h-full flex flex-col justify-center items-center z-50 pt-[10%] pb-[3%] px-[12%] pointer-events-none">
         <div className={`mainTitle text-center text-[#fffced] font-bold font-['Roboto'] leading-[1.1] text-[clamp(2.5rem,6vw,5rem)] mb-[4vw] transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
           Experience the Soul of Music
         </div>
-        <div className="w-full flex flex-row justify-center items-center gap-[2vw] mb-[5%] pointer-events-auto">
+        <div className="w-full flex flex-row justify-center items-center gap-[2vw] mb-[15%] pointer-events-auto">
           <Link to="/music" className="flex-0 px-[2vw] py-[1vw] bg-[#aa2a46] hover:bg-[#8b1f35] hover:scale-105 hover:shadow-lg active:scale-100 rounded-[0.7vw] shadow-md text-[#fffced] text-[clamp(1.2rem,2vw,2rem)] font-medium font-['Roboto'] transition-all duration-200">
             Explore Music
           </Link>
@@ -166,9 +164,9 @@ const DemoBannerDesktop = ({albumImages, fadeOut}) => {
       className="HeroSectionDesktop w-full  aspect-[1920/928]  rounded-none flex flex-col justify-center items-center overflow-hidden relative bg-[#101516] mx-auto"
     >
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-full bg-white rounded-[1.4vw] z-0" />
+      <div className="absolute inset-0 w-full h-full bg-white rounded-[none] z-0" />
       {/* Inner dark frame */}
-      <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[1.4vw] z-0" />
+      <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[none] z-0" />
       {/* Welcome SVG */}
       <div className="absolute left-[-6.3vw] top-[-13%] w-[50vw] max-w-[808px] h-[87%] z-10 pointer-events-none">
         <img
@@ -184,7 +182,7 @@ const DemoBannerDesktop = ({albumImages, fadeOut}) => {
           src={heroPic1}
           alt="Hero"
         /> */}
-          <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw] shadow-lg border border-black absolute`} imageVisibility={true} indicatorVisibility={false} />
+          <FadeCarousel images={albumImages.length > 0 ? albumImages.map(img => img.src) : [heroPic1, heroWelcomePic]} interval={3500} ImageDivName={`w-full h-full object-cover rounded-[1vw]  absolute`} imageVisibility={true} indicatorVisibility={false} />
       </div>
       {/* Main Content */}
       <div className="relative w-full text-nowrap h-full flex flex-col justify-center items-center z-50 pt-[8%] pb-[3%] px-[12%] pointer-events-none">
@@ -248,7 +246,7 @@ const HomeBanner = () => {
     <DemoBannerMobile albumImages={albumImages} fadeOut={fadeOut} />
   </div>
   {/* Tablet only */}
-  <div className="hidden md:block lg:hidden xl:hidden sm:hidden">
+  <div className="hidden sm:hidden md:flex lg:hidden xl:hidden">
 
     <DemoBannerTablet albumImages={albumImages} fadeOut={fadeOut} />
   </div>

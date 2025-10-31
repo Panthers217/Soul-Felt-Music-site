@@ -8,11 +8,11 @@ export const FadeCarouselImages = ({ images, current, ImageDivName, isVisible=tr
   return (
     <>
       {images.map((img, idx) => (
-        <img
+        <img  
           key={idx}
           src={img}
           alt={img}
-          className={
+          className={`flex sm:w-[320px] md:w-[480px] md:h-[489px] xl:h-[482px] xl:w-[482px] ` +
             fadeBase +
             (idx === current
               ? " opacity-100 z-10"
@@ -64,7 +64,7 @@ const FadeCarousel = ({ images, interval = 3500, ImageDivName, indicatorDivName,
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full lg:ml-[-15%] lg:w-[350px] lg:h-[350px]">
       <FadeCarouselImages images={images} current={current} ImageDivName={ImageDivClass} isVisible={imageVisibility}  />
       <FadeCarouselIndicator images={images} current={current} goTo={goTo} isVisible={indicatorVisibility} indicatorDivName={indicatorDivClass} />
     </div>

@@ -400,6 +400,25 @@ function ArtistOverview() {
   console.log("Genre parsed from database:", genre);
   console.log("Artist rating:", album);
 
+  // Optimize background image URL for performance
+  const getOptimizedImageUrl = (url) => {
+    if (!url) return null;
+    
+    // If it's a Cloudinary URL, add optimization parameters
+    if (url.includes('cloudinary.com')) {
+      // Insert transformation parameters before the upload path
+      const optimized = url.replace(
+        '/upload/',
+        '/upload/f_auto,q_auto,w_1920,/'
+      );
+      return optimized;
+    }
+    
+    return url;
+  };
+
+  const optimizedBackgroundUrl = getOptimizedImageUrl(artistImageUrl);
+
   // Handle follow/unfollow artist
   const handleFollowClick = async () => {
     if (!websiteUser) {
@@ -449,7 +468,28 @@ function ArtistOverview() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[#0f1116] text-white">
+    <div className="relative flex flex-col min-h-screen w-full bg-[#0f1116] text-white overflow-hidden">
+      {/* Artist Background Image */}
+      {optimizedBackgroundUrl && (
+        <div 
+          className="fixed inset-0 opacity-60 pointer-events-none z-0"
+          style={{
+            backgroundImage: `url(${optimizedBackgroundUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+          }}
+        >
+          {/* Multi-layer gradient overlays for modern effect */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f1116]/80 via-[#0f1116]/50 to-[#0f1116]/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1116]/70 via-transparent to-[#0f1116]/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1116]/70 via-transparent to-transparent"></div>
+        </div>
+      )}
+      
+      {/* Content layer with relative positioning */}
+      <div className="relative z-10 w-full">
       {/* Header block */}
       <div className="mx-auto w-[92%] md:w-[90%] lg:w-[86%]">
         {/* Mobile: image above, info below */}
@@ -697,6 +737,7 @@ function ArtistOverview() {
         supportText={album.support_text}
         artistId={album?.id}
       />
+      </div>
     </div>
   );
 }
