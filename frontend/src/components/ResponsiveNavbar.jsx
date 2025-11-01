@@ -78,6 +78,15 @@ export default function ResponsiveNavbar() {
                         </span>
                       </div>
                     </div>
+                    <Link 
+                      to="/purchase-history"
+                      className="text-[#e6cfa7] text-base hover:text-[#f7c900] transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      My Purchases
+                    </Link>
                     <button 
                       onClick={handleSignOut}
                       className="text-[#c90036] text-base hover:text-[#1976d2] transition-colors"
@@ -150,10 +159,19 @@ export default function ResponsiveNavbar() {
                     {websiteUser.email?.[0]?.toUpperCase() || 'U'}
                   </span>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-1">
                   <span className="text-[#e6cfa7] text-sm font-medium truncate max-w-[120px]">
                     {websiteUser.email}
                   </span>
+                  <Link 
+                    to="/purchase-history"
+                    className="text-[#e6cfa7] text-xs hover:text-[#f7c900] transition-colors text-left flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    My Purchases
+                  </Link>
                   <button 
                     onClick={handleSignOut}
                     className="text-[#c90036] text-xs hover:text-[#1976d2] transition-colors text-left"

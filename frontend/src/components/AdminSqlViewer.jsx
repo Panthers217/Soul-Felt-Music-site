@@ -35,6 +35,25 @@ function AdminSqlViewer({ dbSnapshot }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [recordsState, setRecordsState] = useState([]);
 
+  // Helper function to safely render cell values
+  const renderCellValue = (value) => {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    
+    // If it's an object or array, stringify it for display
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return "[Complex Object]";
+      }
+    }
+    
+    // For primitive types, convert to string
+    return String(value);
+  };
+
   // Declare table, fields, records before using them in getFilteredRecords
   const table = dbSnapshot && selectedTable ? dbSnapshot[selectedTable] : null;
   const fields = table?.fields || [];
@@ -376,7 +395,7 @@ function AdminSqlViewer({ dbSnapshot }) {
                         onDoubleClick={() => handleCellDoubleClick(row, field)}
                         title="Double click to manage record"
                       >
-                        {row[field] ? row[field] : ""}
+                        {renderCellValue(row[field])}
                       </td>
                     ))}
                   </tr>

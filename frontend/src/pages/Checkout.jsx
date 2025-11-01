@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import toast from 'react-hot-toast';
+import { useUserLogin } from '../hooks/useUserLogin';
+import { auth } from '../firebase';
 
 // Initialize Stripe (you'll need to add your publishable key)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_key_here');
@@ -14,10 +16,11 @@ function CheckoutForm() {
   const elements = useElements();
   const { cart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
+  const { user } = useUserLogin();
   const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
-    email: '',
-    name: '',
+    email: user?.email || '',
+    name: user?.displayName || '',
     address: '',
     city: '',
     state: '',
@@ -58,16 +61,25 @@ function CheckoutForm() {
     setProcessing(true);
 
     try {
+      // Get Firebase auth token if user is logged in
+      const token = user ? await auth.currentUser?.getIdToken() : null;
+      
       // Create payment intent on your backend
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/payments/create-payment-intent`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           amount: Math.round(finalTotal * 100), // Convert to cents
           cart: cart,
-          customerInfo: customerInfo
+          customerInfo: customerInfo,
+          userEmail: user?.email // Send user email for database lookup
         }),
       });
 
