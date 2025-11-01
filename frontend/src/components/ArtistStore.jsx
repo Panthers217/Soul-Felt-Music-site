@@ -7,6 +7,8 @@ import { useCart } from "../context/CartContext.jsx";
 import { useFeatures } from "../context/FeaturesContext.jsx";
 import NotAvailableModal from "./modal/NotAvailableModal.jsx";
 import TrackCard from "./TrackCard.jsx";
+import CartSummary from "./CartSummary.jsx";
+import { getArtistDataById } from "../utils/artistDataHelper.js";
 
 const demoMerchProducts = [
   {
@@ -552,6 +554,11 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       }
 
       return {
+        id: album.id,
+        trackId: null,
+        albumId: album.id,
+        artistId: album.artist_id,
+        artist_name: getArtistDataById(album.artist_id, dbSnapshot)?.name || 'Unknown Artist',
         type:
           album.album_type === "digital"
             ? "Digital Album"
@@ -561,10 +568,10 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
         title: album.title || "Untitled Album",
         price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: album.cover_url || "https://placehold.co/265x265",
-        album_type: album.album_type,
-        artistId: album.artist_id,
-        albumId: album.id,
-        purchaseLink: album.purchase_link,
+        album_type: album.album_type || 'digital',
+        merch_type: undefined,
+        purchaseLink: album.purchase_link || '',
+        audioUrl: undefined,
       };
     });
   }
@@ -616,14 +623,20 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       );
 
       return {
+        id: track.id,
+        trackId: track.id,
+        albumId: track.album_id || null,
+        artistId: track.artist_id,
+        artist_name: getArtistDataById(track.artist_id, dbSnapshot)?.name || 'Unknown Artist',
         type: "Track",
         title: track.title || "Untitled Track",
         price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: album?.cover_url || "https://placehold.co/265x265",
         isTrack: true,
-        artistId: track.artist_id,
-        purchaseLink: track.purchase_link,
-        audioUrl: track.promo_audio_url,
+        album_type: undefined,
+        merch_type: undefined,
+        purchaseLink: track.purchase_link || '',
+        audioUrl: track.promo_audio_url || '',
       };
     });
   }
@@ -851,44 +864,8 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
             </div>
           )}
           {/* Cart display - only show when Stripe is enabled */}
-          {isStripeEnabled && cart.length > 0 && (
-            <div className="w-full max-w-lg bg-[#21212b] rounded-md shadow-md p-4 mb-6">
-              <h3 className="text-[#aa2a46] text-lg font-bold mb-2">
-                Your Cart
-              </h3>
-              <ul className="mb-2">
-                {cart.map((item) => (
-                  <li
-                    key={item.cartId}
-                    className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20"
-                  >
-                    <span className="text-white text-sm">{item.title}</span>
-                    <span className="text-white text-sm">{item.price}</span>
-                    <button
-                      className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs hover:bg-[#d94a6a] transition-colors"
-                      onClick={() => removeFromCart(item.cartId)}
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="text-white font-bold mb-4">
-                Total:{" "}
-                {getCartTotal().toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-              </div>
-              <button
-                onClick={() => navigate("/checkout")}
-                className="w-full py-3 bg-gradient-to-r from-[#aa2a46] to-[#d63c65] text-[#fffced] rounded-lg font-bold hover:from-[#d63c65] hover:to-[#aa2a46] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              >
-                <span className="i-lucide-shopping-bag"></span>
-                Proceed to Checkout
-              </button>
-            </div>
-          )}
+          {isStripeEnabled && <CartSummary />}
+          
           <div className={`${getMerchCardGridClass()}`}>
             {filteredProducts.map((item, idx) => {
               // Check if this is an album and we should show tracks

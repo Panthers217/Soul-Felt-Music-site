@@ -18,7 +18,7 @@ function Wavelength({ playing }) {
   );
 }
 
-function TrackCard({ track, albumCoverUrl, purchaseLink }) {
+function TrackCard({ track, albumCoverUrl, purchaseLink, artistName }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -50,11 +50,20 @@ function TrackCard({ track, albumCoverUrl, purchaseLink }) {
       // Add to cart when Stripe is enabled
       e.preventDefault();
       const cartItem = {
+        id: track.id,
+        trackId: track.id,
+        albumId: track.album_id || null,
+        artistId: track.artist_id || null,
+        artist_name: artistName || track.artist_name || track.artist || 'Unknown Artist',
         type: 'Track',
         title: track.title,
         price: formatPrice(track.track_pricing),
         img: albumCoverUrl,
-        artist_name: track.artist_name
+        isTrack: true,
+        album_type: undefined,
+        merch_type: undefined,
+        purchaseLink: purchaseLink || '',
+        audioUrl: track.promo_audio_url || '',
       };
       addToCart(cartItem);
     } else {

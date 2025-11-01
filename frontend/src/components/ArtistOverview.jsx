@@ -9,6 +9,9 @@ import { auth } from "../firebase";
 import NotAvailableModal from "./modal/NotAvailableModal";
 import { Music, Instagram, Facebook, Youtube } from "lucide-react";
 import { FaSpotify, FaApple, FaTiktok, FaXTwitter } from "react-icons/fa6";
+import { useFeatures } from "../context/FeaturesContext";
+import { useCart } from "../context/CartContext";
+import CartSummary from "./CartSummary";
 
 /**
  * ArtistOverview.jsx
@@ -69,6 +72,10 @@ function FeaturedTracks({ tracks, artistId }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const { websiteUser } = useApiData();
+  const { isEnabled } = useFeatures();
+  const { addToCart } = useCart();
+  
+  const isStripeEnabled = isEnabled('enable_stripe');
 
   // Generate or retrieve session ID for anonymous users
   const getSessionId = () => {
@@ -121,10 +128,34 @@ function FeaturedTracks({ tracks, artistId }) {
     }
   };
 
-  const handleBuyClick = (e, purchaseLink) => {
-    if (!purchaseLink) {
+  // Format price from cents to dollars
+  const formatPrice = (cents) => {
+    const price = Number(cents);
+    return isNaN(price) ? '$0.00' : `$${(price / 100).toFixed(2)}`;
+  };
+
+  const handleBuyClick = (e, track) => {
+    if (isStripeEnabled) {
+      // Add to cart when Stripe is enabled
       e.preventDefault();
-      setShowModal(true);
+      const cartItem = {
+        id: track.id,
+        trackId: track.id,
+        type: 'Track',
+        title: track.title,
+        price: formatPrice(track.track_pricing),
+        img: track.img,
+        artist_name: track.artist_name || 'Unknown Artist',
+        artistId: artistId
+      };
+      addToCart(cartItem);
+      console.log('Added track to cart:', cartItem);
+    } else {
+      // Use purchaseLink when Stripe is disabled
+      if (!track.purchaseLink) {
+        e.preventDefault();
+        setShowModal(true);
+      }
     }
   };
 
@@ -226,16 +257,26 @@ function FeaturedTracks({ tracks, artistId }) {
                 )}
 
                 {/* Action Button */}
-                <a 
-                  href={track.purchaseLink || '#'} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  onClick={(e) => handleBuyClick(e, track.purchaseLink)}
-                  className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
-                >
-                  <span className="i-lucide-shopping-cart text-xs" />
-                  Buy Now
-                </a>
+                {isStripeEnabled ? (
+                  <button
+                    onClick={(e) => handleBuyClick(e, track)}
+                    className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
+                  >
+                    <span className="i-lucide-shopping-cart text-xs" />
+                    Add to Cart
+                  </button>
+                ) : (
+                  <a 
+                    href={track.purchaseLink || '#'} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={(e) => handleBuyClick(e, track)}
+                    className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
+                  >
+                    <span className="i-lucide-shopping-cart text-xs" />
+                    Buy Now
+                  </a>
+                )}
               </div>
             </div>
           ))}
@@ -307,6 +348,9 @@ function ArtistOverview() {
     JSON.parse(sessionStorage.getItem(`album:${id}`) || "null"); //Fallback
   
   const { websiteUser } = useApiData();
+  const { isEnabled } = useFeatures();
+  
+  const isStripeEnabled = isEnabled('enable_stripe');
   
   // Follow artist state
   const [isFollowing, setIsFollowing] = useState(false);
@@ -727,6 +771,13 @@ function ArtistOverview() {
           </div>
         </div>
       </section>
+
+      {/* Cart Summary - only show when Stripe is enabled */}
+      {isStripeEnabled && (
+        <div className="mx-auto mt-6 md:mt-10 lg:mt-12 w-[92%] md:w-[90%] lg:w-[86%] flex justify-center">
+          <CartSummary />
+        </div>
+      )}
 
       <FeaturedTracks tracks={featuredTracks} artistId={album?.id} />
 

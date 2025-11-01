@@ -12,6 +12,7 @@ import statsScheduleRouter, { readScheduleConfig } from './routes/statsSchedule.
 import genreRouter from './routes/genre.js';
 import settingsRouter from './routes/settings.js';
 import paymentsRouter from './routes/payments.js';
+import purchaseHistoryRouter from './routes/purchase-history.js';
 import eventsRouter from './routes/events.js';
 import contactRouter from './routes/contact.js';
 import newsletterRouter from './routes/newsletter.js';
@@ -94,6 +95,7 @@ app.use('/api/admin', statsScheduleRouter);
 app.use('/api', genreRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/purchase-history', purchaseHistoryRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/contact', contactRouter);
 app.use('/api/newsletter', newsletterRouter);

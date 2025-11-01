@@ -6,11 +6,12 @@ import { useNavigate } from "react-router-dom";
 import TrackCard from "./TrackCard";
 import AlbumCard from "./AlbumCard";
 import SearchBar from "./SearchBar";
+import CartSummary from "./CartSummary";
 import axios from "axios";
 
 const Music = () => {
   const { dbSnapshot } = useApiData();
-  const { cart, removeFromCart, getCartTotal } = useCart();
+  const { cart } = useCart();
   const { isEnabled } = useFeatures();
   const navigate = useNavigate();
   const [activeTabs, setActiveTabs] = useState(["all"]);
@@ -56,6 +57,13 @@ const Music = () => {
   const tracks = dbSnapshot?.promotional_tracks?.records || [];
   const albums = dbSnapshot?.albums?.records || [];
   const artistImages = dbSnapshot?.artist_images?.records || [];
+  const artists = dbSnapshot?.artists?.records || [];
+
+  // Helper function to get artist name by artist_id
+  const getArtistName = (artistId) => {
+    const artist = artists.find((a) => a.id === artistId);
+    return artist?.artist_name || artist?.name || 'Unknown Artist';
+  };
 
   // Helper function to get album cover URL by album_id
   const getAlbumCoverUrl = (albumId) => {
@@ -178,42 +186,9 @@ const Music = () => {
         </div>
         
         {/* Cart display - only show when Stripe is enabled */}
-        {isStripeEnabled && cart.length > 0 && (
-          <div className="w-full max-w-lg mx-auto bg-[#21212b] rounded-md shadow-md p-4 mb-6">
-            <h3 className="text-[#aa2a46] text-lg font-bold mb-2">
-              Your Cart
-            </h3>
-            <ul className="mb-2">
-              {cart.map((item) => (
-                <li
-                  key={item.cartId}
-                  className="flex justify-between items-center py-1 border-b border-[#aa2a46]/20"
-                >
-                  <span className="text-white text-sm">{item.title}</span>
-                  <span className="text-white text-sm">{item.price}</span>
-                  <button
-                    className="ml-2 px-2 py-1 bg-[#aa2a46] text-white rounded text-xs hover:bg-[#d94a6a] transition-colors"
-                    onClick={() => removeFromCart(item.cartId)}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="text-white font-bold mb-4">
-              Total:{" "}
-              {getCartTotal().toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              })}
-            </div>
-            <button
-              onClick={() => navigate('/checkout')}
-              className="w-full py-3 bg-gradient-to-r from-[#aa2a46] to-[#d63c65] text-[#fffced] rounded-lg font-bold hover:from-[#d63c65] hover:to-[#aa2a46] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-            >
-              <span className="i-lucide-shopping-bag"></span>
-              Proceed to Checkout
-            </button>
+        {isStripeEnabled && (
+          <div className="w-full flex justify-center">
+            <CartSummary />
           </div>
         )}
         
@@ -290,13 +265,17 @@ const Music = () => {
                         track={track}
                         purchaseLink={track.purchase_link}
                         albumCoverUrl={getTrackImage(track)}
+                        artistName={getArtistName(track.artist_id)}
                       />
                     ))
                   ) : (
                     sectionItems.map((album) => (
                       <AlbumCard
                         key={album.id}
-                        album={album}
+                        album={{
+                          ...album,
+                          artist_name: getArtistName(album.artist_id)
+                        }}
                       />
                     ))
                   )}

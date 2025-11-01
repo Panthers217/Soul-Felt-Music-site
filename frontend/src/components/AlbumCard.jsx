@@ -35,11 +35,19 @@ function AlbumCard({ album, purchaseLink }) {
     if (isStripeEnabled) {
       // Add to cart when Stripe is enabled
       const cartItem = {
+        id: album.id,
+        trackId: null,
+        albumId: album.id,
+        artistId: album.artist_id || null,
+        artist_name: album.artist_name || 'Unknown Artist',
         type: album.album_type === 'digital' ? 'Digital Album' : album.album_type === 'vinyl' ? 'Vinyl Record' : 'Album',
         title: album.title || 'Untitled Album',
         price: formatPrice(album.album_pricing),
         img: album.cover_url || 'https://placehold.co/265x265',
-        album_type: album.album_type
+        album_type: album.album_type || 'digital',
+        merch_type: undefined,
+        purchaseLink: album.purchase_link || '',
+        audioUrl: '',
       };
       addToCart(cartItem);
     }  else {

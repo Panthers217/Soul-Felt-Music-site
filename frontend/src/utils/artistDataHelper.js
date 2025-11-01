@@ -97,7 +97,8 @@ export const buildFeaturedTracks = (artistId, artistName, dbSnapshot) => {
     ...track,
     img: getPromotionalTrackImage(track, artistImages, albums),
     promo_audio_url: track.promo_audio_url,
-    artist_name: artistName
+    artist_name: artistName,
+    purchaseLink: track.purchase_link  // Map snake_case to camelCase
   }));
   
   console.log("✅ Returning mapped featured tracks:", mapped);
