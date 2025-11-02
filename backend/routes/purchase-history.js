@@ -4,8 +4,107 @@ import db from '../config/db.js';
 const router = Router();
 
 /**
+ * GET /api/purchase-history/user-email/:email
+ * Get all purchases and order items for a specific user by email
+ */
+router.get('/user-email/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    // First, look up the user_id from the email
+    const [users] = await db.query(
+      'SELECT id FROM user WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.json({
+        email: email,
+        purchase_count: 0,
+        purchases: []
+      });
+    }
+
+    const userId = users[0].id;
+
+    // Get user's purchases with order items
+    const [purchases] = await db.query(
+      `SELECT 
+        p.id as purchase_id,
+        p.order_id,
+        p.stripe_payment_intent_id,
+        p.amount,
+        p.currency,
+        p.payment_status,
+        p.customer_email,
+        p.customer_name,
+        p.item_type,
+        p.purchased_at,
+        p.updated_at,
+        oi.id as order_item_id,
+        oi.item_type as item_type_detail,
+        oi.item_id,
+        oi.item_title,
+        oi.artist_name,
+        oi.quantity,
+        oi.price as item_price
+      FROM purchases p
+      LEFT JOIN order_items oi ON p.id = oi.purchase_id
+      WHERE p.user_id = ?
+      ORDER BY p.purchased_at DESC, oi.id`,
+      [userId]
+    );
+
+    // Group order items by purchase
+    const purchaseMap = {};
+    purchases.forEach(row => {
+      if (!purchaseMap[row.purchase_id]) {
+        purchaseMap[row.purchase_id] = {
+          purchase_id: row.purchase_id,
+          order_id: row.order_id,
+          stripe_payment_intent_id: row.stripe_payment_intent_id,
+          amount: row.amount,
+          currency: row.currency,
+          payment_status: row.payment_status,
+          customer_email: row.customer_email,
+          customer_name: row.customer_name,
+          item_type: row.item_type,
+          purchased_at: row.purchased_at,
+          updated_at: row.updated_at,
+          items: []
+        };
+      }
+
+      if (row.order_item_id) {
+        purchaseMap[row.purchase_id].items.push({
+          order_item_id: row.order_item_id,
+          item_type: row.item_type_detail,
+          item_id: row.item_id,
+          item_title: row.item_title,
+          artist_name: row.artist_name,
+          quantity: row.quantity,
+          price: row.item_price
+        });
+      }
+    });
+
+    const purchaseHistory = Object.values(purchaseMap);
+
+    res.json({
+      email: email,
+      user_id: userId,
+      purchase_count: purchaseHistory.length,
+      purchases: purchaseHistory
+    });
+  } catch (error) {
+    console.error('Error fetching purchase history by email:', error);
+    res.status(500).json({ error: 'Failed to fetch purchase history' });
+  }
+});
+
+/**
  * GET /api/purchase-history/user/:userId
- * Get all purchases and order items for a specific user
+ * Get all purchases and order items for a specific user by ID
  * Admin only or authenticated user viewing their own history
  */
 router.get('/user/:userId', async (req, res) => {
