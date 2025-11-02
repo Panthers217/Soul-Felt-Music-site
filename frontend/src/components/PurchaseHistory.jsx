@@ -19,8 +19,9 @@ export default function PurchaseHistory() {
     async function fetchPurchases() {
       try {
         setLoading(true);
+        // Use email to fetch purchases since backend stores user.id, not Firebase UID
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/purchase-history/user/${websiteUser.uid}`
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/purchase-history/user-email/${encodeURIComponent(websiteUser.email)}`
         );
 
         if (!response.ok) {
@@ -38,7 +39,7 @@ export default function PurchaseHistory() {
     }
 
     fetchPurchases();
-  }, [user, navigate]);
+  }, [websiteUser, navigate]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -60,6 +61,115 @@ export default function PurchaseHistory() {
         return 'text-red-600 bg-red-100';
       default:
         return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const handleDownload = async (item) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      // Show loading state
+      const button = document.activeElement;
+      const originalText = button.textContent;
+      button.textContent = 'Generating...';
+      button.disabled = true;
+
+      const response = await fetch(`${apiUrl}/api/downloads/generate-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          itemType: item.item_type,
+          itemId: item.item_id,
+          userEmail: websiteUser.email
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate download link');
+      }
+
+      const data = await response.json();
+
+      // Handle single or multiple downloads
+      if (data.downloads.length === 1) {
+        // Single track - direct download
+        window.open(data.downloads[0].downloadUrl, '_blank');
+      } else {
+        // Multiple tracks (album) - open all in new tabs with slight delay
+        alert(`Opening ${data.downloads.length} tracks for download. Please allow pop-ups if prompted.`);
+        data.downloads.forEach((download, index) => {
+          setTimeout(() => {
+            window.open(download.downloadUrl, '_blank');
+          }, index * 500); // 500ms delay between each
+        });
+      }
+
+      // Restore button
+      button.textContent = originalText;
+      button.disabled = false;
+
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error.message}`);
+      
+      // Restore button on error
+      const button = document.activeElement;
+      if (button) {
+        button.textContent = 'Download';
+        button.disabled = false;
+      }
+    }
+  };
+
+  const handleDownloadAsZip = async (item) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      // Show loading state
+      const button = document.activeElement;
+      const originalText = button.textContent;
+      button.textContent = 'Creating ZIP...';
+      button.disabled = true;
+
+      const response = await fetch(`${apiUrl}/api/downloads/generate-album-zip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          albumId: item.item_id,
+          userEmail: websiteUser.email
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate ZIP file');
+      }
+
+      const data = await response.json();
+
+      // Open ZIP download
+      alert(`ZIP file ready! Contains ${data.trackCount} tracks. File will download shortly.`);
+      window.open(data.downloadUrl, '_blank');
+
+      // Restore button
+      button.textContent = originalText;
+      button.disabled = false;
+
+    } catch (error) {
+      console.error('ZIP download error:', error);
+      alert(`ZIP creation failed: ${error.message}`);
+      
+      // Restore button on error
+      const button = document.activeElement;
+      if (button) {
+        button.textContent = 'Download as ZIP';
+        button.disabled = false;
+      }
     }
   };
 
@@ -195,15 +305,22 @@ export default function PurchaseHistory() {
                             ${parseFloat(item.price).toFixed(2)}
                           </p>
                           {item.item_type === 'Digital Album' || item.item_type === 'Track' ? (
-                            <button
-                              onClick={() => {
-                                // TODO: Implement download logic
-                                alert(`Download ${item.item_title}`);
-                              }}
-                              className="mt-2 text-xs text-[#aa2a46] hover:underline font-medium"
-                            >
-                              Download
-                            </button>
+                            <div className="mt-2 flex flex-col gap-1">
+                              <button
+                                onClick={() => handleDownload(item)}
+                                className="text-xs text-[#aa2a46] hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Download Tracks
+                              </button>
+                              {/* {item.item_type === 'Digital Album' && (
+                                <button
+                                  onClick={() => handleDownloadAsZip(item)}
+                                  className="text-xs text-[#aa2a46] hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  Download as ZIP
+                                </button>
+                              )} */}
+                            </div>
                           ) : null}
                         </div>
                       </div>
@@ -219,7 +336,7 @@ export default function PurchaseHistory() {
                       <p className="mt-1">Email: {purchase.customer_email}</p>
                     )}
                   </div>
-                  <button
+                  {/* <button
                     onClick={() => {
                       // TODO: Implement order details view
                       navigate(`/order/${purchase.order_id}`);
@@ -227,7 +344,7 @@ export default function PurchaseHistory() {
                     className="text-sm text-[#aa2a46] hover:text-[#8a1f36] font-medium"
                   >
                     View Details →
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))}
