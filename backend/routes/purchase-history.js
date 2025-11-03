@@ -296,10 +296,64 @@ router.get('/order/:orderId', async (req, res) => {
 /**
  * GET /api/purchase-history/stats
  * Get purchase statistics for admin dashboard
+ * Query params: startDate, endDate, artistId, itemType, paymentStatus
  */
 router.get('/stats', async (req, res) => {
   try {
     // TODO: Add admin verification
+
+    const { startDate, endDate, artistId, itemType, paymentStatus } = req.query;
+
+    // Build WHERE clause based on filters
+    let whereConditions = [];
+    let queryParams = [];
+
+    if (paymentStatus) {
+      whereConditions.push('p.payment_status = ?');
+      queryParams.push(paymentStatus);
+    } else {
+      whereConditions.push("p.payment_status = 'succeeded'");
+    }
+
+    if (startDate) {
+      whereConditions.push('p.purchased_at >= ?');
+      queryParams.push(startDate);
+    }
+
+    if (endDate) {
+      whereConditions.push('p.purchased_at <= ?');
+      queryParams.push(endDate);
+    }
+
+    const whereClause = whereConditions.length > 0 
+      ? 'WHERE ' + whereConditions.join(' AND ')
+      : '';
+
+    // Build additional filters for order_items queries
+    let orderItemsWhere = [...whereConditions];
+    let orderItemsParams = [...queryParams];
+
+    // For artist filter, we need to join with product tables
+    let artistJoin = '';
+    if (artistId) {
+      // We'll filter by artist_name for now since artist_id isn't in order_items
+      // This is a workaround - ideally order_items should have artist_id
+      orderItemsWhere.push(`(
+        oi.item_type = 'Album' AND oi.item_id IN (SELECT id FROM albums WHERE artist_id = ?) OR
+        oi.item_type = 'Track' AND oi.item_id IN (SELECT id FROM promotional_tracks WHERE artist_id = ?) OR
+        oi.item_type = 'Merchandise' AND oi.item_id IN (SELECT id FROM merchandise WHERE artist_id = ?)
+      )`);
+      orderItemsParams.push(artistId, artistId, artistId);
+    }
+
+    if (itemType) {
+      orderItemsWhere.push('oi.item_type = ?');
+      orderItemsParams.push(itemType);
+    }
+
+    const orderItemsWhereClause = orderItemsWhere.length > 0
+      ? 'WHERE ' + orderItemsWhere.join(' AND ')
+      : '';
 
     // Total revenue
     const [revenueResult] = await db.query(
@@ -307,43 +361,65 @@ router.get('/stats', async (req, res) => {
         SUM(amount) as total_revenue,
         COUNT(*) as total_orders,
         AVG(amount) as average_order_value
-      FROM purchases 
-      WHERE payment_status = 'succeeded'`
+      FROM purchases p
+      ${whereClause}`,
+      queryParams
     );
 
     // Orders by status
+    const statusWhereConditions = [...whereConditions].filter(c => !c.includes('payment_status'));
+    const statusParams = queryParams.filter((_, i) => !whereConditions[i]?.includes('payment_status'));
+    const statusWhereClause = statusWhereConditions.length > 0
+      ? 'WHERE ' + statusWhereConditions.join(' AND ')
+      : '';
+
     const [statusResult] = await db.query(
       `SELECT 
-        payment_status,
+        p.payment_status,
         COUNT(*) as count,
-        SUM(amount) as total_amount
-      FROM purchases
-      GROUP BY payment_status`
+        SUM(p.amount) as total_amount
+      FROM purchases p
+      ${statusWhereClause}
+      GROUP BY p.payment_status`,
+      statusParams
     );
 
-    // Top selling items
+    // Top selling items - without artist_id since it's not in order_items table
     const [topItemsResult] = await db.query(
       `SELECT 
         oi.item_type,
         oi.item_title,
         oi.artist_name,
-        COUNT(*) as order_count,
+        COUNT(DISTINCT p.id) as order_count,
         SUM(oi.quantity) as total_quantity,
         SUM(oi.price * oi.quantity) as total_revenue
       FROM order_items oi
       JOIN purchases p ON oi.purchase_id = p.id
-      WHERE p.payment_status = 'succeeded'
+      ${orderItemsWhereClause}
       GROUP BY oi.item_type, oi.item_id, oi.item_title, oi.artist_name
       ORDER BY total_quantity DESC
-      LIMIT 10`
+      LIMIT 10`,
+      orderItemsParams
     );
 
-    // Recent purchases (last 7 days)
+    // Recent purchases (last 7 days or filtered date range)
+    const recentWhereConditions = paymentStatus 
+      ? ['payment_status = ?']
+      : ["payment_status = 'succeeded'"];
+    const recentParams = paymentStatus ? [paymentStatus] : [];
+
+    if (startDate && endDate) {
+      recentWhereConditions.push('purchased_at >= ?', 'purchased_at <= ?');
+      recentParams.push(startDate, endDate);
+    } else {
+      recentWhereConditions.push('purchased_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)');
+    }
+
     const [recentResult] = await db.query(
       `SELECT COUNT(*) as count, SUM(amount) as revenue
       FROM purchases
-      WHERE payment_status = 'succeeded'
-      AND purchased_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`
+      WHERE ${recentWhereConditions.join(' AND ')}`,
+      recentParams
     );
 
     res.json({
@@ -354,11 +430,131 @@ router.get('/stats', async (req, res) => {
       },
       by_status: statusResult,
       top_items: topItemsResult,
-      last_7_days: recentResult[0]
+      last_7_days: recentResult[0],
+      filters: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+        artistId: artistId || null,
+        itemType: itemType || null,
+        paymentStatus: paymentStatus || 'succeeded'
+      }
     });
   } catch (error) {
     console.error('Error fetching purchase stats:', error);
     res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+/**
+ * GET /api/purchase-history/artist-revenue
+ * Get revenue breakdown by artist for payout calculations
+ * Query params: startDate, endDate, artistId
+ */
+router.get('/artist-revenue', async (req, res) => {
+  try {
+    // TODO: Add admin verification
+
+    const { startDate, endDate, artistId } = req.query;
+
+    let whereConditions = ["p.payment_status = 'succeeded'"];
+    let queryParams = [];
+
+    if (startDate) {
+      whereConditions.push('p.purchased_at >= ?');
+      queryParams.push(startDate);
+    }
+
+    if (endDate) {
+      whereConditions.push('p.purchased_at <= ?');
+      queryParams.push(endDate);
+    }
+
+    // For artist filtering, we need to check across product tables
+    let artistFilter = '';
+    if (artistId) {
+      artistFilter = `AND (
+        (oi.item_type = 'Album' AND oi.item_id IN (SELECT id FROM albums WHERE artist_id = ?)) OR
+        (oi.item_type = 'Track' AND oi.item_id IN (SELECT id FROM promotional_tracks WHERE artist_id = ?)) OR
+        (oi.item_type = 'Merchandise' AND oi.item_id IN (SELECT id FROM merchandise WHERE artist_id = ?))
+      )`;
+      queryParams.push(artistId, artistId, artistId);
+    }
+
+    const whereClause = 'WHERE ' + whereConditions.join(' AND ') + ' ' + artistFilter;
+
+    // Get revenue grouped by artist - using subqueries to get artist_id
+    const [artistRevenue] = await db.query(
+      `SELECT 
+        COALESCE(
+          (SELECT artist_id FROM albums WHERE id = oi.item_id AND oi.item_type = 'Album'),
+          (SELECT artist_id FROM promotional_tracks WHERE id = oi.item_id AND oi.item_type = 'Track'),
+          (SELECT artist_id FROM merchandise WHERE id = oi.item_id AND oi.item_type = 'Merchandise')
+        ) as artist_id,
+        oi.artist_name,
+        COUNT(DISTINCT p.id) as total_orders,
+        SUM(oi.quantity) as total_items_sold,
+        SUM(oi.price * oi.quantity) as gross_revenue,
+        SUM(CASE WHEN oi.item_type = 'Album' THEN oi.quantity ELSE 0 END) as albums_sold,
+        SUM(CASE WHEN oi.item_type = 'Track' THEN oi.quantity ELSE 0 END) as tracks_sold,
+        SUM(CASE WHEN oi.item_type = 'Merchandise' THEN oi.quantity ELSE 0 END) as merch_sold,
+        SUM(CASE WHEN oi.item_type = 'Album' THEN oi.price * oi.quantity ELSE 0 END) as album_revenue,
+        SUM(CASE WHEN oi.item_type = 'Track' THEN oi.price * oi.quantity ELSE 0 END) as track_revenue,
+        SUM(CASE WHEN oi.item_type = 'Merchandise' THEN oi.price * oi.quantity ELSE 0 END) as merch_revenue,
+        MIN(p.purchased_at) as first_sale,
+        MAX(p.purchased_at) as last_sale
+      FROM order_items oi
+      JOIN purchases p ON oi.purchase_id = p.id
+      ${whereClause}
+      GROUP BY artist_id, oi.artist_name
+      HAVING artist_id IS NOT NULL
+      ORDER BY gross_revenue DESC`,
+      queryParams
+    );
+
+    // Calculate platform fees (Stripe: 2.9% + $0.30 per transaction)
+    const enrichedData = artistRevenue.map(artist => {
+      const grossRevenue = parseFloat(artist.gross_revenue) || 0;
+      const stripeFeePercentage = 0.029; // 2.9%
+      const stripeFeeFixed = 30; // $0.30 in cents per order
+      
+      const totalStripeFees = (grossRevenue * stripeFeePercentage) + (artist.total_orders * stripeFeeFixed);
+      const revenueAfterStripeFees = grossRevenue - totalStripeFees;
+      
+      // Default artist split: 70% to artist, 30% platform fee
+      const platformFeePercentage = 0.30;
+      const artistShare = revenueAfterStripeFees * (1 - platformFeePercentage);
+      const platformShare = revenueAfterStripeFees * platformFeePercentage;
+
+      return {
+        ...artist,
+        gross_revenue: grossRevenue,
+        stripe_fees: Math.round(totalStripeFees),
+        revenue_after_stripe: Math.round(revenueAfterStripeFees),
+        platform_fee: Math.round(platformShare),
+        artist_payout: Math.round(artistShare),
+        artist_percentage: 70,
+        platform_percentage: 30
+      };
+    });
+
+    res.json({
+      artists: enrichedData,
+      filters: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+        artistId: artistId || null
+      },
+      summary: {
+        total_artists: enrichedData.length,
+        total_gross_revenue: enrichedData.reduce((sum, a) => sum + a.gross_revenue, 0),
+        total_artist_payout: enrichedData.reduce((sum, a) => sum + a.artist_payout, 0),
+        total_platform_fees: enrichedData.reduce((sum, a) => sum + a.platform_fee, 0),
+        total_stripe_fees: enrichedData.reduce((sum, a) => sum + a.stripe_fees, 0)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching artist revenue:', error);
+    res.status(500).json({ error: 'Failed to fetch artist revenue data' });
   }
 });
 

@@ -16,6 +16,7 @@ import ExistingArtist from "./adminComponents/ExistingArtist";
 import StatsScheduleSettings from "./adminComponents/StatsScheduleSettings";
 import AdminSettings from "./adminComponents/AdminSettings";
 import EventManagement from "./adminComponents/EventManagement";
+import PurchaseStats from "./adminComponents/PurchaseStats";
 import AdminSettingsSidebar from "./AdminComponents/AdminSettingsSidebar";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -825,6 +826,7 @@ function AdminDashboard() {
             <option value="events">Community Events</option>
             <option value="stats-settings">Stats Schedule Settings</option>
             <option value="website-settings">Website Settings</option>
+            <option value="purchase-stats">Purchase Statistics</option>
           </select>
         </div>
         {artistMenu === "upload" && <UploadNewArtist mode={mode} />}
@@ -852,6 +854,7 @@ function AdminDashboard() {
         {artistMenu === "events" && <EventManagement />}
         {artistMenu === "stats-settings" && <StatsScheduleSettings />}
         {artistMenu === "website-settings" && <AdminSettings />}
+        {artistMenu === "purchase-stats" && <PurchaseStats />}
       </div>
     </>
   );

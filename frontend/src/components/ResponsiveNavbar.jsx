@@ -5,7 +5,17 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 export default function ResponsiveNavbar() {
-  const { websiteUser } = useApiData();
+  const { websiteUser, websiteSettings } = useApiData();
+
+  // Fallback logo
+  const defaultLogo = (
+    <div className="flex flex-col items-center">
+      <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
+      <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
+      <div className="w-20 h-1 bg-[#f7c900] mt-1 mb-1" />
+      <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
+    </div>
+  );
 
   const handleSignOut = async () => {
     try {
@@ -23,12 +33,17 @@ export default function ResponsiveNavbar() {
       <nav className="bg-[#0c0504] w-full">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo */}
-          <div className="flex flex-col items-center">
-            <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
-            <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
-            <div className="w-20 h-1 bg-[#f7c900] mt-1 mb-1" />
-            <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
-          </div>
+          <Link to="/" className="flex items-center">
+            {websiteSettings?.logo_url ? (
+              <img 
+                src={websiteSettings.logo_url} 
+                alt="Soul Felt Music" 
+                className="h-12 w-auto object-contain"
+              />
+            ) : (
+              defaultLogo
+            )}
+          </Link>
           {/* Hamburger */}
           <button
             className="text-[#e6cfa7] focus:outline-none"
@@ -125,12 +140,22 @@ export default function ResponsiveNavbar() {
     return (
       <nav className="bg-[#1a0b0d] w-full flex items-center flex-wrap">
         {/* Logo Section */}
-        <div className="flex flex-col items-center justify-center px-6 py-2 bg-[#0c0504]" style={{ minWidth: 145 }}>
-          <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
-          <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
-          <div className="w-28 h-1 bg-[#f7c900] mt-1 mb-1" />
-          <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
-        </div>
+        <Link to="/" className="flex items-center justify-center px-6 py-2 bg-[#0c0504]" style={{ minWidth: 145 }}>
+          {websiteSettings?.logo_url ? (
+            <img 
+              src={websiteSettings.logo_url} 
+              alt="Soul Felt Music" 
+              className="h-16 w-auto object-contain"
+            />
+          ) : (
+            <div className="flex flex-col items-center">
+              <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
+              <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
+              <div className="w-28 h-1 bg-[#f7c900] mt-1 mb-1" />
+              <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
+            </div>
+          )}
+        </Link>
         {/* Nav Links */}
         <ul className="flex-1 flex justify-center items-center gap-[1rem] md:gap-[1rem] xl:gap-16 lg:text-md xl:text-[1.5rem] text-[#e6cfa7] xl:text-lg text-[1rem] font-normal">
           <Link to="/">Home</Link>
