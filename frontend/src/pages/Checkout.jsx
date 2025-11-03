@@ -18,9 +18,21 @@ function CheckoutForm() {
   const navigate = useNavigate();
   const { user } = useUserLogin();
   const [processing, setProcessing] = useState(false);
+  const [sameAsShipping, setSameAsShipping] = useState(true);
   const [customerInfo, setCustomerInfo] = useState({
     email: user?.email || '',
     name: user?.displayName || '',
+  });
+  
+  const [shippingAddress, setShippingAddress] = useState({
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'US'
+  });
+  
+  const [billingAddress, setBillingAddress] = useState({
     address: '',
     city: '',
     state: '',
@@ -31,6 +43,17 @@ function CheckoutForm() {
   const cartTotal = getCartTotal();
   const tax = cartTotal * 0.08; // 8% tax
   const finalTotal = cartTotal + tax;
+  
+  // Check if cart has physical items that need shipping
+  const needsShipping = cart.some(item => 
+    item.type === 'Merchandise' || item.type === 'Physical Album'
+  );
+  
+  // Debug: Log cart items to verify types
+  React.useEffect(() => {
+    console.log('🛒 Cart items:', cart.map(item => ({ title: item.title, type: item.type })));
+    console.log('📦 Needs shipping:', needsShipping);
+  }, [cart, needsShipping]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +61,29 @@ function CheckoutForm() {
       ...prev,
       [name]: value
     }));
+  };
+  
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+    setShippingAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleBillingChange = (e) => {
+    const { name, value } = e.target;
+    setBillingAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSameAsShippingToggle = (e) => {
+    setSameAsShipping(e.target.checked);
+    if (e.target.checked) {
+      setBillingAddress({ ...shippingAddress });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -55,6 +101,21 @@ function CheckoutForm() {
     // Validate customer info
     if (!customerInfo.email || !customerInfo.name) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    // Validate shipping address for physical items
+    if (needsShipping) {
+      if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+        toast.error('Please complete the shipping address for physical items');
+        return;
+      }
+    }
+    
+    // Validate billing address
+    const billing = sameAsShipping ? shippingAddress : billingAddress;
+    if (!billing.address || !billing.city || !billing.state || !billing.zipCode) {
+      toast.error('Please complete the billing address');
       return;
     }
 
@@ -78,13 +139,26 @@ function CheckoutForm() {
         body: JSON.stringify({
           amount: Math.round(finalTotal * 100), // Convert to cents
           cart: cart,
-          customerInfo: customerInfo,
+          customerInfo: {
+            email: customerInfo.email,
+            name: customerInfo.name,
+            address: needsShipping ? shippingAddress : (sameAsShipping ? shippingAddress : billingAddress)
+          },
           userEmail: user?.email // Send user email for database lookup
         }),
       });
 
+      console.log('📤 Sending to backend:', {
+        needsShipping,
+        shippingAddress: needsShipping ? shippingAddress : 'N/A',
+        billingAddress: sameAsShipping ? 'same as shipping' : billingAddress
+      });
+
       const { clientSecret } = await response.json();
 
+      // Use appropriate address for Stripe billing details
+      const billingAddr = sameAsShipping ? shippingAddress : billingAddress;
+      
       // Confirm payment
       const cardElement = elements.getElement(CardElement);
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -94,11 +168,11 @@ function CheckoutForm() {
             name: customerInfo.name,
             email: customerInfo.email,
             address: {
-              line1: customerInfo.address,
-              city: customerInfo.city,
-              state: customerInfo.state,
-              postal_code: customerInfo.zipCode,
-              country: customerInfo.country,
+              line1: billingAddr.address,
+              city: billingAddr.city,
+              state: billingAddr.state,
+              postal_code: billingAddr.zipCode,
+              country: billingAddr.country,
             },
           },
         },
@@ -152,73 +226,182 @@ function CheckoutForm() {
         </div>
       </div>
 
-      {/* Billing Address */}
-      <div className="bg-card-bg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-accent mb-4">Billing Address</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-text-primary font-medium mb-2">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={customerInfo.address}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="123 Main St"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+      {/* Shipping/Billing Address */}
+      {needsShipping && (
+        <div className="bg-card-bg rounded-lg p-6">
+          <h2 className="text-2xl font-bold text-accent mb-4">Shipping Address *</h2>
+          <p className="text-text-secondary text-sm mb-4">
+            📦 Your order contains physical items that will be shipped to this address.
+          </p>
+          <div className="space-y-4">
             <div>
-              <label className="block text-text-primary font-medium mb-2">City</label>
+              <label className="block text-text-primary font-medium mb-2">Street Address *</label>
               <input
                 type="text"
-                name="city"
-                value={customerInfo.city}
-                onChange={handleInputChange}
+                name="address"
+                value={shippingAddress.address}
+                onChange={handleShippingChange}
+                required
                 className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="New York"
+                placeholder="123 Main St"
               />
             </div>
-            <div>
-              <label className="block text-text-primary font-medium mb-2">State</label>
-              <input
-                type="text"
-                name="state"
-                value={customerInfo.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="NY"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-text-primary font-medium mb-2">City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={shippingAddress.city}
+                  onChange={handleShippingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="New York"
+                />
+              </div>
+              <div>
+                <label className="block text-text-primary font-medium mb-2">State *</label>
+                <input
+                  type="text"
+                  name="state"
+                  value={shippingAddress.state}
+                  onChange={handleShippingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="NY"
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-text-primary font-medium mb-2">ZIP Code</label>
-              <input
-                type="text"
-                name="zipCode"
-                value={customerInfo.zipCode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="10001"
-              />
-            </div>
-            <div>
-              <label className="block text-text-primary font-medium mb-2">Country</label>
-              <select
-                name="country"
-                value={customerInfo.country}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="GB">United Kingdom</option>
-                <option value="AU">Australia</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-text-primary font-medium mb-2">ZIP Code *</label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={shippingAddress.zipCode}
+                  onChange={handleShippingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="10001"
+                />
+              </div>
+              <div>
+                <label className="block text-text-primary font-medium mb-2">Country *</label>
+                <select
+                  name="country"
+                  value={shippingAddress.country}
+                  onChange={handleShippingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Billing Address */}
+      <div className="bg-card-bg rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-accent mb-4">Billing Address *</h2>
+        
+        {needsShipping && (
+          <div className="mb-4">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sameAsShipping}
+                onChange={handleSameAsShippingToggle}
+                className="w-5 h-5 text-accent bg-background border-primary rounded focus:ring-2 focus:ring-primary"
+              />
+              <span className="text-text-primary font-medium">Same as shipping address</span>
+            </label>
+          </div>
+        )}
+        
+        {(!needsShipping || !sameAsShipping) && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-text-primary font-medium mb-2">Street Address *</label>
+              <input
+                type="text"
+                name="address"
+                value={billingAddress.address}
+                onChange={handleBillingChange}
+                required
+                className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="123 Main St"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-text-primary font-medium mb-2">City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={billingAddress.city}
+                  onChange={handleBillingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="New York"
+                />
+              </div>
+              <div>
+                <label className="block text-text-primary font-medium mb-2">State *</label>
+                <input
+                  type="text"
+                  name="state"
+                  value={billingAddress.state}
+                  onChange={handleBillingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="NY"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-text-primary font-medium mb-2">ZIP Code *</label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={billingAddress.zipCode}
+                  onChange={handleBillingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="10001"
+                />
+              </div>
+              <div>
+                <label className="block text-text-primary font-medium mb-2">Country *</label>
+                <select
+                  name="country"
+                  value={billingAddress.country}
+                  onChange={handleBillingChange}
+                  required
+                  className="w-full px-4 py-3 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {sameAsShipping && needsShipping && (
+          <div className="bg-background/50 border border-primary rounded-lg p-4">
+            <p className="text-text-secondary text-sm">
+              ✓ Billing address is same as shipping address
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Payment Information */}
