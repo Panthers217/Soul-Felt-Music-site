@@ -167,7 +167,7 @@ function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCa
           onClick={handleImageClick}
         >
           <img
-            className="w-[95%] h-[95%] object-cover rounded-t-md transition-transform duration-300 group-hover:scale-110"
+            className="w-[95%] h-[95%] object-contain rounded-t-md transition-transform duration-300 group-hover:scale-110"
             src={album.img}
             alt={album.title}
           />
@@ -180,7 +180,7 @@ function AlbumWithTracks({ album, tracks, dbSnapshot, isStripeEnabled, onAddToCa
           )}
         </div>
         <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[5%] pb-[6%]">
-          <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
+          <div className="text-[green] text-[1.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
             {album.type}
           </div>
           <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">
@@ -280,10 +280,10 @@ function TrackListItem({ track, albumCover, trackNumber }) {
       
       {/* Track Info */}
       <div className="flex-1 min-w-0">
-        <div className="text-[#fffced] text-base font-semibold font-['Roboto'] truncate">
+        <div className="text-[#fffced] text-xl text-base font-semibold font-['Roboto'] truncate">
           {track.title || "Untitled Track"}
         </div>
-        <div className="text-[#aa2a46] text-sm font-medium">
+        <div className="text-[#aa2a46] text-lg font-medium">
           {track.artist_name || "Unknown Artist"}
         </div>
       </div>
@@ -379,7 +379,7 @@ function ArtistMerchCard({
 
   return (
     <div
-      className="flex flex-col w-full max-w-[17rem] h-[23rem] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#aa2a46]/50 hover:-translate-y-2"
+      className="flex flex-col w-full max-w-[17rem] h-[auto] bg-[#21212b] rounded-md outline outline-[0.04rem] outline-offset-[-0.04rem] outline-[#6e5049]/20 overflow-hidden flex-grow transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#aa2a46]/50 hover:-translate-y-2"
       style={{ minWidth: "220px", minHeight: "320px" }}
     >
       <NotAvailableModal
@@ -391,7 +391,7 @@ function ArtistMerchCard({
         onClick={handleImageClick}
       >
         <img
-          className="w-[95%] h-[95%] object-cover rounded-t-md transition-transform duration-300 group-hover:scale-110"
+          className="w-[95%] h-[95%] object-contain rounded-t-md transition-transform duration-300 group-hover:scale-110"
           src={img}
           alt={title}
         />
@@ -403,8 +403,8 @@ function ArtistMerchCard({
           </div>
         )}
       </div>
-      <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[5%] pb-[6%]">
-        <div className="text-[#aa2a46] text-[0.5rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight">
+      <div className="flex flex-col justify-center items-start gap-2 w-full h-[35%] px-[6%] pt-[20%] pb-[6%]">
+        <div className={`${type === 'Digital Album' ? 'text-[green]' : 'text-[#aa2a46]'} text-[1rem] font-medium font-['Roboto'] uppercase leading-3 tracking-tight`}>
           {type}
         </div>
         <div className="text-white text-[1rem] xl:text-[1.2rem] font-medium font-['Roboto'] leading-none">
@@ -444,7 +444,7 @@ function ArtistMerchCard({
           </div>
         )}
         
-        <div className="flex justify-between items-center w-full">
+        <div className="flex justify-between items-center w-full mb-[10%]">
           <div className="text-white text-sm xl:text-[1.2rem]  font-bold font-['Roboto'] leading-tight">
             {price}
           </div>
@@ -661,7 +661,9 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
       }
 
       return {
-        type: merch.merch_type || "Merchandise",
+        id: merch.id,
+        type: "Merchandise",
+        category: merch.merch_type || "General",
         title: merch.title || "Untitled Item",
         price: parsedPrice > 0 ? `$${parsedPrice.toFixed(2)}` : "$0.00",
         img: merch.image_url || "https://placehold.co/265x265",
@@ -873,9 +875,12 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
               
               if (isAlbum && item.albumId) {
                 // Get tracks for this album from promotional_tracks table
-                const albumTracks = (dbSnapshot?.promotional_tracks?.records || []).filter(
-                  track => track.album_id === item.albumId
-                );
+                const albumTracks = (dbSnapshot?.promotional_tracks?.records || [])
+                  .filter(track => track.album_id === item.albumId)
+                  .map(track => ({
+                    ...track,
+                    artist_name: getArtistDataById(track.artist_id, dbSnapshot)?.name || 'Unknown Artist'
+                  }));
                 
                 const isHighlighted = highlightedAlbumId && item.albumId === parseInt(highlightedAlbumId);
                 

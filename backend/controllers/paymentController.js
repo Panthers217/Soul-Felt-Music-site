@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import db from '../config/db.js';
+import { sendPurchaseConfirmationEmail } from '../services/emailService.js';
 
 // Initialize Stripe with a check for the API key
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -105,6 +106,18 @@ export async function createPaymentIntent(req, res) {
       // Insert individual order items
       if (cart && cart.length > 0) {
         console.log('📦 Cart items to insert:', JSON.stringify(cart, null, 2));
+        console.log('🔍 Checking merchandise items:');
+        cart.forEach((item, idx) => {
+          if (item.type === 'Merchandise') {
+            console.log(`  Merch ${idx}:`, {
+              title: item.title,
+              id: item.id,
+              merch_id: item.merch_id,
+              type: item.type,
+              img: item.img
+            });
+          }
+        });
         
         // Build order items with artist names looked up from database
         const orderItemsValues = await Promise.all(cart.map(async (item) => {
@@ -146,13 +159,13 @@ export async function createPaymentIntent(req, res) {
           const itemData = [
             purchaseId,
             item.type || 'track',
-            item.id || item.track_id || item.album_id || 0,
+            item.id || item.merch_id || item.track_id || item.album_id || 0,
             item.title,
             artistName,
             item.quantity || 1,
             typeof item.price === 'string' ? parseFloat(item.price.replace('$', '')) : (item.price || 0)
           ];
-          console.log('Item data:', itemData);
+          console.log('Item data for', item.type, ':', itemData);
           return itemData;
         }));
         
@@ -225,8 +238,105 @@ export async function handleWebhook(req, res) {
         );
         console.log(`✅ Updated purchase record for payment ${paymentIntentSuccess.id}`);
         
-        // TODO: Send confirmation email, fulfill order, etc.
-        // You can access order details from paymentIntentSuccess.metadata
+        // Fetch purchase details with order items to send confirmation email
+        try {
+          const [purchases] = await db.query(
+            `SELECT 
+              p.id as purchase_id,
+              p.order_id,
+              p.customer_email,
+              p.customer_name,
+              p.amount,
+              p.purchased_at,
+              p.shipping_address
+            FROM purchases p
+            WHERE p.stripe_payment_intent_id = ?`,
+            [paymentIntentSuccess.id]
+          );
+          
+          if (purchases.length > 0) {
+            const purchase = purchases[0];
+            
+            // Fetch order items with image URLs
+            const [orderItems] = await db.query(
+              `SELECT 
+                oi.item_type,
+                oi.item_id,
+                oi.item_title,
+                oi.artist_name,
+                oi.quantity,
+                oi.price,
+                CASE 
+                  WHEN oi.item_type = 'Track' THEN (
+                    SELECT a.cover_url 
+                    FROM tracks t 
+                    JOIN albums a ON t.album_id = a.id 
+                    WHERE t.id = oi.item_id
+                  )
+                  WHEN oi.item_type = 'Digital Album' THEN (
+                    SELECT cover_url 
+                    FROM albums 
+                    WHERE id = oi.item_id
+                  )
+                  WHEN oi.item_type = 'Physical Album' THEN (
+                    SELECT cover_url 
+                    FROM albums 
+                    WHERE id = oi.item_id
+                  )
+                  WHEN oi.item_type = 'Merchandise' THEN (
+                    SELECT image_url 
+                    FROM merchandise 
+                    WHERE id = oi.item_id
+                  )
+                  ELSE NULL
+                END as image_url,
+                CASE 
+                  WHEN oi.item_type = 'Merchandise' THEN (
+                    SELECT merch_type 
+                    FROM merchandise 
+                    WHERE id = oi.item_id
+                  )
+                  ELSE NULL
+                END as merch_type
+              FROM order_items oi
+              WHERE oi.purchase_id = ?`,
+              [purchase.purchase_id]
+            );
+            
+            console.log('📧 Order items with images:');
+            orderItems.forEach(item => {
+              console.log(`  ${item.item_type}: ${item.item_title}`);
+              console.log(`    item_id: ${item.item_id}`);
+              console.log(`    image_url: ${item.image_url || 'MISSING'}`);
+            });
+            
+            // Send confirmation email
+            const emailData = {
+              customer_email: purchase.customer_email,
+              customer_name: purchase.customer_name,
+              order_id: purchase.order_id,
+              purchased_at: purchase.purchased_at,
+              amount: purchase.amount,
+              items: orderItems,
+              shipping_address: purchase.shipping_address
+            };
+            
+            console.log('📧 Email data being sent:', {
+              ...emailData,
+              items: orderItems.length,
+              hasShipping: !!purchase.shipping_address,
+              shippingPreview: purchase.shipping_address ? JSON.stringify(purchase.shipping_address).substring(0, 100) : 'none'
+            });
+            
+            await sendPurchaseConfirmationEmail(emailData);
+            console.log(`✅ Sent purchase confirmation email to ${purchase.customer_email}`);
+          } else {
+            console.warn(`⚠️  No purchase found for payment intent ${paymentIntentSuccess.id}`);
+          }
+        } catch (emailError) {
+          // Log error but don't fail the webhook - purchase still succeeded
+          console.error('❌ Error sending confirmation email:', emailError);
+        }
       } catch (dbError) {
         console.error('Error updating purchase record:', dbError);
       }
