@@ -13,6 +13,7 @@ export const ApiDataProvider = ({ children }) => {
   const [albums, setAlbums] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [websiteSettings, setWebsiteSettings] = useState(null);
   const [error, setError] = useState(null);
   const [refreshSqlViewerTable, setRefreshSqlViewerTable] = useState(false);
   const [websiteUser, setWebsiteUser] = useState(null);
@@ -103,6 +104,13 @@ export const ApiDataProvider = ({ children }) => {
         setError(err);
         console.error("Error fetching users:", err);
       });
+    axios
+      .get("/api/settings/public")
+      .then((res) => setWebsiteSettings(res.data))
+      .catch((err) => {
+        setError(err);
+        console.error("Error fetching users:", err);
+      });
   }, []);
 
   //admin data fetch
@@ -147,6 +155,7 @@ export const ApiDataProvider = ({ children }) => {
         triggerRefreshSqlViewerTable,
         websiteUser,
         setWebsiteUser,
+        websiteSettings,
       }}
     >
       {children}

@@ -16,7 +16,10 @@ function GenreManagement() {
 
   const fetchGenres = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/genres`);
+      const token = await auth.currentUser?.getIdToken();
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/genres`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setGenres(response.data.genres || []);
     } catch (err) {
       console.error('Error fetching genres:', err);

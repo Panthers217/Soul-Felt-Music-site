@@ -35,6 +35,8 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("branding");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoInputMode, setLogoInputMode] = useState("url"); // 'url' or 'upload'
 
   // Custom time picker state for office hours
   const [customTimeMode, setCustomTimeMode] = useState({
@@ -190,6 +192,64 @@ const AdminSettings = () => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid image file (PNG, JPG, SVG, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', settings.cloudinary_image_folder || 'SoulFeltMusic/SoulFeltMusicImages');
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('Not authenticated');
+        return;
+      }
+      const token = await user.getIdToken();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || ''}/api/cloudinary/upload`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        handleInputChange('logo_url', data.url);
+        toast.success('Logo uploaded successfully!');
+      } else {
+        const errorText = await response.text();
+        console.error('Upload failed:', errorText);
+        toast.error('Failed to upload logo');
+      }
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast.error('Error uploading logo');
+    } finally {
+      setUploadingLogo(false);
+    }
   };
 
   // Generate hour options (1-12)
@@ -666,23 +726,83 @@ const AdminSettings = () => {
 
               <div>
                 <label className="block text-accent font-medium mb-2">
-                  Logo URL
+                  Logo
                 </label>
-                <input
-                  type="text"
-                  value={settings.logo_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("logo_url", e.target.value)
-                  }
-                  placeholder="https://example.com/logo.png"
-                  className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                {settings.logo_url && (
-                  <img
-                    src={settings.logo_url}
-                    alt="Logo preview"
-                    className="mt-2 h-20 object-contain"
+                
+                {/* Toggle between URL and Upload */}
+                <div className="flex gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputMode('url')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      logoInputMode === 'url'
+                        ? 'bg-primary text-white'
+                        : 'bg-background-secondary text-text-secondary hover:bg-background-tertiary'
+                    }`}
+                  >
+                    URL Input
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputMode('upload')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      logoInputMode === 'upload'
+                        ? 'bg-primary text-white'
+                        : 'bg-background-secondary text-text-secondary hover:bg-background-tertiary'
+                    }`}
+                  >
+                    Upload File
+                  </button>
+                </div>
+
+                {/* URL Input Mode */}
+                {logoInputMode === 'url' && (
+                  <input
+                    type="text"
+                    value={settings.logo_url || ""}
+                    onChange={(e) =>
+                      handleInputChange("logo_url", e.target.value)
+                    }
+                    placeholder="https://example.com/logo.png"
+                    className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
+                )}
+
+                {/* File Upload Mode */}
+                {logoInputMode === 'upload' && (
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                      onChange={handleLogoUpload}
+                      disabled={uploadingLogo}
+                      className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-accent file:cursor-pointer cursor-pointer"
+                    />
+                    <p className="text-xs text-text-secondary">
+                      Recommended: PNG or SVG with transparent background. Max size: 5MB
+                    </p>
+                    {uploadingLogo && (
+                      <div className="flex items-center gap-2 text-primary">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                        <span>Uploading...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Logo Preview */}
+                {settings.logo_url && (
+                  <div className="mt-4 p-4 bg-background-secondary rounded-lg">
+                    <p className="text-sm text-text-secondary mb-2">Preview:</p>
+                    <img
+                      src={settings.logo_url}
+                      alt="Logo preview"
+                      className="h-20 object-contain"
+                    />
+                    <p className="text-xs text-text-secondary mt-2 break-all">
+                      {settings.logo_url}
+                    </p>
+                  </div>
                 )}
               </div>
 
