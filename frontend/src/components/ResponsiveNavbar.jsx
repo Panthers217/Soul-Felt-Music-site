@@ -16,6 +16,18 @@ export default function ResponsiveNavbar() {
       <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
     </div>
   );
+  
+  // Fallback logo 2 with customizable text
+  const defaultLogo2 = (
+    <div className="flex flex-col items-center">
+      <span className="logoLine1 text-[#e6cfa7] text-xs tracking-widest">
+        {websiteSettings?.logo_line1 || null}
+      </span>
+      <span className="logoLine2 text-[#e6cfa7] text-lg font-medium tracking-widest">
+        {websiteSettings?.logo_line2 || null}
+      </span>
+    </div>
+  );
 
   const handleSignOut = async () => {
     try {
@@ -41,7 +53,7 @@ export default function ResponsiveNavbar() {
                 className="h-12 w-auto object-contain"
               />
             ) : (
-              defaultLogo
+              defaultLogo2
             )}
           </Link>
           {/* Hamburger */}
@@ -147,14 +159,7 @@ export default function ResponsiveNavbar() {
               alt="Soul Felt Music" 
               className="h-16 w-auto object-contain"
             />
-          ) : (
-            <div className="flex flex-col items-center">
-              <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
-              <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
-              <div className="w-28 h-1 bg-[#f7c900] mt-1 mb-1" />
-              <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
-            </div>
-          )}
+          ) : (defaultLogo2)}
         </Link>
         {/* Nav Links */}
         <ul className="flex-1 flex justify-center items-center gap-[1rem] md:gap-[1rem] xl:gap-16 lg:text-md xl:text-[1.5rem] text-[#e6cfa7] xl:text-lg text-[1rem] font-normal">

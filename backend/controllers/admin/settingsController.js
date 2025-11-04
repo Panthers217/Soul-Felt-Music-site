@@ -201,6 +201,8 @@ export async function updateSettings(req, res) {
       business_name,
       logo_url,
       favicon_url,
+      logo_line1,
+      logo_line2,
       primary_color,
       secondary_color,
       accent_color,
@@ -262,6 +264,8 @@ export async function updateSettings(req, res) {
     if (business_name !== undefined) { updates.push('business_name = ?'); values.push(business_name); }
     if (logo_url !== undefined) { updates.push('logo_url = ?'); values.push(logo_url); }
     if (favicon_url !== undefined) { updates.push('favicon_url = ?'); values.push(favicon_url); }
+    if (logo_line1 !== undefined) { updates.push('logo_line1 = ?'); values.push(logo_line1); }
+    if (logo_line2 !== undefined) { updates.push('logo_line2 = ?'); values.push(logo_line2); }
     if (primary_color !== undefined) { updates.push('primary_color = ?'); values.push(primary_color); }
     if (secondary_color !== undefined) { updates.push('secondary_color = ?'); values.push(secondary_color); }
     if (accent_color !== undefined) { updates.push('accent_color = ?'); values.push(accent_color); }

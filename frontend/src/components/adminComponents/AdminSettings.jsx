@@ -544,6 +544,8 @@ const AdminSettings = () => {
       business_name: "Soul Felt Music",
       logo_url: null,
       favicon_url: null,
+      logo_line1: "SOULFELT",
+      logo_line2: "MUSIC",
       primary_color: "#aa2a46",
       secondary_color: "#d63c65",
       accent_color: "#fffced",
@@ -629,6 +631,8 @@ const AdminSettings = () => {
           text_secondary: defaultSettings.text_secondary,
           business_name: defaultSettings.business_name,
           logo_url: defaultSettings.logo_url,
+          logo_line1: defaultSettings.logo_line1,
+          logo_line2: defaultSettings.logo_line2,
         });
 
         toast.success("✅ Settings reset to defaults successfully!");
@@ -819,6 +823,66 @@ const AdminSettings = () => {
                   placeholder="https://example.com/favicon.ico"
                   className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+              </div>
+
+              {/* Logo Text Lines */}
+              <div className="border-t border-primary pt-6 mt-6">
+                <h3 className="text-xl font-semibold text-accent mb-4">
+                  Fallback Logo Text (when no logo image is uploaded)
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-accent font-medium mb-2">
+                      Logo Line 1 (Top Text)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.logo_line1 || ""}
+                      onChange={(e) =>
+                        handleInputChange("logo_line1", e.target.value)
+                      }
+                      placeholder="SOULFELT"
+                      maxLength={100}
+                      className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-text-secondary mt-1">
+                      First line of text shown when logo image is not available
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-accent font-medium mb-2">
+                      Logo Line 2 (Bottom Text)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.logo_line2 || ""}
+                      onChange={(e) =>
+                        handleInputChange("logo_line2", e.target.value)
+                      }
+                      placeholder="MUSIC"
+                      maxLength={100}
+                      className="w-full px-4 py-2 bg-background text-text-primary border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-text-secondary mt-1">
+                      Second line of text shown when logo image is not available
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preview of text logo */}
+                <div className="mt-4 p-4 bg-background-secondary rounded-lg">
+                  <p className="text-sm text-text-secondary mb-2">Text Logo Preview:</p>
+                  <div className="flex flex-col items-center bg-[#0c0504] p-4 rounded">
+                    <span className="text-[#e6cfa7] text-xs tracking-widest">
+                      {settings.logo_line1 || 'SOULFELT'}
+                    </span>
+                    <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">
+                      {settings.logo_line2 || 'MUSIC'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
