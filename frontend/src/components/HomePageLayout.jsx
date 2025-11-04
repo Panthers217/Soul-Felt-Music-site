@@ -349,9 +349,8 @@ const HomePageLayout = () => {
         <ArtistGallery />
         <VideoPlayerComponent />
         {/* <ImageCarousel />  */}
-        <PopularAlbums /> 
+        <PopularAlbums />
       </div>
-      
     </>
   );
 };

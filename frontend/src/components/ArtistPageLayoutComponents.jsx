@@ -454,13 +454,13 @@ const ArtistPageComponent = () => {
 
     return (
       <div className="w-80 flex flex-col items-start">
-        <div className="relative w-80 h-52 rounded-[3px] mb-4 overflow-hidden">
+        <div className="relative w-80 h-52 rounded-[3px] mb-4 overflow-hidden bg-zinc-800">
           {/* Rotating background images */}
           {trackImages.length > 0 ? (
             trackImages.map((img, idx) => (
               <img
                 key={idx}
-                className={`w-full h-full object-cover rounded-[3px] absolute top-0 left-0 transition-opacity duration-1000 ${
+                className={`w-full h-full object-contain rounded-[3px] absolute top-0 left-0 transition-opacity duration-1000 ${
                   idx === currentImageIndex ? "opacity-100" : "opacity-0"
                 }`}
                 src={img}
@@ -469,7 +469,7 @@ const ArtistPageComponent = () => {
             ))
           ) : (
             <img
-              className="w-full h-full object-cover rounded-[3px] absolute top-0 left-0"
+              className="w-full h-full object-contain rounded-[3px] absolute top-0 left-0"
               src={headerPic}
               alt="Top Tracks"
             />
