@@ -28,7 +28,9 @@ router.get('/public', async (req, res) => {
         logo_url,
         favicon_url,
         hero_title,
-        hero_subtitle
+        hero_subtitle,
+        logo_line1,
+        logo_line2
       FROM website_settings 
       ORDER BY id DESC 
       LIMIT 1`
@@ -41,7 +43,9 @@ router.get('/public', async (req, res) => {
         logo_url: null,
         favicon_url: null,
         hero_title: 'Stream & Discover Soul Felt Music',
-        hero_subtitle: 'Feel the Vibes'
+        hero_subtitle: 'Feel the Vibes',
+        logo_line1: 'SOULFELT',
+        logo_line2: 'MUSIC'
       });
     }
     

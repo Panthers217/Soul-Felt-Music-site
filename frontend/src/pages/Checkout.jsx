@@ -46,12 +46,16 @@ function CheckoutForm() {
   
   // Check if cart has physical items that need shipping
   const needsShipping = cart.some(item => 
-    item.type === 'Merchandise' || item.type === 'Physical Album'
+    item.type === 'Merchandise' || 
+    item.type === 'Vinyl Record' || 
+    item.type === 'CD' || 
+    item.type === 'Cassette' ||
+    (item.type === 'Album' && item.album_type !== 'digital')
   );
   
   // Debug: Log cart items to verify types
   React.useEffect(() => {
-    console.log('🛒 Cart items:', cart.map(item => ({ title: item.title, type: item.type })));
+    console.log('🛒 Cart items:', cart.map(item => ({ title: item.title, type: item.type, album_type: item.album_type })));
     console.log('📦 Needs shipping:', needsShipping);
   }, [cart, needsShipping]);
 
@@ -113,7 +117,9 @@ function CheckoutForm() {
     }
     
     // Validate billing address
-    const billing = sameAsShipping ? shippingAddress : billingAddress;
+    // If no shipping needed, validate billingAddress directly
+    // If shipping needed, validate based on sameAsShipping toggle
+    const billing = needsShipping && sameAsShipping ? shippingAddress : billingAddress;
     if (!billing.address || !billing.city || !billing.state || !billing.zipCode) {
       toast.error('Please complete the billing address');
       return;
@@ -151,13 +157,13 @@ function CheckoutForm() {
       console.log('📤 Sending to backend:', {
         needsShipping,
         shippingAddress: needsShipping ? shippingAddress : 'N/A',
-        billingAddress: sameAsShipping ? 'same as shipping' : billingAddress
+        billingAddress: (needsShipping && sameAsShipping) ? 'same as shipping' : billingAddress
       });
 
       const { clientSecret } = await response.json();
 
       // Use appropriate address for Stripe billing details
-      const billingAddr = sameAsShipping ? shippingAddress : billingAddress;
+      const billingAddr = (needsShipping && sameAsShipping) ? shippingAddress : billingAddress;
       
       // Confirm payment
       const cardElement = elements.getElement(CardElement);
