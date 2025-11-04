@@ -14,6 +14,11 @@ const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
   const [lastInteractionTime, setLastInteractionTime] = useState(Date.now());
   const autoAdvanceTimerRef = React.useRef(null);
   const inactivityTimerRef = React.useRef(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
 
   // Extract YouTube video ID from URL
   const getYouTubeVideoId = (url) => {
@@ -98,6 +103,30 @@ const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
     advanceToNextVideo();
   };
 
+  // Touch handlers for swipe gestures
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && videos.length > 1) {
+      handleNext();
+    } else if (isRightSwipe && videos.length > 1) {
+      handlePrevious();
+    }
+  };
+
   useEffect(() => {
     // If videoUrls prop is provided, use it (for filtered videos)
     if (videoUrls !== null) {
@@ -166,7 +195,12 @@ const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
         </div>
       )}
 
-      <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden">
+      <div 
+        className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden touch-pan-y"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {loading ? (
           <div className="flex items-center justify-center w-full h-full text-white text-xl font-bold">
             Loading videos...

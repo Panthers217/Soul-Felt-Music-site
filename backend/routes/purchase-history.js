@@ -316,12 +316,12 @@ router.get('/stats', async (req, res) => {
     }
 
     if (startDate) {
-      whereConditions.push('p.purchased_at >= ?');
+      whereConditions.push('DATE(p.purchased_at) >= ?');
       queryParams.push(startDate);
     }
 
     if (endDate) {
-      whereConditions.push('p.purchased_at <= ?');
+      whereConditions.push('DATE(p.purchased_at) <= ?');
       queryParams.push(endDate);
     }
 
@@ -339,7 +339,7 @@ router.get('/stats', async (req, res) => {
       // We'll filter by artist_name for now since artist_id isn't in order_items
       // This is a workaround - ideally order_items should have artist_id
       orderItemsWhere.push(`(
-        oi.item_type = 'Album' AND oi.item_id IN (SELECT id FROM albums WHERE artist_id = ?) OR
+        (oi.item_type = 'Album' OR oi.item_type = 'Digital Album') AND oi.item_id IN (SELECT id FROM albums WHERE artist_id = ?) OR
         oi.item_type = 'Track' AND oi.item_id IN (SELECT id FROM promotional_tracks WHERE artist_id = ?) OR
         oi.item_type = 'Merchandise' AND oi.item_id IN (SELECT id FROM merchandise WHERE artist_id = ?)
       )`);

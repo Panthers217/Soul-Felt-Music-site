@@ -8,6 +8,12 @@ import ImageCarousel from "./ImageCarousel";
 // SingleImageCarousel: mobile-only, shows one album at a time with carousel controls
 const SingleImageCarousel = ({ albums, centerIdx, handlePrev, handleNext }) => {
   const navigate = useNavigate();
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
+
   if (!albums || albums.length === 0) return null;
   const album = albums[centerIdx % albums.length];
   
@@ -16,10 +22,38 @@ const SingleImageCarousel = ({ albums, centerIdx, handlePrev, handleNext }) => {
       navigate(`/store/${album.artist_id}?albumId=${album.id}`);
     }
   };
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null); // Reset touch end
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+  };
   
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="relative w-full flex justify-center items-center">
+      <div 
+        className="relative w-full flex justify-center items-center touch-pan-y"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <button
           onClick={handlePrev}
           className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center z-30 transition"
@@ -119,10 +153,38 @@ const PopularAlbumsCarousel = () => {
   }
 
   const [centerIdx, setCenterIdx] = useState(2);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
 
   const handlePrev = () =>
     setCenterIdx((idx) => (idx - 1 + albums.length) % albums.length);
   const handleNext = () => setCenterIdx((idx) => (idx + 1) % albums.length);
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+  };
 
   // Calculate visible albums (always show 5 with wrapping)
   const getVisibleAlbums = () => {
@@ -223,7 +285,12 @@ const PopularAlbumsCarousel = () => {
           />
         </div>
         {/* Tablet and up: Use VisibleAlbums */}
-        <div className="hidden md:flex lg:flex xl:flex relative w-full justify-center items-end min-h-[350px] md:pb-[10%]">
+        <div 
+          className="hidden md:flex lg:flex xl:flex relative w-full justify-center items-end min-h-[350px] md:pb-[10%] touch-pan-y"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {/* Carousel Controls */}
           <button
             onClick={handlePrev}

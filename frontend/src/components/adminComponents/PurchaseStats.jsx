@@ -9,6 +9,7 @@ const PurchaseStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'artist-revenue'
+  const [lastRefreshed, setLastRefreshed] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -40,6 +41,16 @@ const PurchaseStats = () => {
     if (activeTab === 'artist-revenue') {
       fetchArtistRevenue();
     }
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchStats();
+      if (activeTab === 'artist-revenue') {
+        fetchArtistRevenue();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [filters, activeTab]);
 
   const fetchStats = async () => {
@@ -56,6 +67,7 @@ const PurchaseStats = () => {
       const response = await axios.get(`/api/purchase-history/stats?${params.toString()}`);
       setStats(response.data);
       setError(null);
+      setLastRefreshed(new Date());
     } catch (err) {
       console.error('Error fetching purchase stats:', err);
       setError('Failed to load statistics');
@@ -219,25 +231,32 @@ const PurchaseStats = () => {
             Artist Revenue
           </button>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={exportToCSV}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export CSV
-          </button>
-          <button
-            onClick={() => {
-              fetchStats();
-              if (activeTab === 'artist-revenue') fetchArtistRevenue();
-            }}
-            className="px-4 py-2 bg-[#aa2a46] text-white rounded-lg hover:bg-[#d94a6a] transition-colors duration-200"
-          >
-            Refresh
-          </button>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={exportToCSV}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export CSV
+            </button>
+            <button
+              onClick={() => {
+                fetchStats();
+                if (activeTab === 'artist-revenue') fetchArtistRevenue();
+              }}
+              className="px-4 py-2 bg-[#aa2a46] text-white rounded-lg hover:bg-[#d94a6a] transition-colors duration-200"
+            >
+              Refresh
+            </button>
+          </div>
+          {lastRefreshed && (
+            <span className="text-xs text-[#fffced]/60">
+              Last updated: {lastRefreshed.toLocaleTimeString()}
+            </span>
+          )}
         </div>
       </div>
 
@@ -317,7 +336,7 @@ const PurchaseStats = () => {
                 className="w-full px-3 py-2 bg-[#2a2b35] border border-[#aa2a46]/30 rounded-lg text-[#fffced] focus:outline-none focus:ring-2 focus:ring-[#aa2a46]"
               >
                 <option value="">All Types</option>
-                <option value="Album">Albums</option>
+                <option value="Digital Album">Albums</option>
                 <option value="Track">Tracks</option>
                 <option value="Merchandise">Merchandise</option>
               </select>

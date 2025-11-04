@@ -510,7 +510,7 @@ function generatePurchaseEmailTemplate(data) {
       flex: 1;
     }
     .item-title {
-      font-size: 18px;
+      font-size: 1rem;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
