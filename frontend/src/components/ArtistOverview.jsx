@@ -23,6 +23,14 @@ import CartSummary from "./CartSummary";
  */
 function GetMusic({ artistName, musicText, buttonText, supportText, artistId }) {
   const navigate = useNavigate();
+  const { isEnabled } = useFeatures();
+  const isMerchandiseEnabled = isEnabled('enable_merchandise');
+
+  // Don't render if merchandise is disabled
+  if (!isMerchandiseEnabled) {
+    return null;
+  }
+
   return (
     <section className="mx-auto mt-6 md:mt-10 lg:mt-12 mb-16 w-[92%] md:w-[90%] lg:w-[86%]">
       <div className="rounded-xl bg-white/[0.035] ring-1 ring-white/10 p-4 md:p-6 lg:p-8">
@@ -76,6 +84,7 @@ function FeaturedTracks({ tracks, artistId }) {
   const { addToCart } = useCart();
   
   const isStripeEnabled = isEnabled('enable_stripe');
+  const isMerchandiseEnabled = isEnabled('enable_merchandise');
 
   // Generate or retrieve session ID for anonymous users
   const getSessionId = () => {
@@ -257,7 +266,8 @@ function FeaturedTracks({ tracks, artistId }) {
                 )}
 
                 {/* Action Button */}
-                {isStripeEnabled ? (
+                {isMerchandiseEnabled && (
+                  isStripeEnabled ? (
                   <button
                     onClick={(e) => handleBuyClick(e, track)}
                     className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
@@ -276,6 +286,7 @@ function FeaturedTracks({ tracks, artistId }) {
                     <span className="i-lucide-shopping-cart text-xs" />
                     Buy Now
                   </a>
+                  )
                 )}
               </div>
             </div>

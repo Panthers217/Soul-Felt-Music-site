@@ -33,6 +33,7 @@ import Faq from './pages/Faq';
 import Terms from './pages/Terms';
 import ThemeDemo from './components/ThemeDemo';
 import ScrollToTop from './components/ScrollToTop';
+import NotFound from './pages/NotFound';
 import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
 import { Navigate, useParams } from 'react-router-dom';
@@ -54,6 +55,22 @@ function ArtistStoreWrapper() {
 
 function App() {
   const { user, loading } = useUserLogin();
+  const { websiteSettings } = useApiData();
+  
+  // Update favicon dynamically when websiteSettings change
+  React.useEffect(() => {
+    if (websiteSettings?.favicon_url) {
+      // Find existing favicon link or create new one
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = websiteSettings.favicon_url;
+    }
+  }, [websiteSettings]);
+  
   // Helper to check admin claim
   const isAdmin = user && user.getIdTokenResult && user.email && user.getIdTokenResult;
 
@@ -128,7 +145,8 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
             <Route path="/admin/newsletter" element={<AdminDashboardRoute />} /> {/* Protected newsletter campaigns route */}
             <Route path="/admin/faq" element={<AdminDashboardRoute />} /> {/* Protected FAQ management route */}
-            {/* Add more routes as needed */}
+            {/* 404 Catch-all route - must be last */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />

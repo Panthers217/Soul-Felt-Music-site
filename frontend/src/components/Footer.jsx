@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import React, { useState } from "react";
 import SocialMediaLinks from "./SocialMediaLinks";
 import NewsletterSubscription from "./NewsletterSubscription";
+import { useFeatures } from "../context/FeaturesContext";
 
 const socialLinks = [
   {
@@ -42,6 +43,9 @@ const supportLinks = [
 ];
 
 const Footer = () => {
+  const { isEnabled } = useFeatures();
+  const isNewsletterEnabled = isEnabled('enable_newsletter');
+
   return (
     <footer className="bg-[#120c0a] text-[#fffced] pt-8 pb-4 px-2">
       <div className="max-w-7xl mx-auto border border-[#231f1c] rounded-sm p-6 md:p-8 flex flex-col md:flex-row md:items-start gap-8 md:gap-0">
@@ -98,16 +102,18 @@ const Footer = () => {
           </div>
         </div>
         {/* Newsletter */}
-        <NewsletterSubscription 
-          title="Soul Felt Music Newsletter"
-          description={
-            <>
-              Subscribe to our newsletter
-              <br />
-              for the latest updates.
-            </>
-          }
-        />
+        {isNewsletterEnabled && (
+          <NewsletterSubscription 
+            title="Soul Felt Music Newsletter"
+            description={
+              <>
+                Subscribe to our newsletter
+                <br />
+                for the latest updates.
+              </>
+            }
+          />
+        )}
       </div>
       <div className="max-w-7xl mx-auto mt-4 text-xs text-[#fffced]">
         © 2024 Soul Felt Music. All rights reserved.

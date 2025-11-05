@@ -29,5 +29,6 @@
             "username": "avnadmin",
             "password": "AVNS_VlgvIp7f7BYsRHjxRP4"
         }
-    ]
+    ],
+    "liveServer.settings.port": 5501
 }

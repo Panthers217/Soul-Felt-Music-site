@@ -803,7 +803,7 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
         {/* Content layer with relative positioning */}
         <div className="relative z-10 w-full">
           <ArtistStoreNav
-            storeName={artistId ? `${artistName} Store` : "Luna Starlight Store"}
+            storeName={artistId ? `${artistName} Store` : "SoulFelt Music Store"}
             cartCount={cart.length}
             tabs={tabs}
             activeTab={activeTab}
@@ -821,7 +821,7 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
             description={
               artistId
                 ? `Support ${artistName} directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects.`
-                : "Support Luna Starlight directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."
+                : "Support SoulFelt Music directly by purchasing official music releases and exclusive merchandise. All proceeds help fund future creative projects."
             }
           />
 
