@@ -4,6 +4,7 @@ import heroWelcomePic from "/workspaces/Soul-Felt-Music-site/frontend/src/assets
 import HomeBanner from "./HomeBanner";
 import { ArtistGallery } from "./ArtistGallery";
 import VideoPlayerComponent from "./VideoPlayerComponent";
+import { useFeatures } from "../context/FeaturesContext";
 import ImageCarousel from "./ImageCarousel";
 import PopularAlbums from "./PopularAlbums";
 
@@ -342,12 +343,15 @@ const DemoBannerDesktop = () => {
 };
 
 const HomePageLayout = () => {
+  const { isEnabled } = useFeatures();
+  const isVideosEnabled = isEnabled('enable_videos');
+
   return (
     <>
       <div className="flex flex-col justify-center items-center gap-8 md:gap-12 lg:gap-16 bg-[#101516] py-8">
         <HomeBanner />
         <ArtistGallery />
-        <VideoPlayerComponent />
+        {isVideosEnabled && <VideoPlayerComponent />}
         {/* <ImageCarousel />  */}
         <PopularAlbums />
       </div>

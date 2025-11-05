@@ -11,6 +11,7 @@ function AlbumCard({ album, purchaseLink }) {
   const [showModal, setShowModal] = useState(false);
   
   const isStripeEnabled = isEnabled('enable_stripe');
+  const isMerchandiseEnabled = isEnabled('enable_merchandise');
   
   // Debug log
   console.log('AlbumCard - Stripe enabled:', isStripeEnabled);
@@ -122,6 +123,7 @@ function AlbumCard({ album, purchaseLink }) {
           )}
 
           {/* Price and Buy Button */}
+          {isMerchandiseEnabled && (
           <div className="mt-4 pt-4 border-t border-[#2a2b35] flex flex-col gap-2">
             <div className="text-[#aa2a46] text-2xl font-bold">
               {formatPrice(album.album_pricing)}
@@ -147,6 +149,7 @@ function AlbumCard({ album, purchaseLink }) {
               </a>
             )}
           </div>
+          )}
         </div>
       </div>
 

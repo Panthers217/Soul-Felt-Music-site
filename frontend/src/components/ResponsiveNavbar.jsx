@@ -1,11 +1,16 @@
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import React, { useState } from "react";
 import { useApiData } from "../context/ApiDataContext";
+import { useFeatures } from "../context/FeaturesContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 export default function ResponsiveNavbar() {
   const { websiteUser, websiteSettings } = useApiData();
+  const { isEnabled } = useFeatures();
+  const isMerchandiseEnabled = isEnabled('enable_merchandise');
+  const isVideosEnabled = isEnabled('enable_videos');
+  const isUserAccountsEnabled = isEnabled('enable_user_accounts');
 
   // Fallback logo
   const defaultLogo = (
@@ -74,11 +79,11 @@ export default function ResponsiveNavbar() {
           <div className="bg-[#0c0504] border-t border-[#1a1312] w-full">
             <ul className="flex flex-col py-2 px-4 space-y-3 text-[#e6cfa7] text-base">
               <Link to="/">Home</Link>
-              <Link to="/store">Store</Link>
+              {isMerchandiseEnabled && <Link to="/store">Store</Link>}
               <Link to="/music">Music</Link>
               <Link to="/artists">Artists</Link>
               {/* <Link to="/news">News</Link> */}
-              <Link to="/videos">Videos</Link>
+              {isVideosEnabled && <Link to="/videos">Videos</Link>}
               <Link to="/community">Community/News</Link>
               <Link to="/contact">Contact</Link>
               {websiteUser?.isAdmin && (
@@ -123,8 +128,12 @@ export default function ResponsiveNavbar() {
                   </>
                 ) : (
                   <>
-                    <Link to="/sign-up" className="text-[#1976d2] text-base">Sign Up</Link>
-                    <Link to="/login" className="text-[#1976d2] text-base">Login</Link>
+                    {(isUserAccountsEnabled || websiteUser?.isAdmin) && (
+                      <>
+                        <Link to="/sign-up" className="text-[#1976d2] text-base">Sign Up</Link>
+                        <Link to="/login" className="text-[#1976d2] text-base">Login</Link>
+                      </>
+                    )}
                   </>
                 )}
                 <div className="relative mt-2">
@@ -164,11 +173,11 @@ export default function ResponsiveNavbar() {
         {/* Nav Links */}
         <ul className="flex-1 flex justify-center items-center gap-[1rem] md:gap-[1rem] xl:gap-16 lg:text-md xl:text-[1.5rem] text-[#e6cfa7] xl:text-lg text-[1rem] font-normal">
           <Link to="/">Home</Link>
-          <Link to="/store">Store</Link>
+          {isMerchandiseEnabled && <Link to="/store">Store</Link>}
           <Link to="/music">Music</Link>
           <Link to="/artists">Artists</Link>
           {/* <Link to="/news">News</Link> */}
-          <Link to="/videos">Videos</Link>
+          {isVideosEnabled && <Link to="/videos">Videos</Link>}
           <Link to="/community">Community/News</Link>
           <Link to="/contact">Contact</Link>
           {websiteUser?.isAdmin && (
@@ -213,8 +222,12 @@ export default function ResponsiveNavbar() {
             </>
           ) : (
             <>
-              <Link to="/sign-up" className="text-[#1976d2] text-lg font-medium">Sign Up</Link>
-              <Link to="/login" className="text-[#1976d2] text-lg font-medium">Login</Link>
+              {(isUserAccountsEnabled || websiteUser?.isAdmin) && (
+                <>
+                  <Link to="/sign-up" className="text-[#1976d2] text-lg font-medium">Sign Up</Link>
+                  <Link to="/login" className="text-[#1976d2] text-lg font-medium">Login</Link>
+                </>
+              )}
             </>
           )}
           <div className="relative">

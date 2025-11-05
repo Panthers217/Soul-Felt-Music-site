@@ -26,6 +26,7 @@ function TrackCard({ track, albumCoverUrl, purchaseLink, artistName }) {
   const { addToCart } = useCart();
   
   const isStripeEnabled = isEnabled('enable_stripe');
+  const isMerchandiseEnabled = isEnabled('enable_merchandise');
   
   // Debug log
   console.log('TrackCard - Stripe enabled:', isStripeEnabled);
@@ -141,6 +142,7 @@ function TrackCard({ track, albumCoverUrl, purchaseLink, artistName }) {
         <Wavelength playing={playing} />
 
         {/* Price and Buy Section */}
+        {isMerchandiseEnabled && (
         <div className="mt-4 w-full flex flex-col items-center gap-3 pt-4 border-t border-white/10">
           <div className="flex items-baseline gap-2">
             <span className="text-[#aa2a46] text-2xl font-bold">{formatPrice(track.track_pricing)}</span>
@@ -166,6 +168,7 @@ function TrackCard({ track, albumCoverUrl, purchaseLink, artistName }) {
             </a>
           )}
         </div>
+        )}
       </div>
     </div>
   );
