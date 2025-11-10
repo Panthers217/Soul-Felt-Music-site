@@ -10,9 +10,9 @@ import HomePageLayout from '../components/HomePageLayout'; // Assuming you have 
 
 const Home = () => {
   return (
-    <>
+    <div className=' '>
     <HomePageLayout/>
-    </>
+    </div>
     // <section className="bg-gray-100 text-gray-800">
     //   {/* Hero Section */}
     //   <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white py-16 px-6 text-center">

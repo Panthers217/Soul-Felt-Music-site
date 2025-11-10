@@ -35,6 +35,12 @@ export default {
       'xl': { 'min': '1440px' },
       
     },
+    minHeight: {
+      'fill': '-webkit-fill-available',
+    },
+    height: {
+      'fill': '-webkit-fill-available',
+    },
     },
   },
   plugins: [],

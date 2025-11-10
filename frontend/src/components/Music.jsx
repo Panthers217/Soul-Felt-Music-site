@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useApiData } from "../context/ApiDataContext";
 import { useCart } from "../context/CartContext";
 import { useFeatures } from "../context/FeaturesContext";
 import { useNavigate } from "react-router-dom";
-import TrackCard from "./TrackCard";
-import AlbumCard from "./AlbumCard";
+import MusicSection from "./MusicSection";
 import SearchBar from "./SearchBar";
 import CartSummary from "./CartSummary";
 import axios from "axios";
@@ -18,8 +17,63 @@ const Music = () => {
   const [genres, setGenres] = useState([]);
   const [viewMode, setViewMode] = useState("tracks"); // "tracks" or "albums"
   const [searchResults, setSearchResults] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   
   const isStripeEnabled = isEnabled('enable_stripe');
+
+  // Swipe handling
+  const useSwipe = (scrollRef) => {
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+    const isDown = useRef(false);
+    const hasMoved = useRef(false);
+
+    const handleStart = (clientX) => {
+      if (!scrollRef.current) return;
+      isDown.current = true;
+      hasMoved.current = false;
+      startX.current = clientX - scrollRef.current.offsetLeft;
+      scrollLeft.current = scrollRef.current.scrollLeft;
+      scrollRef.current.style.cursor = 'grabbing';
+      scrollRef.current.style.userSelect = 'none';
+    };
+
+    const handleMove = (clientX) => {
+      if (!isDown.current || !scrollRef.current) return;
+      hasMoved.current = true;
+      const x = clientX - scrollRef.current.offsetLeft;
+      const walk = (x - startX.current) * 2; // Scroll speed multiplier
+      scrollRef.current.scrollLeft = scrollLeft.current - walk;
+    };
+
+    const handleEnd = () => {
+      if (!scrollRef.current) return;
+      isDown.current = false;
+      scrollRef.current.style.cursor = 'grab';
+      scrollRef.current.style.userSelect = 'auto';
+    };
+
+    return {
+      onMouseDown: (e) => handleStart(e.pageX),
+      onMouseMove: (e) => handleMove(e.pageX),
+      onMouseUp: handleEnd,
+      onMouseLeave: handleEnd,
+      onTouchStart: (e) => handleStart(e.touches[0].pageX),
+      onTouchMove: (e) => handleMove(e.touches[0].pageX),
+      onTouchEnd: handleEnd,
+    };
+  };
+
+  // Detect screen size for mobile vs desktop behavior
+  useEffect(() => {
+    const updateScreenSize = () => {
+      setIsMobile(window.innerWidth <= 425);
+    };
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
 
   // Fetch active genres from database
   useEffect(() => {
@@ -252,36 +306,18 @@ const Music = () => {
               }
             }
             
-            return sectionItems.length > 0 ? (
-              <div key={section.key} className="mb-8">
-                <h2 className="text-[#aa2a46] text-3xl font-bold mb-6 font-['Public_Sans'] text-center">
-                  {section.label}
-                </h2>
-                <div className="flex flex-wrap gap-8 justify-center">
-                  {viewMode === "tracks" ? (
-                    sectionItems.map((track) => (
-                      <TrackCard
-                        key={track.id}
-                        track={track}
-                        purchaseLink={track.purchase_link}
-                        albumCoverUrl={getTrackImage(track)}
-                        artistName={getArtistName(track.artist_id)}
-                      />
-                    ))
-                  ) : (
-                    sectionItems.map((album) => (
-                      <AlbumCard
-                        key={album.id}
-                        album={{
-                          ...album,
-                          artist_name: getArtistName(album.artist_id)
-                        }}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            ) : null;
+            return (
+              <MusicSection
+                key={section.key}
+                section={section}
+                sectionItems={sectionItems}
+                viewMode={viewMode}
+                isMobile={isMobile}
+                getTrackImage={getTrackImage}
+                getArtistName={getArtistName}
+                useSwipe={useSwipe}
+              />
+            );
           })}
         <div className="w-full flex flex-col items-center mt-8">
           <h2 className="text-[#aa2a46] text-2xl font-bold mb-2 font-['Public_Sans'] text-center">

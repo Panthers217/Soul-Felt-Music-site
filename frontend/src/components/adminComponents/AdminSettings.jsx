@@ -27,7 +27,7 @@ import {
   FaPatreon,
 } from "react-icons/fa";
 import { SiTidal, SiNapster } from "react-icons/si";
-import { BrandingTab, ThemeColorsTab,ContactInfoTab, EmailSettingsTab,CloudinaryTab, FeaturesTab, HomepageTab, LegalTab, OtherTab} from "./websiteSettingsComponents";
+import { BrandingTab, ThemeColorsTab,ContactInfoTab, EmailSettingsTab,CloudinaryTab, FeaturesTab, HomepageTab, LegalTab, OtherTab, AboutTab} from "./websiteSettingsComponents";
 import { Cloud } from "lucide-react";
 
 const AdminSettings = () => {
@@ -684,6 +684,7 @@ const AdminSettings = () => {
     { id: "cloudinary", label: "☁️ Cloudinary", icon: "☁️" },
     { id: "features", label: "🔧 Features", icon: "🔧" },
     { id: "homepage", label: "🏠 Homepage", icon: "🏠" },
+    { id: "about", label: "ℹ️ About", icon: "ℹ️" },
     { id: "legal", label: "⚖️ Legal", icon: "⚖️" },
     { id: "other", label: "⚙️ Other", icon: "⚙️" },
   ];
@@ -782,6 +783,13 @@ const AdminSettings = () => {
           {/* Homepage Tab */}
           {activeTab === "homepage" && (
             <HomepageTab
+              settings={settings}
+              handleInputChange={handleInputChange}
+            />
+          )}
+          {/* About Tab */}
+          {activeTab === "about" && (
+            <AboutTab
               settings={settings}
               handleInputChange={handleInputChange}
             />

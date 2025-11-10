@@ -39,6 +39,7 @@ const quickLinks = [
 const supportLinks = [
   { label: "Contact", to: "/contact" },
   { label: "FAQ", to: "/faq" },
+  { label: "About", to: "/about" },
   { label: "Terms", to: "/terms" },
 ];
 
@@ -48,7 +49,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#120c0a] text-[#fffced] pt-8 pb-4 px-2">
-      <div className="max-w-7xl mx-auto border border-[#231f1c] rounded-sm p-6 md:p-8 flex flex-col md:flex-row md:items-start gap-8 md:gap-0">
+      <div className="max-w-7xl mx-auto border border-[#231f1c] rounded-sm p-6 md:p-8 flex flex-col md:flex-col lg:flex-row xl:flex-row md:items-start gap-8 md:gap-0">
         {/* Left column */}
         <div className="flex-1 mb-6 md:mb-0">
           <span className="text-[#aa2a46] text-2xl font-bold">
