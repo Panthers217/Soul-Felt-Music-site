@@ -53,13 +53,25 @@ admin.initializeApp({
 const app = express();
 
 // Configure CORS to allow all origins (for development)
-app.use(cors({
-  origin: true,
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow all origins in development
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 // Stripe webhook needs raw body - must come BEFORE bodyParser.json()
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));

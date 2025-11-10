@@ -254,7 +254,33 @@ export async function updateSettings(req, res) {
       site_keywords,
       items_per_page,
       max_upload_size_mb,
-      terms_of_service
+      terms_of_service,
+      // About page fields
+      about_page_title,
+      about_hero_tagline,
+      about_story_paragraph1,
+      about_story_paragraph2,
+      about_story_paragraph3,
+      about_mission,
+      about_vision,
+      about_stat1_number,
+      about_stat1_label,
+      about_stat2_number,
+      about_stat2_label,
+      about_stat3_number,
+      about_stat3_label,
+      about_stat4_number,
+      about_stat4_label,
+      about_value1_title,
+      about_value1_desc,
+      about_value2_title,
+      about_value2_desc,
+      about_value3_title,
+      about_value3_desc,
+      about_value4_title,
+      about_value4_desc,
+      about_cta_title,
+      about_cta_description
     } = req.body;
 
     // Build dynamic update query
@@ -321,6 +347,33 @@ export async function updateSettings(req, res) {
     if (items_per_page !== undefined) { updates.push('items_per_page = ?'); values.push(items_per_page); }
     if (max_upload_size_mb !== undefined) { updates.push('max_upload_size_mb = ?'); values.push(max_upload_size_mb); }
     if (terms_of_service !== undefined) { updates.push('terms_of_service = ?'); values.push(terms_of_service); }
+    
+    // About page fields
+    if (about_page_title !== undefined) { updates.push('about_page_title = ?'); values.push(about_page_title); }
+    if (about_hero_tagline !== undefined) { updates.push('about_hero_tagline = ?'); values.push(about_hero_tagline); }
+    if (about_story_paragraph1 !== undefined) { updates.push('about_story_paragraph1 = ?'); values.push(about_story_paragraph1); }
+    if (about_story_paragraph2 !== undefined) { updates.push('about_story_paragraph2 = ?'); values.push(about_story_paragraph2); }
+    if (about_story_paragraph3 !== undefined) { updates.push('about_story_paragraph3 = ?'); values.push(about_story_paragraph3); }
+    if (about_mission !== undefined) { updates.push('about_mission = ?'); values.push(about_mission); }
+    if (about_vision !== undefined) { updates.push('about_vision = ?'); values.push(about_vision); }
+    if (about_stat1_number !== undefined) { updates.push('about_stat1_number = ?'); values.push(about_stat1_number); }
+    if (about_stat1_label !== undefined) { updates.push('about_stat1_label = ?'); values.push(about_stat1_label); }
+    if (about_stat2_number !== undefined) { updates.push('about_stat2_number = ?'); values.push(about_stat2_number); }
+    if (about_stat2_label !== undefined) { updates.push('about_stat2_label = ?'); values.push(about_stat2_label); }
+    if (about_stat3_number !== undefined) { updates.push('about_stat3_number = ?'); values.push(about_stat3_number); }
+    if (about_stat3_label !== undefined) { updates.push('about_stat3_label = ?'); values.push(about_stat3_label); }
+    if (about_stat4_number !== undefined) { updates.push('about_stat4_number = ?'); values.push(about_stat4_number); }
+    if (about_stat4_label !== undefined) { updates.push('about_stat4_label = ?'); values.push(about_stat4_label); }
+    if (about_value1_title !== undefined) { updates.push('about_value1_title = ?'); values.push(about_value1_title); }
+    if (about_value1_desc !== undefined) { updates.push('about_value1_desc = ?'); values.push(about_value1_desc); }
+    if (about_value2_title !== undefined) { updates.push('about_value2_title = ?'); values.push(about_value2_title); }
+    if (about_value2_desc !== undefined) { updates.push('about_value2_desc = ?'); values.push(about_value2_desc); }
+    if (about_value3_title !== undefined) { updates.push('about_value3_title = ?'); values.push(about_value3_title); }
+    if (about_value3_desc !== undefined) { updates.push('about_value3_desc = ?'); values.push(about_value3_desc); }
+    if (about_value4_title !== undefined) { updates.push('about_value4_title = ?'); values.push(about_value4_title); }
+    if (about_value4_desc !== undefined) { updates.push('about_value4_desc = ?'); values.push(about_value4_desc); }
+    if (about_cta_title !== undefined) { updates.push('about_cta_title = ?'); values.push(about_cta_title); }
+    if (about_cta_description !== undefined) { updates.push('about_cta_description = ?'); values.push(about_cta_description); }
 
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });

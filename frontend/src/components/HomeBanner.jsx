@@ -15,7 +15,7 @@ const DemoBannerMobile = ({ albumImages, fadeOut }) => {
     <div data-layer="Frame 32" className="Frame32  w-[20rem] h-auto aspect-[425/630] minMobile:aspect-[320/475]  relative bg-[#101516]">
        {/* welcome logo */}
 
-      <div data-layer="WelcomeSvg" className="Welcomesvg z-10 w-full h-48 left-0 top-[0%] minMobile:ml-[11%]  absolute">
+      <div data-layer="WelcomeSvg" className="Welcomesvg z-10 w-full h-48 left-0 top-[0%] minMobile:ml-[11%] absolute"  style={{ width: '-webkit-fill-available', minwidth: '-webkit-fill-available' }}>
           <img data-layer="envato-labs-image-edit 4" className="EnvatoLabsImageEdit4 w-full  pl-[15%] left-0 top-0 minMobile:pt-[10%]  minMobile:pl-[0%] absolute" src={heroWelcomePic} />
       
       </div>

@@ -185,7 +185,7 @@ const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
   const currentThumbnail = currentVideo ? getThumbnailUrl(currentVideo) : null;
 
   return (
-    <div className="w-full max-w-[75rem] mx-auto bg-black rounded-lg shadow-lg p-4 flex flex-col items-center">
+    <div className="w-full max-w-[75rem] mx-auto bg-black rounded-lg shadow-lg p-4 flex flex-col items-center ">
       {/* Video Counter */}
       {!loading && videos.length > 0 && (
         <div className="w-full flex justify-between items-center mb-4">
@@ -316,7 +316,7 @@ const VideoPlayerComponent = ({ videoUrls = null, onPlaylistEnd = null }) => {
 
       {/* Dots Indicator */}
       {!loading && videos.length > 1 && (
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 sm:gap-0 mt-4">
           {videos.map((_, index) => (
             <button
               key={index}

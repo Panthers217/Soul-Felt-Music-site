@@ -8,3 +8,4 @@ export { default as FeaturesTab } from './FeaturesTab';
 export { default as HomepageTab } from './HomepageTab';
 export { default as LegalTab } from './LegalTab';
 export { default as OtherTab } from './OtherTab';
+export { default as AboutTab } from './AboutTab';

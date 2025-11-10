@@ -1,16 +1,30 @@
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from "react-router-dom";
+import React, { useState, useMemo } from "react";
 import { useApiData } from "../context/ApiDataContext";
 import { useFeatures } from "../context/FeaturesContext";
+import { useCart } from "../context/CartContext";
+import { useNavbar } from "../context/NavbarContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import SearchBar from "./SearchBar";
 
 export default function ResponsiveNavbar() {
   const { websiteUser, websiteSettings } = useApiData();
   const { isEnabled } = useFeatures();
+  const { getCartCount } = useCart();
+  const location = useLocation();
   const isMerchandiseEnabled = isEnabled('enable_merchandise');
   const isVideosEnabled = isEnabled('enable_videos');
   const isUserAccountsEnabled = isEnabled('enable_user_accounts');
+  
+  const cartCount = getCartCount();
+  const [_searchResults, setSearchResults] = useState(null);
+  
+  // Pages that use SearchBar - memoize to prevent unnecessary re-renders
+  const showSearchBar = useMemo(() => {
+    const searchPages = ['/music', '/artists', '/videos', '/store'];
+    return searchPages.some(path => location.pathname.startsWith(path));
+  }, [location.pathname]);
 
   // Fallback logo
   const defaultLogo = (
@@ -44,10 +58,10 @@ export default function ResponsiveNavbar() {
   };
 
   const MobileTabletNavbar = () => {
-    const [menuOpen, setMenuOpen] = useState(false);
+    const { isNavbarOpen, toggleNavbar } = useNavbar();
   
     return (
-      <nav className="bg-[#0c0504] w-full">
+      <nav className="bg-[#0c0504] w-full  fixed top-0 left-0 right-0 z-[100]">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -61,21 +75,37 @@ export default function ResponsiveNavbar() {
               defaultLogo2
             )}
           </Link>
-          {/* Hamburger */}
-          <button
-            className="text-[#e6cfa7] focus:outline-none"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
-              <rect y="8" width="32" height="2" rx="1" fill="#e6cfa7" />
-              <rect y="15" width="32" height="2" rx="1" fill="#e6cfa7" />
-              <rect y="22" width="32" height="2" rx="1" fill="#e6cfa7" />
-            </svg>
-          </button>
+          
+          {/* Right Side - Cart & Hamburger */}
+          <div className="flex items-center gap-4">
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative">
+              <svg className="w-7 h-7 text-[#e6cfa7] hover:text-[#f7c900] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#c90036] text-[#e6cfa7] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            
+            {/* Hamburger */}
+            <button
+              className="text-[#e6cfa7] focus:outline-none"
+              onClick={toggleNavbar}
+              aria-label="Toggle menu"
+            >
+              <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
+                <rect y="8" width="32" height="2" rx="1" fill="#e6cfa7" />
+                <rect y="15" width="32" height="2" rx="1" fill="#e6cfa7" />
+                <rect y="22" width="32" height="2" rx="1" fill="#e6cfa7" />
+              </svg>
+            </button>
+          </div>
         </div>
         {/* Menu */}
-        {menuOpen && (
+        {isNavbarOpen && (
           <div className="bg-[#0c0504] border-t border-[#1a1312] w-full">
             <ul className="flex flex-col py-2 px-4 space-y-3 text-[#e6cfa7] text-base">
               <Link to="/">Home</Link>
@@ -85,6 +115,7 @@ export default function ResponsiveNavbar() {
               {/* <Link to="/news">News</Link> */}
               {isVideosEnabled && <Link to="/videos">Videos</Link>}
               <Link to="/community">Community/News</Link>
+              <Link to="/about">About</Link>
               <Link to="/contact">Contact</Link>
               {websiteUser?.isAdmin && (
                 <>
@@ -136,19 +167,21 @@ export default function ResponsiveNavbar() {
                     )}
                   </>
                 )}
-                <div className="relative mt-2">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="bg-transparent border border-[#c90036] rounded-full px-3 py-1 text-[#e6cfa7] w-full text-sm focus:outline-none"
-                  />
-                  <span className="absolute right-2 top-1.5">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-                      <circle cx="8" cy="8" r="7" stroke="#c90036" strokeWidth="2" />
-                      <line x1="13" y1="13" x2="17" y2="17" stroke="#c90036" strokeWidth="2" />
-                    </svg>
-                  </span>
-                </div>
+                {/* {showSearchBar && (
+                  <div className="mt-2" style={{ maxWidth: '100%' }}>
+                    <div className="relative">
+                      <div className="[&>div]:max-w-full [&>div]:mx-0 [&>div]:mb-0 [&_input]:bg-transparent [&_input]:border-[#c90036] [&_input]:text-[#e6cfa7] [&_input]:text-sm [&_input]:py-1 [&_input]:px-3 [&_input]:rounded-full [&_input]:pl-3 [&_input]:pr-8 [&_input]:focus:border-[#c90036] [&_.absolute.left-4]:hidden [&_.absolute.right-4]:right-2 [&_.absolute.right-4]:top-2 [&_.mt-2]:hidden">
+                        <SearchBar key="mobile-search" onSearchResults={setSearchResults} viewMode="all" />
+                      </div>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
+                          <circle cx="8" cy="8" r="7" stroke="#c90036" strokeWidth="2" />
+                          <line x1="13" y1="13" x2="17" y2="17" stroke="#c90036" strokeWidth="2" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                )} */}
               </div>
             </div>
           </div>
@@ -159,7 +192,7 @@ export default function ResponsiveNavbar() {
 
   const DesktopNavbar = () => {
     return (
-      <nav className="bg-[#1a0b0d] w-full flex items-center flex-wrap">
+      <nav className="bg-[#1a0b0d] w-full flex items-center flex-wrap fixed top-0 left-0 right-0 z-[100]">
         {/* Logo Section */}
         <Link to="/" className="flex items-center justify-center px-6 py-2 bg-[#0c0504]" style={{ minWidth: 145 }}>
           {websiteSettings?.logo_url ? (
@@ -179,6 +212,7 @@ export default function ResponsiveNavbar() {
           {/* <Link to="/news">News</Link> */}
           {isVideosEnabled && <Link to="/videos">Videos</Link>}
           <Link to="/community">Community/News</Link>
+          <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           {websiteUser?.isAdmin && (
             <>
@@ -188,8 +222,20 @@ export default function ResponsiveNavbar() {
             </>
           )}
         </ul>
-        {/* Auth/Search Section */}
+        {/* Auth/Search/Cart Section */}
         <div className="flex items-center gap-6 px-6 py-2 bg-[#1a0b0d]" style={{ minWidth: 220 }}>
+          {/* Cart Icon */}
+          <Link to="/cart" className="relative">
+            <svg className="w-7 h-7 text-[#e6cfa7] hover:text-[#f7c900] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#c90036] text-[#e6cfa7] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+          
           {websiteUser ? (
             <>
               <div className="flex items-center gap-3">
@@ -230,19 +276,19 @@ export default function ResponsiveNavbar() {
               )}
             </>
           )}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent border border-[#c90036] rounded-full px-3 py-1 text-[#e6cfa7] w-24 text-sm focus:outline-none"
-            />
-            <span className="absolute right-2 top-1.5">
-              <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-                <circle cx="8" cy="8" r="7" stroke="#c90036" strokeWidth="2" />
-                <line x1="13" y1="13" x2="17" y2="17" stroke="#c90036" strokeWidth="2" />
-              </svg>
-            </span>
-          </div>
+          {/* {showSearchBar && (
+            <div className="relative" style={{ width: '140px' }}>
+              <div className="[&>div]:max-w-full [&>div]:mx-0 [&>div]:mb-0 [&_input]:bg-transparent [&_input]:border-[#c90036] [&_input]:text-[#e6cfa7] [&_input]:text-sm [&_input]:py-1 [&_input]:px-3 [&_input]:rounded-full [&_input]:w-full [&_input]:pl-3 [&_input]:pr-8 [&_input]:focus:border-[#c90036] [&_input]:focus:w-full [&_.absolute.left-4]:hidden [&_.absolute.right-4]:right-2 [&_.absolute.right-4]:top-2 [&_.mt-2]:hidden">
+                <SearchBar key="desktop-search" onSearchResults={setSearchResults} viewMode="all" />
+              </div>
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
+                  <circle cx="8" cy="8" r="7" stroke="#c90036" strokeWidth="2" />
+                  <line x1="13" y1="13" x2="17" y2="17" stroke="#c90036" strokeWidth="2" />
+                </svg>
+              </span>
+            </div>
+          )} */}
         </div>
       </nav>
     );

@@ -3,6 +3,7 @@ import AdminLogin from './components/AdminLogin'; // Import AdminLogin component
 import AdminSqlViewer from './components/AdminSqlViewer';
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { NavbarProvider, useNavbar } from './context/NavbarContext';
 
 // Import your components here
 import NavBar from "./components/NavBar";
@@ -20,6 +21,7 @@ import ArtistPage from "./pages/ArtistPage"; // Assuming you have this page
 import ResponsiveNavbar from "./components/ResponsiveNavbar";
 import ArtistOverview from "./components/ArtistOverview";
 import ArtistStore from "./components/ArtistStore";
+import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import PurchaseHistory from "./components/PurchaseHistory";
@@ -53,9 +55,10 @@ function ArtistStoreWrapper() {
   return <ArtistStore artistId={artistId} artistName={artistName} />;
 }
 
-function App() {
+function AppContent() {
   const { user, loading } = useUserLogin();
   const { websiteSettings } = useApiData();
+  const { isNavbarOpen } = useNavbar();
   
   // Update favicon dynamically when websiteSettings change
   React.useEffect(() => {
@@ -72,7 +75,7 @@ function App() {
   }, [websiteSettings]);
   
   // Helper to check admin claim
-  const isAdmin = user && user.getIdTokenResult && user.email && user.getIdTokenResult;
+  // const isAdmin = user && user.getIdTokenResult && user.email && user.getIdTokenResult;
 
   // Custom AdminDashboard route protection
   function AdminDashboardRoute() {
@@ -111,18 +114,22 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
-        <ScrollToTop />
-        <Toaster />
-        {/* <NavBar /> */}
-        <ResponsiveNavbar />
-        <main className="flex-1">
+    
+      <Router>
+        <div className="min-h-screen  flex flex-col">
+          <ScrollToTop />
+          <Toaster />
+          {/* <NavBar /> */}
+          <div className="flex w-full">
+          <ResponsiveNavbar />
+          </div>
+          <main className={`flex-1 bg-[black] pt-[4rem] ${isNavbarOpen ? (user ? 'sm:pt-[35rem] md:pt-[30rem]' : 'sm:pt-[30rem] md:pt-[30rem]') : 'sm:pt-[4rem] md:pt-[4rem]' } transition-all duration-300`}>
           <Routes>
             <Route path="/" element={<Home />} />
             {/* <Route path="/store" element={<Store />} /> */}
             <Route path="/store" element={<ArtistStore />} />
             <Route path="/store/:artistId" element={<ArtistStoreWrapper />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/purchase-history" element={<PurchaseHistory />} />
@@ -145,6 +152,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboardRoute />} /> {/* Protected admin dashboard route */}
             <Route path="/admin/newsletter" element={<AdminDashboardRoute />} /> {/* Protected newsletter campaigns route */}
             <Route path="/admin/faq" element={<AdminDashboardRoute />} /> {/* Protected FAQ management route */}
+            
             {/* 404 Catch-all route - must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -152,6 +160,15 @@ function App() {
         <Footer />
       </div>
     </Router>
+   
+  );
+}
+
+function App() {
+  return (
+    <NavbarProvider>
+      <AppContent />
+    </NavbarProvider>
   );
 }
 
