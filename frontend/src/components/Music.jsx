@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useApiData } from "../context/ApiDataContext";
-import { useCart } from "../context/CartContext";
 import { useFeatures } from "../context/FeaturesContext";
-import { useNavigate } from "react-router-dom";
 import MusicSection from "./MusicSection";
 import SearchBar from "./SearchBar";
 import CartSummary from "./CartSummary";
@@ -11,9 +9,7 @@ import axios from "axios";
 
 const Music = () => {
   const { dbSnapshot } = useApiData();
-  const { cart } = useCart();
   const { isEnabled } = useFeatures();
-  const navigate = useNavigate();
   const [activeTabs, setActiveTabs] = useState(["all"]);
   const [genres, setGenres] = useState([]);
   const [viewMode, setViewMode] = useState("tracks"); // "tracks" or "albums"
