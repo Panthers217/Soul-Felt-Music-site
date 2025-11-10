@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import MusicSection from "./MusicSection";
 import SearchBar from "./SearchBar";
 import CartSummary from "./CartSummary";
+import SEO from "./SEO";
 import axios from "axios";
 
 const Music = () => {
@@ -180,15 +181,22 @@ const Music = () => {
     : activeTabs;
 
   return (
-    <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
-      <div className="w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
-        <h1 className="text-[#fffced] text-5xl md:text-6xl font-extrabold font-['Roboto'] mb-4 text-center drop-shadow-lg">
-          Stream & Discover Soul Felt Music
-        </h1>
-        <p className="text-[#fffced] text-lg md:text-xl font-semibold text-center mb-8">
-          Play samples, discover new artists, and purchase your favorite tracks
-          and albums.
-        </p>
+    <>
+      <SEO 
+        title="Music - Stream & Discover Soul Felt Music"
+        description="Stream music samples and discover soul tracks and albums. Browse featured releases, new arrivals, and popular music from talented artists."
+        keywords={`soul music, music streaming, ${genres.map(g => g.name).join(', ')}, tracks, albums, featured music, new releases`}
+        url="https://soulfeltmusic.com/music"
+      />
+      <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
+        <div className="w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
+          <h1 className="text-[#fffced] text-5xl md:text-6xl font-extrabold font-['Roboto'] mb-4 text-center drop-shadow-lg">
+            Stream & Discover Soul Felt Music
+          </h1>
+          <p className="text-[#fffced] text-lg md:text-xl font-semibold text-center mb-8">
+            Play samples, discover new artists, and purchase your favorite tracks
+            and albums.
+          </p>
         
         {/* View Toggle */}
         <div className="flex justify-center mb-6">
@@ -332,6 +340,7 @@ const Music = () => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 export default Music;

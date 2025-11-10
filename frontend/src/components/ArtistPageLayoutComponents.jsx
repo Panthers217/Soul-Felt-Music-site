@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { useApiData } from "../context/ApiDataContext";
 import SearchBar from "./SearchBar";
+import SEO from "./SEO";
 import {
   trackcardImage,
   topTrackcardImage,
@@ -790,21 +791,29 @@ const ArtistPageComponent = () => {
   }
 
   return (
-    <div className="bg-zinc-900">
-      {/* SearchBar at top level - prevents re-creation on view changes */}
-      <div className="w-full max-w-7xl mx-auto px-4 pt-8 pb-4">
-        <SearchBar onSearchResults={handleSearchResults} viewMode="artists" />
-      </div>
-      
-      {isDesktop && desktopView}
-      {isTablet && tabletView}
-      {isMobile && mobileView}
-      <TrackModal
-        open={trackModal.open}
-        track={trackModal.track}
-        onClose={() => setTrackModal({ open: false, track: null })}
+    <>
+      <SEO 
+        title="Artists - Soul Felt Music"
+        description="Explore talented artists and their music collections. Discover new sounds, albums, and tracks from your favorite soul music artists."
+        keywords="soul artists, music artists, artist profiles, soul music, discover artists"
+        url="https://soulfeltmusic.com/artist"
       />
-    </div>
+      <div className="bg-zinc-900">
+        {/* SearchBar at top level - prevents re-creation on view changes */}
+        <div className="w-full max-w-7xl mx-auto px-4 pt-8 pb-4">
+          <SearchBar onSearchResults={handleSearchResults} viewMode="artists" />
+        </div>
+        
+        {isDesktop && desktopView}
+        {isTablet && tabletView}
+        {isMobile && mobileView}
+        <TrackModal
+          open={trackModal.open}
+          track={trackModal.track}
+          onClose={() => setTrackModal({ open: false, track: null })}
+        />
+      </div>
+    </>
   );
 };
 
