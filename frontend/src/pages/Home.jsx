@@ -7,12 +7,21 @@ import Videos from '../components/Videos';
 import Community from '../components/Community';
 import Footer from '../components/Footer';
 import HomePageLayout from '../components/HomePageLayout'; // Assuming you have a layout component
+import SEO from '../components/SEO';
 
 const Home = () => {
   return (
-    <div className=' '>
-    <HomePageLayout/>
-    </div>
+    <>
+      <SEO 
+        title="Soul Felt Music - Experience the Soul of Music"
+        description="Discover and stream soulful music from talented artists. Explore albums, tracks, exclusive content, and shop for merchandise at Soul Felt Music."
+        keywords="soul music, music streaming, albums, tracks, artists, music store, soul felt music, new releases"
+        url="https://soulfeltmusic.com/"
+      />
+      <div className=' '>
+        <HomePageLayout/>
+      </div>
+    </>
     // <section className="bg-gray-100 text-gray-800">
     //   {/* Hero Section */}
     //   <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white py-16 px-6 text-center">
