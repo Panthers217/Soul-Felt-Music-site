@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Route, Routes, Link, useLocation } from "react-router-dom";
-import React, { useState, useMemo } from "react";
+import { BrowserRouter as Router, Route, Routes, Link,  } from "react-router-dom";
+// import React, { useState, useMemo } from "react";
 import { useApiData } from "../context/ApiDataContext";
 import { useFeatures } from "../context/FeaturesContext";
 import { useCart } from "../context/CartContext";
@@ -12,29 +12,29 @@ export default function ResponsiveNavbar() {
   const { websiteUser, websiteSettings } = useApiData();
   const { isEnabled } = useFeatures();
   const { getCartCount } = useCart();
-  const location = useLocation();
+  // const location = useLocation();
   const isMerchandiseEnabled = isEnabled('enable_merchandise');
   const isVideosEnabled = isEnabled('enable_videos');
   const isUserAccountsEnabled = isEnabled('enable_user_accounts');
   
   const cartCount = getCartCount();
-  const [_searchResults, setSearchResults] = useState(null);
+  // const [_searchResults, setSearchResults] = useState(null);
   
-  // Pages that use SearchBar - memoize to prevent unnecessary re-renders
-  const showSearchBar = useMemo(() => {
-    const searchPages = ['/music', '/artists', '/videos', '/store'];
-    return searchPages.some(path => location.pathname.startsWith(path));
-  }, [location.pathname]);
+  // // Pages that use SearchBar - memoize to prevent unnecessary re-renders
+  // const showSearchBar = useMemo(() => {
+  //   const searchPages = ['/music', '/artists', '/videos', '/store'];
+  //   return searchPages.some(path => location.pathname.startsWith(path));
+  // }, [location.pathname]);
 
   // Fallback logo
-  const defaultLogo = (
-    <div className="flex flex-col items-center">
-      <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
-      <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
-      <div className="w-20 h-1 bg-[#f7c900] mt-1 mb-1" />
-      <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
-    </div>
-  );
+  // const defaultLogo = (
+  //   <div className="flex flex-col items-center">
+  //     <span className="text-[#e6cfa7] text-xs tracking-widest">SOULFELT</span>
+  //     <span className="text-[#e6cfa7] text-lg font-medium tracking-widest">MUSIC</span>
+  //     <div className="w-20 h-1 bg-[#f7c900] mt-1 mb-1" />
+  //     <span className="text-[#e6cfa7] text-[7px] tracking-widest">FEEL THE VIBES</span>
+  //   </div>
+  // );
   
   // Fallback logo 2 with customizable text
   const defaultLogo2 = (
