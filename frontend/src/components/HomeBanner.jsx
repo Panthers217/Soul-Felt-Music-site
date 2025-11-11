@@ -224,7 +224,7 @@ const HomeBanner = () => {
 
  let albumImages = []
   // Only log albums from dbSnapshot
-  if (dbSnapshot && dbSnapshot.albums.records) {
+  if (dbSnapshot && dbSnapshot.albums && dbSnapshot.albums.records) {
     // console.log("albums in dbSnapshot:", dbSnapshot.albums.records);
      albumImages = dbSnapshot.albums.records
       .map((album) => ({
