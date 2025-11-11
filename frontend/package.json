@@ -10,7 +10,8 @@
     "postbuild": "react-snap",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-sitemap": "node scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "netlify-build": "npm install --legacy-peer-deps && vite build"
   },
   "reactSnap": {
     "inlineCss": true,

@@ -5,6 +5,7 @@ import MusicSection from "./MusicSection";
 import SearchBar from "./SearchBar";
 import CartSummary from "./CartSummary";
 import SEO from "./SEO";
+import DemoBanner from "./DemoBanner";
 import axios from "axios";
 
 const Music = () => {
@@ -184,6 +185,7 @@ const Music = () => {
         keywords={`soul music, music streaming, ${genres.map(g => g.name).join(', ')}, tracks, albums, featured music, new releases`}
         url="https://soulfeltmusic.com/music"
       />
+      <DemoBanner variant="compact" />
       <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
         <div className="w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
           <h1 className="text-[#fffced] text-5xl md:text-6xl font-extrabold font-['Roboto'] mb-4 text-center drop-shadow-lg">

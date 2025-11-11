@@ -1,5 +1,5 @@
 // src/components/About.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Feature from '../components/Feature';
 import NewArrivals from '../components/NewArrivals';
 import Artist from '../components/Artist';
@@ -8,8 +8,23 @@ import Community from '../components/Community';
 import Footer from '../components/Footer';
 import HomePageLayout from '../components/HomePageLayout'; // Assuming you have a layout component
 import SEO from '../components/SEO';
+import DemoBanner from '../components/DemoBanner';
+import DemoBannerReset from '../components/DemoBannerReset'; // Development helper
 
 const Home = () => {
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Check if banner was previously dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('demoBannerDismissed');
+    if (dismissed) setShowBanner(false);
+  }, []);
+
+  const handleDismiss = () => {
+    setShowBanner(false);
+    localStorage.setItem('demoBannerDismissed', 'true');
+  };
+
   return (
     <>
       <SEO 
@@ -18,8 +33,11 @@ const Home = () => {
         keywords="soul music, music streaming, albums, tracks, artists, music store, soul felt music, new releases"
         url="https://soulfeltmusic.com/"
       />
-      <div className=' '>
+      <div className='min-h-screen'>
+        {showBanner && <DemoBanner onClose={handleDismiss} />}
         <HomePageLayout/>
+        {/* Development helper - Remove before production */}
+        {process.env.NODE_ENV === 'development' && <DemoBannerReset />}
       </div>
     </>
     // <section className="bg-gray-100 text-gray-800">

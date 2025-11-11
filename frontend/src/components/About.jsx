@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { FaMusic, FaHeart, FaUsers, FaAward, FaRocket, FaHandshake } from 'react-icons/fa';
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 import { Link } from 'react-router-dom';
+import DemoBanner from './DemoBanner';
 
 const About = () => {
   const { websiteSettings } = useApiData();
@@ -72,6 +73,11 @@ const About = () => {
     <div className="min-h-screen py-16 px-4" style={{ backgroundColor: themeColors?.background || '#0c0504' }}>
       <div className="max-w-7xl mx-auto">
         
+        {/* Demo Banner - Detailed variant for About page */}
+        <div className="mb-12">
+          <DemoBanner variant="detailed" showAdminInfo={true} />
+        </div>
+
         {/* Hero Section with Logo */}
         <div className="text-center mb-20">
           <div className="mb-8 flex justify-center">

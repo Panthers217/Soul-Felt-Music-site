@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useApiData } from "../context/ApiDataContext";
 import SearchBar from "./SearchBar";
 import SEO from "./SEO";
+import DemoBanner from "./DemoBanner";
 import {
   trackcardImage,
   topTrackcardImage,
@@ -797,6 +798,7 @@ const ArtistPageComponent = () => {
         keywords="soul artists, music artists, artist profiles, soul music, discover artists"
         url="https://soulfeltmusic.com/artist"
       />
+      <DemoBanner variant="compact" />
       <div className="bg-zinc-900">
         {/* SearchBar at top level - prevents re-creation on view changes */}
         <div className="w-full max-w-7xl mx-auto px-4 pt-8 pb-4">
