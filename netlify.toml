@@ -4,7 +4,7 @@
 [build]
   base = "frontend"
   publish = "dist"
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "npm install --legacy-peer-deps && npx vite build"
 
 # Environment variables (set these in Netlify dashboard)
 # VITE_API_URL=https://your-backend.onrender.com
