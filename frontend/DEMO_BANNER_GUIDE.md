@@ -7,9 +7,11 @@ These components help communicate to potential employers that this is a portfoli
 ## 📦 Components Created
 
 ### 1. `DemoBanner.jsx`
+
 Full-width banner with three variants for different contexts.
 
 ### 2. `DemoBadge.jsx`
+
 Small inline badge for use within content.
 
 ---
@@ -17,16 +19,18 @@ Small inline badge for use within content.
 ## 🎨 DemoBanner Variants
 
 ### Default Banner (Recommended for Home Page)
-```jsx
-import DemoBanner from './components/DemoBanner';
 
-<DemoBanner 
+```jsx
+import DemoBanner from "./components/DemoBanner";
+
+<DemoBanner
   onClose={() => setShowBanner(false)} // Optional: allow dismissal
-/>
+/>;
 ```
 
 **Use case:** Top of home page or main landing area
-**Features:** 
+**Features:**
+
 - Eye-catching blue gradient
 - Lists key demo content types
 - Professional messaging for employers
@@ -35,15 +39,14 @@ import DemoBanner from './components/DemoBanner';
 ---
 
 ### Compact Banner (For Internal Pages)
+
 ```jsx
-<DemoBanner 
-  variant="compact"
-  onClose={() => setShowBanner(false)}
-/>
+<DemoBanner variant="compact" onClose={() => setShowBanner(false)} />
 ```
 
 **Use case:** Music page, Store page, Artist pages
 **Features:**
+
 - Minimal space usage
 - Simple reminder message
 - Easy to dismiss
@@ -52,16 +55,18 @@ import DemoBanner from './components/DemoBanner';
 ---
 
 ### Detailed Banner (For About/Portfolio Pages)
+
 ```jsx
-<DemoBanner 
+<DemoBanner
   variant="detailed"
-  showAdminInfo={true}  // Shows what admin features exist
+  showAdminInfo={true} // Shows what admin features exist
   onClose={() => setShowBanner(false)}
 />
 ```
 
 **Use case:** About page, dedicated "Portfolio" section
 **Features:**
+
 - Comprehensive technology stack details
 - Expandable technical information
 - Lists admin features (even though not accessible)
@@ -72,6 +77,7 @@ import DemoBanner from './components/DemoBanner';
 ## 🏷️ DemoBadge Usage
 
 ### Next to Prices
+
 ```jsx
 <div className="flex items-center gap-2">
   <span className="text-2xl font-bold">${price}</span>
@@ -80,6 +86,7 @@ import DemoBanner from './components/DemoBanner';
 ```
 
 ### Next to Artist Names
+
 ```jsx
 <h1 className="text-4xl font-bold flex items-center gap-3">
   {artistName}
@@ -88,6 +95,7 @@ import DemoBanner from './components/DemoBanner';
 ```
 
 ### In Product Cards
+
 ```jsx
 <div className="product-card">
   <img src={image} alt={title} />
@@ -105,11 +113,13 @@ import DemoBanner from './components/DemoBanner';
 ### High Priority (Add These First)
 
 1. **Home Page** - Top of page
+
    ```jsx
    <DemoBanner onClose={() => setShowBanner(false)} />
    ```
 
 2. **Store/Merchandise Page** - Above products
+
    ```jsx
    <DemoBanner variant="compact" />
    ```
@@ -122,11 +132,13 @@ import DemoBanner from './components/DemoBanner';
 ### Medium Priority
 
 4. **Music Page** - Top of music catalog
+
    ```jsx
    <DemoBanner variant="compact" />
    ```
 
 5. **About Page** - Showcase technical details
+
    ```jsx
    <DemoBanner variant="detailed" showAdminInfo={true} />
    ```
@@ -135,8 +147,8 @@ import DemoBanner from './components/DemoBanner';
    ```jsx
    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
      <p className="text-sm text-blue-900">
-       <strong>Demo Mode:</strong> This checkout process is fully functional 
-       but uses Stripe test mode. No real charges will be made.
+       <strong>Demo Mode:</strong> This checkout process is fully functional but
+       uses Stripe test mode. No real charges will be made.
      </p>
    </div>
    ```
@@ -154,21 +166,21 @@ import DemoBanner from './components/DemoBanner';
 ### Example 1: Home Page with Dismissible Banner
 
 ```jsx
-import { useState, useEffect } from 'react';
-import DemoBanner from './components/DemoBanner';
+import { useState, useEffect } from "react";
+import DemoBanner from "./components/DemoBanner";
 
 function Home() {
   const [showBanner, setShowBanner] = useState(true);
 
   // Optional: Remember dismissal in localStorage
   useEffect(() => {
-    const dismissed = localStorage.getItem('demoBannerDismissed');
+    const dismissed = localStorage.getItem("demoBannerDismissed");
     if (dismissed) setShowBanner(false);
   }, []);
 
   const handleDismiss = () => {
     setShowBanner(false);
-    localStorage.setItem('demoBannerDismissed', 'true');
+    localStorage.setItem("demoBannerDismissed", "true");
   };
 
   return (
@@ -185,13 +197,13 @@ function Home() {
 ### Example 2: Store Page with Persistent Compact Banner
 
 ```jsx
-import DemoBanner from './components/DemoBanner';
+import DemoBanner from "./components/DemoBanner";
 
 function Store() {
   return (
     <div>
       <DemoBanner variant="compact" />
-      
+
       <div className="container mx-auto px-4 py-8">
         <h1>Merchandise Store</h1>
         {/* Store content */}
@@ -206,7 +218,7 @@ function Store() {
 ### Example 3: Product Card with Badge
 
 ```jsx
-import DemoBadge from './components/DemoBadge';
+import DemoBadge from "./components/DemoBadge";
 
 function ProductCard({ product }) {
   return (
@@ -234,7 +246,7 @@ function ProductCard({ product }) {
 ### Example 4: Artist Page with Info
 
 ```jsx
-import DemoBanner from './components/DemoBanner';
+import DemoBanner from "./components/DemoBanner";
 
 function ArtistPage({ artist }) {
   return (
@@ -263,22 +275,17 @@ function ArtistPage({ artist }) {
 ### Example 5: About Page - Technical Showcase
 
 ```jsx
-import DemoBanner from './components/DemoBanner';
+import DemoBanner from "./components/DemoBanner";
 
 function About() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">About This Project</h1>
-      
-      {/* Full technical details for employers */}
-      <DemoBanner 
-        variant="detailed" 
-        showAdminInfo={true}
-      />
 
-      <div className="mt-8">
-        {/* Additional about content */}
-      </div>
+      {/* Full technical details for employers */}
+      <DemoBanner variant="detailed" showAdminInfo={true} />
+
+      <div className="mt-8">{/* Additional about content */}</div>
     </div>
   );
 }
@@ -294,21 +301,21 @@ Edit `DemoBanner.jsx` to match your brand:
 
 ```jsx
 // Current: Blue theme
-className="bg-gradient-to-r from-blue-500 to-indigo-600"
+className = "bg-gradient-to-r from-blue-500 to-indigo-600";
 
 // Alternative: Purple theme
-className="bg-gradient-to-r from-purple-500 to-pink-600"
+className = "bg-gradient-to-r from-purple-500 to-pink-600";
 
 // Alternative: Green theme
-className="bg-gradient-to-r from-green-500 to-teal-600"
+className = "bg-gradient-to-r from-green-500 to-teal-600";
 ```
 
 ### Add Your Portfolio Link
 
 ```jsx
 <div className="mt-4">
-  <a 
-    href="https://yourportfolio.com" 
+  <a
+    href="https://yourportfolio.com"
     className="text-sm text-blue-100 hover:text-white underline"
     target="_blank"
     rel="noopener noreferrer"
@@ -336,16 +343,19 @@ className="bg-gradient-to-r from-green-500 to-teal-600"
 ## 🔍 What Employers Will See
 
 ### First Impression (Home Page)
+
 ✅ "This is a professional portfolio demonstration"
 ✅ Clear listing of technologies used
 ✅ Polished, dismissible banner design
 
 ### Navigation (Internal Pages)
+
 ✅ Subtle reminders about demo content
 ✅ Non-intrusive compact banners
 ✅ Consistent messaging throughout
 
 ### Technical Details (About/Portfolio)
+
 ✅ Full technology stack breakdown
 ✅ List of admin features (even if not accessible)
 ✅ Demonstrates documentation skills
