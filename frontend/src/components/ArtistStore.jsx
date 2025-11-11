@@ -501,9 +501,9 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
   // Debug: Log artist image URL
   React.useEffect(() => {
     if (artistId) {
-      console.log('Artist ID:', artistId);
-      console.log('Artist Data:', artistData);
-      console.log('Artist Image URL:', artistImageUrl);
+      // console.log('Artist ID:', artistId);
+      // console.log('Artist Data:', artistData);
+      // console.log('Artist Image URL:', artistImageUrl);
     }
   }, [artistId, artistData, artistImageUrl]);
 

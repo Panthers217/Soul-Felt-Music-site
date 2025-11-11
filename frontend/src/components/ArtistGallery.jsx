@@ -8,7 +8,7 @@ export const ArtistGallery = () => {
 
   let artists = [];
   if (dbSnapshot) {
-    console.log("🎭 ArtistGallery - Full dbSnapshot keys:", Object.keys(dbSnapshot));
+    // console.log("🎭 ArtistGallery - Full dbSnapshot keys:", Object.keys(dbSnapshot));
     artists = dbSnapshot.artists?.records || [];
   }
 
@@ -90,9 +90,9 @@ export const ArtistGallery = () => {
                 to={`/artist/${encodeURIComponent(artistName)}/${encodeURIComponent(artist.id)}`}
                 state={{ art: artistData }}
                 onClick={() => {
-                  console.log("Navigating to artist:", artistName);
-                  console.log("Artist object:", artist);
-                  console.log("Featured tracks being passed:", artistData.featured_tracks);
+                  // console.log("Navigating to artist:", artistName);
+                  // console.log("Artist object:", artist);
+                  // console.log("Featured tracks being passed:", artistData.featured_tracks);
                   sessionStorage.setItem(`album:${artist.id}`, JSON.stringify(artistData));
                 }}
                 className="relative group overflow-hidden rounded-xl shadow-lg aspect-[3/2] bg-[#21212b] animate-fadeIn cursor-pointer"

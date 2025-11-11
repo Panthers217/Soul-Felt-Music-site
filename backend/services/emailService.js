@@ -957,19 +957,19 @@ export async function sendPurchaseConfirmationEmail(purchaseData) {
             parsedShippingAddress.zipCode);
 
         if (!hasValidAddress) {
-          console.log("⚠️  Shipping address object exists but is empty");
+          // console.log("⚠️  Shipping address object exists but is empty");
           parsedShippingAddress = null;
         } else {
-          console.log(
-            "✅ Valid shipping address found:",
-            parsedShippingAddress
-          );
+          // console.log(
+          //   "✅ Valid shipping address found:",
+          //   parsedShippingAddress
+          // );
         }
       } catch (e) {
         console.error("❌ Error parsing shipping address:", e);
       }
     } else {
-      console.log("⚠️  No shipping address provided in purchase data");
+      // console.log("⚠️  No shipping address provided in purchase data");
     }
 
     // Generate secure download links for digital items
@@ -1087,8 +1087,8 @@ export async function sendPurchaseConfirmationEmail(purchaseData) {
 
     const info = await transporter.sendMail(mailOptions);
 
-    console.log(`✅ Purchase confirmation email sent to ${customer_email}`);
-    console.log(`📧 Message ID: ${info.messageId}`);
+    // console.log(`✅ Purchase confirmation email sent to ${customer_email}`);
+    // console.log(`📧 Message ID: ${info.messageId}`);
 
     return {
       success: true,

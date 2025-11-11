@@ -653,13 +653,13 @@ function AdminDashboard() {
   const handleSubmit = async (e, modeArg = mode) => {
     e.preventDefault();
 
-    console.log("your fields", fieldValues);
+    // console.log("your fields", fieldValues);
     setMessage("");
 
     if (Array.isArray(fields) && fields.length > 0) {
       // Mode is available as modeArg --- this is your mode state variable
-      console.log("Current mode in handleSubmit:", modeArg);
-      console.log("Selected field values:", fieldValues);
+      // console.log("Current mode in handleSubmit:", modeArg);
+      // console.log("Selected field values:", fieldValues);
 
       // Use FormData for file upload
       const formData = new FormData();

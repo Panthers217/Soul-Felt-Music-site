@@ -65,24 +65,24 @@ export const buildFeaturedTracks = (artistId, artistName, dbSnapshot) => {
   const artistImages = dbSnapshot?.artist_images?.records || [];
   const albums = dbSnapshot?.albums?.records || [];
   
-  console.log("🔍 buildFeaturedTracks called with:", {
-    artistId,
-    artistName,
-    totalPromotionalTracks: promotionalTracks.length,
-    totalArtistImages: artistImages.length,
-    totalAlbums: albums.length
-  });
+  // console.log("🔍 buildFeaturedTracks called with:", {
+  //   artistId,
+  //   artistName,
+  //   totalPromotionalTracks: promotionalTracks.length,
+  //   totalArtistImages: artistImages.length,
+  //   totalAlbums: albums.length
+  // });
 
-  console.log("📋 Promotional Tracks Sample:", promotionalTracks.slice(0, 3));
+  // console.log("📋 Promotional Tracks Sample:", promotionalTracks.slice(0, 3));
 
   // Filter promotional tracks for this artist where artist_id matches
   const artistPromotionalTracks = promotionalTracks.filter(
     (track) => track.artist_id === artistId
   );
   
-  console.log(`📊 Found ${artistPromotionalTracks.length} promotional tracks for artist ${artistId}`);
+  // console.log(`📊 Found ${artistPromotionalTracks.length} promotional tracks for artist ${artistId}`);
   if (artistPromotionalTracks.length > 0) {
-    console.log("Sample track:", artistPromotionalTracks[0]);
+    // console.log("Sample track:", artistPromotionalTracks[0]);
   }
   
   // Filter for only featured tracks (featured = 1)
@@ -90,7 +90,7 @@ export const buildFeaturedTracks = (artistId, artistName, dbSnapshot) => {
     (track) => track.artist_id === artistId || track.featured === true
   );
   
-  console.log(`⭐ Found ${artistFeaturedTracks.length} featured tracks (featured = 1)`);
+  // console.log(`⭐ Found ${artistFeaturedTracks.length} featured tracks (featured = 1)`);
   
   // Map featured tracks with full details including images
   const mapped = artistFeaturedTracks.map((track) => ({
@@ -101,7 +101,7 @@ export const buildFeaturedTracks = (artistId, artistName, dbSnapshot) => {
     purchaseLink: track.purchase_link  // Map snake_case to camelCase
   }));
   
-  console.log("✅ Returning mapped featured tracks:", mapped);
+  // console.log("✅ Returning mapped featured tracks:", mapped);
   return mapped;
 };
 
@@ -112,33 +112,33 @@ export const buildFeaturedTracks = (artistId, artistName, dbSnapshot) => {
  * @returns {Object} - Formatted artist data object ready for ArtistOverview component
  */
 export const buildArtistData = (artist, dbSnapshot) => {
-  console.log("🎨 buildArtistData called for artist:", artist?.name || artist?.artist_name);
-  console.log("🎨 Raw artist object:", artist);
-  console.log("🆔 Artist ID from params:", artist?.id);
+  // console.log("🎨 buildArtistData called for artist:", artist?.name || artist?.artist_name);
+  // console.log("🎨 Raw artist object:", artist);
+  // console.log("🆔 Artist ID from params:", artist?.id);
   
   const promotionalTracks = dbSnapshot?.promotional_tracks?.records || [];
   const albums = dbSnapshot?.albums?.records || [];
   const artistImages = dbSnapshot?.artist_images?.records || [];
   
-  console.log("📦 dbSnapshot data:", {
-    hasPromotionalTracks: !!dbSnapshot?.promotional_tracks,
-    promotionalTracksCount: promotionalTracks.length,
-    hasAlbums: !!dbSnapshot?.albums,
-    albumsCount: albums.length,
-    hasArtistImages: !!dbSnapshot?.artist_images,
-    artistImagesCount: artistImages.length
-  });
+  // console.log("📦 dbSnapshot data:", {
+  //   hasPromotionalTracks: !!dbSnapshot?.promotional_tracks,
+  //   promotionalTracksCount: promotionalTracks.length,
+  //   hasAlbums: !!dbSnapshot?.albums,
+  //   albumsCount: albums.length,
+  //   hasArtistImages: !!dbSnapshot?.artist_images,
+  //   artistImagesCount: artistImages.length
+  // });
   
   // Find artist image from artist_images table
   const artistImage = artistImages.find(img => img.artist_id === artist.id);
-  console.log("🖼️ Found artist image:", artistImage);
+  // console.log("🖼️ Found artist image:", artistImage);
   
   const mappedFeaturedTracks = buildFeaturedTracks(
     artist.id,
     artist.artist_name || artist.name,
     dbSnapshot
   );
-  console.log("🎵 Mapped featured tracks:", mappedFeaturedTracks);
+  // console.log("🎵 Mapped featured tracks:", mappedFeaturedTracks);
 
   const artistData = {
     id: artist.id,
@@ -163,7 +163,7 @@ export const buildArtistData = (artist, dbSnapshot) => {
     facebook_url: artist.facebook_url,
   };
   
-  console.log("✨ Final artistData:", artistData);
+  // console.log("✨ Final artistData:", artistData);
   return artistData;
 };
 

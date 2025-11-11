@@ -21,7 +21,7 @@ function ArtistSearchForm({
     }
   }, [autoFocus]); // only refocus when the flag flips
 
-  console.log("you SearchType", searchType, searchValue);
+  // console.log("you SearchType", searchType, searchValue);
 
   // Use the callback from parent to perform the search and update result
   // The actual search logic is handled in the parent (AdminDashboard)

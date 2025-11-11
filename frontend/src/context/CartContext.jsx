@@ -26,7 +26,7 @@ export const CartProvider = ({ children }) => {
 
   // Helper function to normalize cart item with consistent structure
   const normalizeCartItem = (rawItem) => {
-    console.log('🔍 Normalizing raw item:', rawItem);
+    // console.log('🔍 Normalizing raw item:', rawItem);
     
     // Determine item type and extract IDs
     const isTrack = rawItem.isTrack || rawItem.type === 'Track';
@@ -43,7 +43,7 @@ export const CartProvider = ({ children }) => {
       if (trackData) {
         artistId = artistId || trackData.artist_id;
         albumId = albumId || trackData.album_id;
-        console.log('📀 Found track data:', { artistId, albumId });
+        // console.log('📀 Found track data:', { artistId, albumId });
       }
     }
     
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }) => {
       const albumData = dbSnapshot.albums.records.find(a => a.id === albumId);
       if (albumData) {
         artistId = albumData.artist_id;
-        console.log('💿 Found album data, artistId:', artistId);
+        // console.log('💿 Found album data, artistId:', artistId);
       }
     }
     
@@ -66,7 +66,7 @@ export const CartProvider = ({ children }) => {
       const artistData = getArtistDataById(artistId, dbSnapshot);
       if (artistData) {
         artistName = artistName || artistData.name;
-        console.log('🎤 Artist data:', artistData.name);
+        // console.log('🎤 Artist data:', artistData.name);
       }
     }
     
@@ -76,7 +76,7 @@ export const CartProvider = ({ children }) => {
       if (albumData) {
         albumType = albumType || albumData.album_type;
         purchaseLink = purchaseLink || albumData.purchase_link;
-        console.log('💿 Album data enriched');
+        // console.log('💿 Album data enriched');
       }
     }
     
@@ -118,7 +118,7 @@ export const CartProvider = ({ children }) => {
       cartId: Date.now() + Math.random()
     };
     
-    console.log('✅ Normalized item:', normalized);
+    // console.log('✅ Normalized item:', normalized);
     return normalized;
   };
 
@@ -143,14 +143,14 @@ export const CartProvider = ({ children }) => {
   const addToCart = (item) => {
     console.log('🛒 Raw item received:', item);
     const normalizedItem = normalizeCartItem(item);
-    console.log('🛒 Normalized item:', normalizedItem);
-    console.log('🛒 Artist name:', normalizedItem.artist_name);
-    console.log('🛒 Track ID:', normalizedItem.trackId);
-    console.log('🛒 Album ID:', normalizedItem.albumId);
+    // console.log('🛒 Normalized item:', normalizedItem);
+    // console.log('🛒 Artist name:', normalizedItem.artist_name);
+    // console.log('🛒 Track ID:', normalizedItem.trackId);
+    // console.log('🛒 Album ID:', normalizedItem.albumId);
     
     setCart((prev) => {
       const newCart = [...prev, normalizedItem];
-      console.log('🛒 Updated cart:', newCart);
+      // console.log('🛒 Updated cart:', newCart);
       return newCart;
     });
   };

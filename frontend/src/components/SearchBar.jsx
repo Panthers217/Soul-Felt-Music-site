@@ -35,22 +35,22 @@ function SearchBar({ onSearchResults, viewMode }) {
     // Get artist IDs from matching artists
     const matchingArtistIds = results.artists.map(artist => artist.id);
     
-    console.log('Search term:', searchTerm);
-    console.log('Matching artists:', results.artists);
-    console.log('Matching artist IDs:', matchingArtistIds);
+    // console.log('Search term:', searchTerm);
+    // console.log('Matching artists:', results.artists);
+    // console.log('Matching artist IDs:', matchingArtistIds);
 
     // Search tracks by title OR artist_id
     if (dbSnapshot.tracks?.records) {
       // Debug: Check artist_id types
       const sampleTrack = dbSnapshot.tracks.records[0];
-      console.log('Sample track artist_id:', sampleTrack?.artist_id, 'Type:', typeof sampleTrack?.artist_id);
-      console.log('Looking for artist_ids:', matchingArtistIds, 'Types:', matchingArtistIds.map(id => typeof id));
+      // console.log('Sample track artist_id:', sampleTrack?.artist_id, 'Type:', typeof sampleTrack?.artist_id);
+      // console.log('Looking for artist_ids:', matchingArtistIds, 'Types:', matchingArtistIds.map(id => typeof id));
       
       results.tracks = dbSnapshot.tracks.records.filter(track => 
         track.title?.toLowerCase().includes(searchTerm) ||
         (track.artist_id && matchingArtistIds.includes(track.artist_id))
       );
-      console.log('Matching tracks:', results.tracks.length);
+      // console.log('Matching tracks:', results.tracks.length);
     }
 
     // Search albums by title OR artist_id
@@ -59,7 +59,7 @@ function SearchBar({ onSearchResults, viewMode }) {
         album.title?.toLowerCase().includes(searchTerm) ||
         (album.artist_id && matchingArtistIds.includes(album.artist_id))
       );
-      console.log('Matching albums:', results.albums.length);
+      // console.log('Matching albums:', results.albums.length);
     }
 
     // Search promotional tracks by title OR artist_id
@@ -84,7 +84,7 @@ function SearchBar({ onSearchResults, viewMode }) {
         merch.title?.toLowerCase().includes(searchTerm) ||
         (merch.artist_id && matchingArtistIds.includes(merch.artist_id))
       );
-      console.log('Matching merchandise:', results.merchandise.length);
+      // console.log('Matching merchandise:', results.merchandise.length);
     }
 
       onSearchResults(results);

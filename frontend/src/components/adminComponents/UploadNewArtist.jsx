@@ -49,8 +49,8 @@ function UploadNewArtist() {
         formData.append(key, v);
       });
       try {
-        console.log("modeArg:", mode);
-        console.log("Submitting single record:", Object.fromEntries(formData.entries()));
+        // console.log("modeArg:", mode);
+        // console.log("Submitting single record:", Object.fromEntries(formData.entries()));
         if (!user || !user.getIdToken) {
           throw new Error("You must be logged in as an admin to upload records.");
         }
@@ -88,7 +88,7 @@ function UploadNewArtist() {
         }
       });
       try {
-        console.log("Submitting single record:", Object.fromEntries(formData.entries()));
+        // console.log("Submitting single record:", Object.fromEntries(formData.entries()));
         if (!user || !user.getIdToken) {
           throw new Error("You must be logged in as an admin to upload records.");
         }

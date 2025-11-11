@@ -52,13 +52,34 @@ admin.initializeApp({
 
 const app = express();
 
-// Configure CORS to allow all origins (for development)
+// Configure CORS for development and production
+const allowedOrigins = [
+  'http://localhost:5173',       // Local Vite dev
+  'http://localhost:4173',       // Local Vite preview
+  'http://localhost:3000',       // Alternative local
+  process.env.FRONTEND_URL,      // From env variable
+  // Add your production URLs here when deploying:
+  // 'https://your-site.netlify.app',
+  // 'https://soulfeltmusic.com',
+].filter(Boolean); // Remove undefined values
+
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    // Allow all origins in development
-    callback(null, true);
+    
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // In production, check against whitelist
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  CORS blocked request from: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -81,8 +102,8 @@ app.use(bodyParser.json());
 
 // Debug logging for auth routes
 app.use('/api/auth', (req, res, next) => {
-  console.log(`🔍 Auth route hit: ${req.method} ${req.originalUrl}`);
-  console.log('Headers:', { authorization: req.headers.authorization?.substring(0, 20) + '...' });
+  // console.log(`🔍 Auth route hit: ${req.method} ${req.originalUrl}`);
+  // console.log('Headers:', { authorization: req.headers.authorization?.substring(0, 20) + '...' });
   next();
 });
 // app.post('/api/admin/verify', async (req, res) => {
@@ -115,9 +136,42 @@ app.use('/api/contact', contactRouter);
 app.use('/api/newsletter', newsletterRouter);
 app.use('/api/newsletter', newsletterCampaignsRouter);
 app.use('/api/faq', faqRouter);
+
+// Root endpoint
 app.get('/', (req, res) => {
-  res.send('Soul Felt Music API is running');
+  res.json({ 
+    message: 'Soul Felt Music API is running',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
+
+// Health check endpoint for monitoring services (Render, etc.)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Readiness check endpoint
+app.get('/ready', async (req, res) => {
+  try {
+    // Could add database connection check here if needed
+    res.status(200).json({ 
+      status: 'ready',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'not ready',
+      error: error.message 
+    });
+  }
+});
+
 // Middleware to require admin
 export async function requireAdmin(req, res, next) {
   try {
@@ -168,24 +222,24 @@ function getCronExpression(config) {
  * Run stats update job
  */
 async function runStatsUpdate() {
-  console.log('📊 Running scheduled stats update...');
+  // console.log('📊 Running scheduled stats update...');
   
   try {
     // Step 1: Update external stats (Spotify, YouTube, etc.)
-    console.log('🌐 Fetching external API stats...');
+    // console.log('🌐 Fetching external API stats...');
     const { stdout: externalOutput, stderr: externalError } = await execAsync('node scripts/updateExternalStats.js');
-    console.log(externalOutput);
+    // console.log(externalOutput);
     if (externalError) console.error('External stats errors:', externalError);
     
     // Step 2: Calculate website plays and totals
-    console.log('🧮 Calculating monthly listeners...');
+    // console.log('🧮 Calculating monthly listeners...');
     const { stdout: monthlyOutput, stderr: monthlyError } = await execAsync('node scripts/updateMonthlyListeners.js');
-    console.log(monthlyOutput);
+    // console.log(monthlyOutput);
     if (monthlyError) console.error('Monthly listeners errors:', monthlyError);
     
-    console.log('✅ Stats update completed!');
+    // console.log('✅ Stats update completed!');
   } catch (error) {
-    console.error('❌ Error during stats update:', error);
+    // console.error('❌ Error during stats update:', error);
   }
 }
 
@@ -208,9 +262,9 @@ async function initializeSchedule() {
     currentCronJob = cron.schedule(cronExpression, runStatsUpdate);
     
     const scheduleDesc = getScheduleDescription(config);
-    console.log(`⏰ Stats update scheduled: ${scheduleDesc}`);
+    // console.log(`⏰ Stats update scheduled: ${scheduleDesc}`);
   } else {
-    console.log('⏸️  Stats update schedule is disabled');
+    // console.log('⏸️  Stats update schedule is disabled');
   }
 }
 
@@ -239,7 +293,7 @@ function getScheduleDescription(config) {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+  // console.log(`Server running on port ${PORT}`);
   
   // Initialize schedule on startup
   await initializeSchedule();
@@ -247,7 +301,7 @@ app.listen(PORT, async () => {
   // Check for schedule updates every 10 seconds
   setInterval(async () => {
     if (global.scheduleNeedsUpdate) {
-      console.log('🔄 Reloading stats schedule...');
+      // console.log('🔄 Reloading stats schedule...');
       await initializeSchedule();
       global.scheduleNeedsUpdate = false;
     }

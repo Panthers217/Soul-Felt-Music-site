@@ -63,15 +63,15 @@ function CheckoutForm() {
 
   // Debug: Log cart items to verify types
   React.useEffect(() => {
-    console.log(
-      "🛒 Cart items:",
-      cart.map((item) => ({
-        title: item.title,
-        type: item.type,
-        album_type: item.album_type,
-      }))
-    );
-    console.log("📦 Needs shipping:", needsShipping);
+    // console.log(
+    //   "🛒 Cart items:",
+    //   cart.map((item) => ({
+    //     title: item.title,
+    //     type: item.type,
+    //     album_type: item.album_type,
+    //   }))
+    // );
+    // console.log("📦 Needs shipping:", needsShipping);
   }, [cart, needsShipping]);
 
   const handleInputChange = (e) => {
@@ -189,12 +189,12 @@ function CheckoutForm() {
         }
       );
 
-      console.log("📤 Sending to backend:", {
-        needsShipping,
-        shippingAddress: needsShipping ? shippingAddress : "N/A",
-        billingAddress:
-          needsShipping && sameAsShipping ? "same as shipping" : billingAddress,
-      });
+      // console.log("📤 Sending to backend:", {
+      //   needsShipping,
+      //   shippingAddress: needsShipping ? shippingAddress : "N/A",
+      //   billingAddress:
+      //     needsShipping && sameAsShipping ? "same as shipping" : billingAddress,
+      // });
 
       const { clientSecret } = await response.json();
 

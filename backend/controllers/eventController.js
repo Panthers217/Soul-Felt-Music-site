@@ -173,7 +173,7 @@ export async function updateEvent(req, res) {
         if (oldPublicId) {
           try {
             await cloudinary.uploader.destroy(oldPublicId, { resource_type: 'image' });
-            console.log(`Deleted old event image: ${oldPublicId}`);
+            // console.log(`Deleted old event image: ${oldPublicId}`);
           } catch (cloudErr) {
             console.error('Cloudinary delete error:', cloudErr);
           }

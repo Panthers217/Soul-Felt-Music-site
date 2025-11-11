@@ -38,7 +38,7 @@ export async function createPaymentIntent(req, res) {
         const [users] = await db.query('SELECT id FROM user WHERE email = ?', [userEmail]);
         if (users.length > 0) {
           userId = users[0].id;
-          console.log(`✅ Found user_id ${userId} for email ${userEmail}`);
+          // console.log(`✅ Found user_id ${userId} for email ${userEmail}`);
         }
       } catch (dbError) {
         console.error('Error looking up user:', dbError);
@@ -74,7 +74,7 @@ export async function createPaymentIntent(req, res) {
     try {
       // Calculate item_type summary from cart (e.g., "Track, Album, Merchandise")
       const itemTypes = [...new Set(cart.map(item => item.type || 'Unknown'))].join(', ');
-      console.log('📋 Item types in order:', itemTypes);
+      // console.log('📋 Item types in order:', itemTypes);
       
       // Insert purchase record (one record per order)
       const [purchaseResult] = await db.query(
@@ -101,21 +101,21 @@ export async function createPaymentIntent(req, res) {
       );
       
       purchaseId = purchaseResult.insertId;
-      console.log(`✅ Created purchase record #${purchaseId} for order ${orderId}`);
+      // console.log(`✅ Created purchase record #${purchaseId} for order ${orderId}`);
       
       // Insert individual order items
       if (cart && cart.length > 0) {
-        console.log('📦 Cart items to insert:', JSON.stringify(cart, null, 2));
-        console.log('🔍 Checking merchandise items:');
+        // console.log('📦 Cart items to insert:', JSON.stringify(cart, null, 2));
+        // console.log('🔍 Checking merchandise items:');
         cart.forEach((item, idx) => {
           if (item.type === 'Merchandise') {
-            console.log(`  Merch ${idx}:`, {
-              title: item.title,
-              id: item.id,
-              merch_id: item.merch_id,
-              type: item.type,
-              img: item.img
-            });
+            // console.log(`  Merch ${idx}:`, {
+            //   title: item.title,
+            //   id: item.id,
+            //   merch_id: item.merch_id,
+            //   type: item.type,
+            //   img: item.img
+            // });
           }
         });
         
@@ -165,26 +165,26 @@ export async function createPaymentIntent(req, res) {
             item.quantity || 1,
             typeof item.price === 'string' ? parseFloat(item.price.replace('$', '')) : (item.price || 0)
           ];
-          console.log('Item data for', item.type, ':', itemData);
+          // console.log('Item data for', item.type, ':', itemData);
           return itemData;
         }));
         
-        console.log('🔄 Inserting order items...');
+        // console.log('🔄 Inserting order items...');
         const [itemsResult] = await db.query(
           `INSERT INTO order_items 
           (purchase_id, item_type, item_id, item_title, artist_name, quantity, price) 
           VALUES ?`,
           [orderItemsValues]
         );
-        console.log(`✅ Created ${cart.length} order items for purchase #${purchaseId}`, itemsResult);
+        // console.log(`✅ Created ${cart.length} order items for purchase #${purchaseId}`, itemsResult);
       } else {
-        console.log('⚠️  No cart items to insert');
+        // console.log('⚠️  No cart items to insert');
       }
     } catch (dbError) {
-      console.error('❌ Error creating purchase record:', dbError);
-      console.error('Error details:', dbError.message);
-      console.error('SQL State:', dbError.sqlState);
-      console.error('SQL Message:', dbError.sqlMessage);
+      // console.error('❌ Error creating purchase record:', dbError);
+      // console.error('Error details:', dbError.message);
+      // console.error('SQL State:', dbError.sqlState);
+      // console.error('SQL Message:', dbError.sqlMessage);
       // Continue anyway - payment intent was created
     }
 
@@ -226,7 +226,7 @@ export async function handleWebhook(req, res) {
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntentSuccess = event.data.object;
-      console.log('PaymentIntent was successful!', paymentIntentSuccess.id);
+      // console.log('PaymentIntent was successful!', paymentIntentSuccess.id);
       
       // Update purchase record to completed
       try {
@@ -236,7 +236,7 @@ export async function handleWebhook(req, res) {
            WHERE stripe_payment_intent_id = ?`,
           [paymentIntentSuccess.id]
         );
-        console.log(`✅ Updated purchase record for payment ${paymentIntentSuccess.id}`);
+        // console.log(`✅ Updated purchase record for payment ${paymentIntentSuccess.id}`);
         
         // Fetch purchase details with order items to send confirmation email
         try {
@@ -303,11 +303,11 @@ export async function handleWebhook(req, res) {
               [purchase.purchase_id]
             );
             
-            console.log('📧 Order items with images:');
+            // console.log('📧 Order items with images:');
             orderItems.forEach(item => {
-              console.log(`  ${item.item_type}: ${item.item_title}`);
-              console.log(`    item_id: ${item.item_id}`);
-              console.log(`    image_url: ${item.image_url || 'MISSING'}`);
+              // console.log(`  ${item.item_type}: ${item.item_title}`);
+              // console.log(`    item_id: ${item.item_id}`);
+              // console.log(`    image_url: ${item.image_url || 'MISSING'}`);
             });
             
             // Send confirmation email
@@ -321,30 +321,30 @@ export async function handleWebhook(req, res) {
               shipping_address: purchase.shipping_address
             };
             
-            console.log('📧 Email data being sent:', {
-              ...emailData,
-              items: orderItems.length,
-              hasShipping: !!purchase.shipping_address,
-              shippingPreview: purchase.shipping_address ? JSON.stringify(purchase.shipping_address).substring(0, 100) : 'none'
-            });
+            // console.log('📧 Email data being sent:', {
+            //   ...emailData,
+            //   items: orderItems.length,
+            //   hasShipping: !!purchase.shipping_address,
+            //   shippingPreview: purchase.shipping_address ? JSON.stringify(purchase.shipping_address).substring(0, 100) : 'none'
+            // });
             
             await sendPurchaseConfirmationEmail(emailData);
-            console.log(`✅ Sent purchase confirmation email to ${purchase.customer_email}`);
+            // console.log(`✅ Sent purchase confirmation email to ${purchase.customer_email}`);
           } else {
-            console.warn(`⚠️  No purchase found for payment intent ${paymentIntentSuccess.id}`);
+            // console.warn(`⚠️  No purchase found for payment intent ${paymentIntentSuccess.id}`);
           }
         } catch (emailError) {
           // Log error but don't fail the webhook - purchase still succeeded
-          console.error('❌ Error sending confirmation email:', emailError);
+          // console.error('❌ Error sending confirmation email:', emailError);
         }
       } catch (dbError) {
-        console.error('Error updating purchase record:', dbError);
+        // console.error('Error updating purchase record:', dbError);
       }
       break;
       
     case 'payment_intent.payment_failed':
       const failedPayment = event.data.object;
-      console.log('PaymentIntent failed:', failedPayment.id);
+      // console.log('PaymentIntent failed:', failedPayment.id);
       
       // Update purchase record to failed
       try {
@@ -354,7 +354,7 @@ export async function handleWebhook(req, res) {
            WHERE stripe_payment_intent_id = ?`,
           [failedPayment.id]
         );
-        console.log(`⚠️  Updated purchase record to failed for payment ${failedPayment.id}`);
+        // console.log(`⚠️  Updated purchase record to failed for payment ${failedPayment.id}`);
       } catch (dbError) {
         console.error('Error updating purchase record:', dbError);
       }
@@ -362,7 +362,7 @@ export async function handleWebhook(req, res) {
       
     case 'payment_intent.canceled':
       const canceledPayment = event.data.object;
-      console.log('PaymentIntent was canceled:', canceledPayment.id);
+      // console.log('PaymentIntent was canceled:', canceledPayment.id);
       
       // Update purchase record to canceled
       try {
@@ -378,7 +378,7 @@ export async function handleWebhook(req, res) {
       break;
       
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      // console.log(`Unhandled event type ${event.type}`);
   }
 
   res.json({ received: true });

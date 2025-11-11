@@ -55,7 +55,7 @@ const SignUp = () => {
         }
       );
 
-      console.log("User created successfully:", response.data);
+      // console.log("User created successfully:", response.data);
       setSubmitted(true);
 
       // Optional: Redirect to login or home page after 2 seconds
@@ -76,7 +76,7 @@ const SignUp = () => {
       } else if (err.response?.data?.error) {
         // Show specific backend error
         setError(err.response.data.error);
-        console.log("Backend error:", err.response.data.error);
+        // console.log("Backend error:", err.response.data.error);
       } else if (err.response) {
         // Backend responded with error
         setError(

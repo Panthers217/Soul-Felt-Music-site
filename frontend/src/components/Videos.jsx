@@ -47,11 +47,11 @@ const Videos = () => {
     // Get videos from database - show all videos since there's no active field
     const allVideos = dbSnapshot?.videos?.records || [];
     
-    console.log('=== Videos Debug ===');
-    console.log('Total videos in DB:', dbSnapshot?.videos?.records?.length);
+        // console.log('=== Videos Debug ===');
+        // console.log('Total videos in DB:', dbSnapshot?.videos?.records?.length);
     if (dbSnapshot?.videos?.records?.length > 0) {
-      console.log('Sample video fields:', Object.keys(dbSnapshot.videos.records[0]));
-      console.log('Sample video:', dbSnapshot.videos.records[0]);
+      // console.log('Sample video fields:', Object.keys(dbSnapshot.videos.records[0]));
+      // console.log('Sample video:', dbSnapshot.videos.records[0]);
     }
     
     let videosToFilter = allVideos;
@@ -94,8 +94,8 @@ const Videos = () => {
 
     // Extract video URLs for VideoPlayerComponent
     const videoUrls = filtered.map(v => v.video_url).filter(url => url);
-    console.log('Filtered videos:', filtered.length);
-    console.log('Video URLs to display:', videoUrls);
+    // console.log('Filtered videos:', filtered.length);
+    // console.log('Video URLs to display:', videoUrls);
     setFilteredVideoUrls(videoUrls);
   }, [dbSnapshot, searchResults, activeTabs, genres]);
 

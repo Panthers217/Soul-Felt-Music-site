@@ -51,12 +51,12 @@ export async function deleteRecord(req, res) {
           } else if (fileField.includes('audio')) {
             resourceType = 'raw';
           }
-          console.log('Cloudinary delete debug:', { publicId, resourceType });
+          // console.log('Cloudinary delete debug:', { publicId, resourceType });
           try {
             const destroyResult = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
-            console.log('Cloudinary destroy result:', destroyResult);
+            // console.log('Cloudinary destroy result:', destroyResult);
           } catch (cloudErr) {
-            console.error('Cloudinary delete error:', cloudErr);
+            // console.error('Cloudinary delete error:', cloudErr);
           }
         }
       }
@@ -91,9 +91,9 @@ export async function insertRecord(req, res) {
 
     const fieldValues = { ...req.body.fields };
 
-  console.log(`Insert mode: ${mode}`);
+  // console.log(`Insert mode: ${mode}`);
   // const { fields, rows, formData } = req.body;
-  console.log('Form Data on line 28:', { body: req.body, file: req.file, files: req.files });
+  // console.log('Form Data on line 28:', { body: req.body, file: req.file, files: req.files });
 
   // Retrieve xmode from header (case-insensitive)
  
@@ -236,7 +236,7 @@ export async function insertRecord(req, res) {
       await pool.query(insertSql, values);
       res.json({ success: true, inserted: columnValueObj });
     } else {
-      console.log("No valid fields to insert.");
+      // console.log("No valid fields to insert.");
       res.status(400).json({ success: false, message: "No valid fields to insert." });
     }
     return;
@@ -378,7 +378,7 @@ export async function updateRecord(req, res) {
           } else if (fieldKey.includes('video_url') || fieldKey.includes('promo_video_url')) {
             resourceType = 'video';
           }
-          console.log(`Deleting old file with public_id: ${oldPublicId} and resource_type: ${resourceType}`);
+          // console.log(`Deleting old file with public_id: ${oldPublicId} and resource_type: ${resourceType}`);
           try {
             await cloudinary.uploader.destroy(oldPublicId, { resource_type: resourceType });
           } catch (cloudErr) {
@@ -387,9 +387,9 @@ export async function updateRecord(req, res) {
         }
         // Log audio_url value and folderPath just before Cloudinary upload
         if (fieldKey === 'audio_url') {
-          console.log('audio_url about to be uploaded:', file.path || file.buffer);
+          // console.log('audio_url about to be uploaded:', file.path || file.buffer);
         }
-        console.log('Cloudinary upload folderPath:', folderPath);
+        // console.log('Cloudinary upload folderPath:', folderPath);
         // Upload to Cloudinary
         let result;
         try {
@@ -479,7 +479,7 @@ export async function updateRecord(req, res) {
         }
       }
     }
-     console.log("Updates to apply:", updates);
+    //  // console.log("Updates to apply:", updates);
     // Filter out fields with empty, null, or undefined values
     // For tracks table, treat 'duration' as integer field
     function filterEmptyFields(obj) {

@@ -40,7 +40,7 @@ const Login = () => {
 				return;
 			}
 			
-			console.log('User logged in successfully:', user.uid);
+			// console.log('User logged in successfully:', user.uid);
 			setSubmitted(true);
 			
 			// Redirect to home after 1 second

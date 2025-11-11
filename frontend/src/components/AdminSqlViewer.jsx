@@ -190,9 +190,9 @@ function AdminSqlViewer({ dbSnapshot }) {
         apiUrl = `/api/admin/records/${selectedTable}`;
         method = "POST";
         body = { ...modalValue };
-        console.log("Inserting record:", body);
-        console.log("POST to:", apiUrl);
-        console.log("Selected table:", selectedTable);
+        // console.log("Inserting record:", body);
+        // console.log("POST to:", apiUrl);
+        // console.log("Selected table:", selectedTable);
       }
       // Make API call if apiUrl is set
       if (apiUrl) {

@@ -30,7 +30,7 @@ export const FeaturesProvider = ({ children }) => {
   
   // Debug: Log when features state changes
   useEffect(() => {
-    console.log('Features state updated:', features);
+    // console.log('Features state updated:', features);
   }, [features]);
 
   const fetchFeatures = async () => {
@@ -38,7 +38,7 @@ export const FeaturesProvider = ({ children }) => {
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/settings/features`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Features fetched:', data);
+        // console.log('Features fetched:', data);
         setFeatures(data);
       }
     } catch (error) {
@@ -51,7 +51,7 @@ export const FeaturesProvider = ({ children }) => {
 
   const isEnabled = (featureName) => {
     const enabled = features[featureName] ?? true; // Default to true if not found
-    console.log(`isEnabled(${featureName}):`, enabled, 'from features:', features);
+    // console.log(`isEnabled(${featureName}):`, enabled, 'from features:', features);
     return enabled;
   };
   
