@@ -294,7 +294,9 @@ function getScheduleDescription(config) {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
-  // console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌐 FRONTEND_URL: ${process.env.FRONTEND_URL || 'NOT SET (using default)'}`);
+  console.log(`🔒 NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
   
   // Initialize schedule on startup
   await initializeSchedule();
