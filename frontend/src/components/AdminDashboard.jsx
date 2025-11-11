@@ -779,7 +779,7 @@ function AdminDashboard() {
               // Toggle local demo value and send in API call header
               const demoValue = window.confirm("Switch to LIVE mode? Click Cancel for DEMO mode.") ? 1 : 0;
               try {
-                await axios.post("/api/website-mode", {}, {
+                await axios.post(`${import.meta.env.VITE_API_URL}/api/website-mode`, {}, {
                   headers: { demo: demoValue }
                 });
                 alert(`Website mode updated to ${demoValue === 1 ? 'LIVE' : 'DEMO'}`);

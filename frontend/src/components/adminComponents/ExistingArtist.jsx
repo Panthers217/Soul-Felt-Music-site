@@ -95,7 +95,7 @@ function ExistingArtist({
           "Authorization": `Bearer ${token}`,
         },
       };
-      const response = await axios.delete(`/api/admin/records/${table}/${id}`, config);
+      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/records/${table}/${id}`, config);
       const result = response.data;
       const message = result.message || (result.success ? "Delete successful!" : "Delete failed.");
       setMessageForDelete(message);

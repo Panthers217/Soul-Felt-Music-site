@@ -64,7 +64,7 @@ const PurchaseStats = () => {
       if (filters.itemType) params.append('itemType', filters.itemType);
       if (filters.paymentStatus) params.append('paymentStatus', filters.paymentStatus);
 
-      const response = await axios.get(`/api/purchase-history/stats?${params.toString()}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/purchase-history/stats?${params.toString()}`);
       setStats(response.data);
       setError(null);
       setLastRefreshed(new Date());
@@ -84,7 +84,7 @@ const PurchaseStats = () => {
       if (filters.endDate) params.append('endDate', filters.endDate);
       if (filters.artistId) params.append('artistId', filters.artistId);
 
-      const response = await axios.get(`/api/purchase-history/artist-revenue?${params.toString()}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/purchase-history/artist-revenue?${params.toString()}`);
       setArtistRevenue(response.data);
     } catch (err) {
       console.error('Error fetching artist revenue:', err);

@@ -76,36 +76,37 @@ export const ApiDataProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL;
     axios
-      .get("/api/artists")
+      .get(`${API_URL}/api/artists`)
       .then((res) => setArtists(res.data))
       .catch((err) => {
         setError(err);
         console.error("Error fetching artists:", err);
       });
     axios
-      .get("/api/albums")
+      .get(`${API_URL}/api/albums`)
       .then((res) => setAlbums(res.data))
       .catch((err) => {
         setError(err);
         console.error("Error fetching albums:", err);
       });
     axios
-      .get("/api/tracks")
+      .get(`${API_URL}/api/tracks`)
       .then((res) => setTracks(res.data))
       .catch((err) => {
         setError(err);
         console.error("Error fetching tracks:", err);
       });
     axios
-      .get("/api/users")
+      .get(`${API_URL}/api/users`)
       .then((res) => setUsers(res.data))
       .catch((err) => {
         setError(err);
         console.error("Error fetching users:", err);
       });
     axios
-      .get("/api/settings/public")
+      .get(`${API_URL}/api/settings/public`)
       .then((res) => setWebsiteSettings(res.data))
       .catch((err) => {
         setError(err);
@@ -121,13 +122,14 @@ export const ApiDataProvider = ({ children }) => {
   useEffect(() => {
     async function fetchAdminData() {
       try {
+        const API_URL = import.meta.env.VITE_API_URL;
         let config = {};
         if (user && user.getIdToken) {
           const token = await user.getIdToken();
           config.headers = { Authorization: `Bearer ${token}` };
         }
         const res = await axios.get(
-          "/api/admin/tables-with-fields-records",
+          `${API_URL}/api/admin/tables-with-fields-records`,
           config
         );
         setDbSnapshot(res.data);
