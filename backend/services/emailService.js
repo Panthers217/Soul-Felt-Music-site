@@ -975,7 +975,8 @@ export async function sendPurchaseConfirmationEmail(purchaseData) {
     // Generate secure download links for digital items
     const itemsWithDownloadLinks = items.map((item) => {
       if (item.item_type === "Track" || item.item_type === "Digital Album") {
-        const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+        // Remove trailing slash from FRONTEND_URL to prevent double slashes
+        const baseUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, '');
         // Create a secure download link that will verify purchase and generate signed URL
         const secureDownloadUrl = `${baseUrl}/download?type=${encodeURIComponent(
           item.item_type
@@ -991,8 +992,9 @@ export async function sendPurchaseConfirmationEmail(purchaseData) {
     });
 
     // Generate download URL (points to purchase history page)
+    // Remove trailing slash from FRONTEND_URL to prevent double slashes
     const downloadUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
+      (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, '')
     }/purchase-history`;
 
     // Format order date
