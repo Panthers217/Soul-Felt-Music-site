@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import heroPic1 from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroPic1.png";
-import heroWelcomePic from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/hero_section_pics/heroWelcomePic.svg";
+import heroPic1 from "../assets/hero_section_pics/heroPic1.png";
+import heroWelcomePic from "../assets/hero_section_pics/heroWelcomePic.svg";
 import FadeCarousel, { FadeCarouselImages } from "./FadeCarousel";
 import { useApiData } from "../context/ApiDataContext.jsx";
 
