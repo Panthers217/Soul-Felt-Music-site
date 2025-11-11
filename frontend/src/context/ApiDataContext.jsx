@@ -30,7 +30,7 @@ export const ApiDataProvider = ({ children }) => {
   // Persist mode changes to localStorage
   useEffect(() => {
     localStorage.setItem("soulFeltMode", mode);
-    console.log("Mode set to:", mode);
+    // console.log("Mode set to:", mode);
    
   }, [mode]);
 
@@ -52,7 +52,7 @@ export const ApiDataProvider = ({ children }) => {
             photoURL: firebaseUser.photoURL,
             isAdmin: isAdmin,
           });
-          console.log("User is signed in:", firebaseUser.email, "Admin:", isAdmin);
+          // console.log("User is signed in:", firebaseUser.email, "Admin:", isAdmin);
         } catch (error) {
           console.error("Error checking admin status:", error);
           setWebsiteUser({
@@ -67,7 +67,7 @@ export const ApiDataProvider = ({ children }) => {
       } else {
         // User is signed out
         setWebsiteUser(null);
-        console.log("User is signed out");
+        // console.log("User is signed out");
       }
     });
 
@@ -131,7 +131,7 @@ export const ApiDataProvider = ({ children }) => {
           config
         );
         setDbSnapshot(res.data);
-        console.log("DB Snapshot:", res.data);
+        // console.log("DB Snapshot:", res.data);
       } catch (err) {
         console.error("Error fetching DB snapshot:", err);
       }

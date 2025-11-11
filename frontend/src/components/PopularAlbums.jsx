@@ -139,10 +139,10 @@ const PopularAlbumsCarousel = () => {
   const { dbSnapshot } = useApiData();
   let albums = [];
   if (dbSnapshot) {
-    console.log(
-      "artist_images array from dbSnapshot:",
-      dbSnapshot.artist_images.records
-    );
+    // console.log(
+    //   "artist_images array from dbSnapshot:",
+    //   dbSnapshot.artist_images.records
+    // );
     albums = dbSnapshot.albums.records.map((img, index) => ({
       id: img.id || index,
       image: img.cover_url,

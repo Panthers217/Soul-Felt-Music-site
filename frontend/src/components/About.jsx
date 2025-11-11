@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const About = () => {
   const { websiteSettings } = useApiData();
   const { themeColors } = useTheme();
-  console.log("page_title:", websiteSettings?.about_page_title);
+  // console.log("page_title:", websiteSettings?.about_page_title);
 
   // Core values/features
   const coreValues = [

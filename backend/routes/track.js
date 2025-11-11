@@ -70,7 +70,7 @@ router.post('/play', verifyToken, async (req, res) => {
         [trackId, artistId, userId, ipAddress, sessionId, userAgent]
       );
       
-      console.log(`✅ Logged play: Track ${trackId}, Artist ${artistId}`);
+      // console.log(`✅ Logged play: Track ${trackId}, Artist ${artistId}`);
       
       res.json({ success: true });
     } finally {

@@ -97,17 +97,17 @@ router.get('/admin/categories', requireAdmin, async (req, res) => {
 // Create new FAQ - Admin only
 router.post('/admin', requireAdmin, async (req, res) => {
   try {
-    console.log('📝 Create FAQ request received');
-    console.log('Request body:', req.body);
+    // console.log('📝 Create FAQ request received');
+    // console.log('Request body:', req.body);
     
     const { question, answer, category, display_order, is_published } = req.body;
 
     if (!question || !answer) {
-      console.log('❌ Validation failed: missing question or answer');
+      // console.log('❌ Validation failed: missing question or answer');
       return res.status(400).json({ error: 'Question and answer are required' });
     }
 
-    console.log('✅ Validation passed, inserting into database...');
+    // console.log('✅ Validation passed, inserting into database...');
     const [result] = await pool.query(
       'INSERT INTO faqs (question, answer, category, display_order, is_published) VALUES (?, ?, ?, ?, ?)',
       [
@@ -119,7 +119,7 @@ router.post('/admin', requireAdmin, async (req, res) => {
       ]
     );
 
-    console.log('✅ Insert successful, ID:', result.insertId);
+    // console.log('✅ Insert successful, ID:', result.insertId);
     const [newFaq] = await pool.query('SELECT * FROM faqs WHERE id = ?', [result.insertId]);
 
     res.status(201).json({ 

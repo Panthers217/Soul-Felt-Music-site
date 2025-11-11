@@ -6,10 +6,10 @@ const ImageCarousel = ({ visibleImages = 1 }) => {
 
   let images = [];
   if (dbSnapshot) {
-    console.log(
-      "artist_images array from dbSnapshot:",
-      dbSnapshot.artist_images.records
-    );
+    // console.log(
+    //   "artist_images array from dbSnapshot:",
+    //   dbSnapshot.artist_images.records
+    // );
     images = dbSnapshot.artist_images.records.map((img, index) => ({
       id: img.id || index,
       src: img.image_url,

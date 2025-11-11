@@ -143,7 +143,7 @@ const ArtistPageComponent = () => {
     const fetchImage = async () => {
       const imageUrl = await fetchArtistImage();
       setAlbumImage(imageUrl);
-      console.log("Fetched image URL:", imageUrl);
+      // console.log("Fetched image URL:", imageUrl);
     };
     fetchImage();
   }, []);
@@ -152,7 +152,7 @@ const ArtistPageComponent = () => {
   const dbArtists = dbSnapshot?.artists?.records || [];
 
   // Debug logging to see what fields are available
-  console.log("DB Artists sample:", dbArtists[0]);
+  // console.log("DB Artists sample:", dbArtists[0]);
 
   // Get promotional_tracks from database
   const promotionalTracks = dbSnapshot?.promotional_tracks?.records || [];
@@ -162,16 +162,16 @@ const ArtistPageComponent = () => {
   const dbTracks = dbSnapshot?.tracks?.records || [];
   const albums = dbSnapshot?.albums?.records || [];
 
-  console.log("Albums from database:", albums);
-  console.log("artist from database:", dbArtists);
-  console.log("Promotional tracks from database:", promotionalTracks);
-  console.log("Promotional tracks count:", promotionalTracks.length);
-  console.log("Sample promotional track:", promotionalTracks[0]);
-  console.log("Sample promotional track ALL KEYS:", promotionalTracks[0] ? Object.keys(promotionalTracks[0]) : 'no tracks');
-  console.log("Sample promotional track featured_track field:", promotionalTracks[0]?.featured_track);
-  console.log("Sample promotional track featured field:", promotionalTracks[0]?.featured);
-  console.log("Sample promotional track featured field TYPE:", typeof promotionalTracks[0]?.featured);
-  console.log("Sample promotional track artist_id:", promotionalTracks[0]?.artist_id);
+  // console.log("Albums from database:", albums);
+  // console.log("artist from database:", dbArtists);
+  // console.log("Promotional tracks from database:", promotionalTracks);
+  // console.log("Promotional tracks count:", promotionalTracks.length);
+  // console.log("Sample promotional track:", promotionalTracks[0]);
+  // console.log("Sample promotional track ALL KEYS:", promotionalTracks[0] ? Object.keys(promotionalTracks[0]) : 'no tracks');
+  // console.log("Sample promotional track featured_track field:", promotionalTracks[0]?.featured_track);
+  // console.log("Sample promotional track featured field:", promotionalTracks[0]?.featured);
+  // console.log("Sample promotional track featured field TYPE:", typeof promotionalTracks[0]?.featured);
+  // console.log("Sample promotional track artist_id:", promotionalTracks[0]?.artist_id);
   
   // Helper function to get image for promotional track
   const getPromotionalTrackImage = (track) => {
@@ -207,10 +207,10 @@ const ArtistPageComponent = () => {
     );
     
     if (idx === 0) {
-      console.log(`First artist (${artist.artist_name || artist.name}):`);
-      console.log("  - All promotional tracks for this artist:", artistPromotionalTracks.length);
-      console.log("  - Featured tracks for this artist:", artistFeaturedTracks.length);
-      console.log("  - Sample promotional track:", artistPromotionalTracks[0]);
+      // console.log(`First artist (${artist.artist_name || artist.name}):`);
+      // console.log("  - All promotional tracks for this artist:", artistPromotionalTracks.length);
+      // console.log("  - Featured tracks for this artist:", artistFeaturedTracks.length);
+      // console.log("  - Sample promotional track:", artistPromotionalTracks[0]);
     }
     
     const mappedFeaturedTracks = artistFeaturedTracks.map((track) => ({
@@ -249,8 +249,8 @@ const ArtistPageComponent = () => {
     };
   });
   
-  console.log("artists with genre from database:", artists);
-  console.log("Featured tracks for first artist:", artists[0]?.featured_tracks);
+  // console.log("artists with genre from database:", artists);
+  // console.log("Featured tracks for first artist:", artists[0]?.featured_tracks);
 
   // Helper function to get album cover URL by album_id
   const getAlbumCoverUrl = (albumId) => {
@@ -271,9 +271,9 @@ const ArtistPageComponent = () => {
       audio_url: track.audio_url,
     }));
 
-  console.log("Top Track Cards from database:", topTracks);
+  // console.log("Top Track Cards from database:", topTracks);
 
-  console.log("Top Tracks from database:", topTracks);
+  // console.log("Top Tracks from database:", topTracks);
 
   // Derive unique countries from database, with \"All countries\" as first option
   const uniqueCountries = [
@@ -282,12 +282,11 @@ const ArtistPageComponent = () => {
   const countries = ["All countries", ...uniqueCountries.sort()];
 
   const handleSearchResults = React.useCallback((results) => {
-    console.log("🔍 Search results received:", results);
+    // console.log("🔍 Search results received:", results);
     setSearchResults(results);
   }, []);
 
-  console.log(albumImage);
-
+  // // console.log(albumImage);
   // --- FILTER ARTISTS BY COUNTRY ---
   const artistCountryMap = React.useMemo(() => {
     const map = {};
@@ -300,7 +299,7 @@ const ArtistPageComponent = () => {
   // Use search results if available, otherwise use all artists
   const sourceArtists = React.useMemo(() => {
     if (!searchResults) {
-      console.log("📋 Using all artists:", artists.length);
+      // console.log("📋 Using all artists:", artists.length);
       return artists;
     }
     
@@ -324,7 +323,7 @@ const ArtistPageComponent = () => {
       return countryMatch;
     });
     
-    console.log("🌍 Country filter:", selectedCountry, "→", filtered.length, "artists");
+    // console.log("🌍 Country filter:", selectedCountry, "→", filtered.length, "artists");
     return filtered;
   }, [sourceArtists, selectedCountry]);
 
@@ -395,8 +394,8 @@ const ArtistPageComponent = () => {
             to={`/artist/${encodeURIComponent([art.name])}`}
             state={{ art, albumImage }}
             onClick={() => {
-              console.log("Navigating to artist:", art.name);
-              console.log("Featured tracks being passed:", art.featured_tracks);
+              // console.log("Navigating to artist:", art.name);
+              // console.log("Featured tracks being passed:", art.featured_tracks);
               sessionStorage.setItem(`album:${art.id}`, JSON.stringify(art));
             }}
             style={{ ...positions[idx], position: "absolute" }}

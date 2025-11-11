@@ -56,7 +56,7 @@ const DemoBannerMobile = ({ albumImages, fadeOut }) => {
 
 
 const DemoBannerTablet = ({ albumImages, fadeOut }) => {
-  console.log("🖥️ DemoBannerTablet is rendering");
+  // console.log("🖥️ DemoBannerTablet is rendering");
   return (
     <div className="relative w-full max-w-[1440px] mt-[-30%] aspect-[1/1] mx-auto bg-[#101516] flex flex-col items-center justify-center  rounded-[1.4vw]">
       {/* White background frame */}
@@ -237,7 +237,7 @@ const HomeBanner = () => {
     
    
   }
-  console.log("Album images for carousel:", albumImages)
+  // console.log("Album images for carousel:", albumImages)
 
   return (
     <>

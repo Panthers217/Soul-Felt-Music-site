@@ -2,11 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import process from 'process';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SITE_URL = 'https://soulfeltmusic.com';
+// Use environment variable or default
+const SITE_URL = process.env.VITE_SITE_URL || 'https://soulfeltmusic.com';
 
 // Static routes
 const staticRoutes = [

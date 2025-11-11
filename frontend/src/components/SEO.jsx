@@ -5,15 +5,24 @@ const SEO = ({
   title = 'Soul Felt Music - Experience the Soul of Music',
   description = 'Discover and stream soulful music from talented artists. Explore albums, tracks, and exclusive content at Soul Felt Music.',
   keywords = 'soul music, music streaming, albums, tracks, artists, music store',
-  image = 'https://soulfeltmusic.com/og-image.jpg',
-  url = 'https://soulfeltmusic.com',
+  image,
+  url,
   type = 'website',
   artist,
   album,
   track,
   schemaData
 }) => {
-  const siteTitle = 'Soul Felt Music';
+  // Get site URL from environment variable or default
+  const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://soulfeltmusic.com';
+  const SITE_NAME = import.meta.env.VITE_SITE_NAME || 'Soul Felt Music';
+  
+  // Use environment-based URLs
+  const defaultImage = `${SITE_URL}/og-image.jpg`;
+  const pageUrl = url || SITE_URL;
+  const ogImage = image || defaultImage;
+  
+  const siteTitle = SITE_NAME;
   const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
 
   // Construct schema.org structured data
@@ -24,9 +33,9 @@ const SEO = ({
     const organizationSchema = {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'Soul Felt Music',
-      url: 'https://soulfeltmusic.com',
-      logo: 'https://soulfeltmusic.com/logo.png',
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
       sameAs: [
         // Add social media links here
       ]
@@ -41,7 +50,7 @@ const SEO = ({
         image: artist.image_url,
         description: artist.bio,
         genre: artist.genre,
-        url: `https://soulfeltmusic.com/artist/${artist.id}`
+        url: `${SITE_URL}/artist/${artist.id}`
       };
     }
 
@@ -58,7 +67,7 @@ const SEO = ({
           name: album.artist_name
         },
         datePublished: album.release_date,
-        url: `https://soulfeltmusic.com/album/${album.id}`
+        url: `${SITE_URL}/album/${album.id}`
       };
     }
 
@@ -77,7 +86,7 @@ const SEO = ({
           '@type': 'MusicAlbum',
           name: track.album_title
         } : undefined,
-        url: `https://soulfeltmusic.com/track/${track.id}`
+        url: `${SITE_URL}/track/${track.id}`
       };
     }
 
@@ -94,20 +103,20 @@ const SEO = ({
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
+      <meta property="og:url" content={pageUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={ogImage} />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
+      <meta property="twitter:url" content={pageUrl} />
       <meta property="twitter:title" content={fullTitle} />
       <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={image} />
+      <meta property="twitter:image" content={ogImage} />
 
       {/* Canonical URL */}
-      <link rel="canonical" href={url} />
+      <link rel="canonical" href={pageUrl} />
 
       {/* Structured Data */}
       <script type="application/ld+json">

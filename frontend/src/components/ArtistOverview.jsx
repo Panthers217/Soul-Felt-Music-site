@@ -70,11 +70,11 @@ function GetMusic({ artistName, musicText, buttonText, supportText, artistId }) 
 }
 // Dynamic FeaturedTracks component
 function FeaturedTracks({ tracks, artistId }) {
-  console.log("🎵 FeaturedTracks COMPONENT MOUNTED/RENDERED 🎵");
-  console.log("Featured Tracks received:", tracks);
-  console.log("Featured Tracks count:", tracks?.length);
-  console.log("First track data:", tracks?.[0]);
-  console.log("Artist ID:", artistId);
+  // console.log("🎵 FeaturedTracks COMPONENT MOUNTED/RENDERED 🎵");
+  // console.log("Featured Tracks received:", tracks);
+  // console.log("Featured Tracks count:", tracks?.length);
+  // console.log("First track data:", tracks?.[0]);
+  // console.log("Artist ID:", artistId);
   
   const [playingTrack, setPlayingTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -112,7 +112,7 @@ function FeaturedTracks({ tracks, artistId }) {
         token ? { headers: { Authorization: `Bearer ${token}` } } : {}
       );
       
-      console.log(`✅ Logged play for track ${trackId}`);
+      // console.log(`✅ Logged play for track ${trackId}`);
     } catch (error) {
       console.error('Failed to log track play:', error);
       // Don't block playback if logging fails
@@ -121,7 +121,7 @@ function FeaturedTracks({ tracks, artistId }) {
 
   const handleTrackClick = (idx) => {
     const track = tracks[idx];
-    console.log("Clicking track:", idx, "URL:", track?.promo_audio_url);
+    // console.log("Clicking track:", idx, "URL:", track?.promo_audio_url);
     
     if (playingTrack === idx) {
       setIsPlaying(false);
@@ -158,7 +158,7 @@ function FeaturedTracks({ tracks, artistId }) {
         artistId: artistId
       };
       addToCart(cartItem);
-      console.log('Added track to cart:', cartItem);
+      // console.log('Added track to cart:', cartItem);
     } else {
       // Use purchaseLink when Stripe is disabled
       if (!track.purchaseLink) {
@@ -366,7 +366,7 @@ function ArtistOverview() {
   // Follow artist state
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  console.log("ArtistOverview: websiteUser:", websiteUser);
+  // console.log("ArtistOverview: websiteUser:", websiteUser);
 
   // Check if user is following this artist on mount
   useEffect(() => {
@@ -392,9 +392,9 @@ function ArtistOverview() {
     checkFollowStatus();
   }, [websiteUser, album?.id]);
   
-  console.log("State passed to ArtistOverview", state);
-  console.log("Album data:", album);
-  console.log("Featured tracks from album:", album?.featured_tracks);
+  // console.log("State passed to ArtistOverview", state);
+  // console.log("Album data:", album);
+  // console.log("Featured tracks from album:", album?.featured_tracks);
   
   // Use artist image_url from the artists table (passed as art.img)
   const artistImageUrl = album?.img || artistPics?.cover_photo?.urls?.regular;
@@ -421,10 +421,10 @@ function ArtistOverview() {
   const artistInfluences = album?.influences || null;
   const featuredTracks = album?.featured_tracks || [];
   
-  console.log("Artist bio:", artistBio);
-  console.log("Career highlights:", careerHighlights);
-  console.log("Artist influences:", artistInfluences);
-  console.log("Featured tracks:", featuredTracks);
+  // console.log("Artist bio:", artistBio);
+  // console.log("Career highlights:", careerHighlights);
+  // console.log("Artist influences:", artistInfluences);
+  // console.log("Featured tracks:", featuredTracks);
   
   // Parse career_highlights if it's a newline-separated string
   const parsedHighlights = careerHighlights
@@ -452,8 +452,8 @@ function ArtistOverview() {
   const monthlyListeners = album?.monthly_listeners || "2.3M";
   const albumsReleased = album?.albums_released || "47";
 
-  console.log("Genre parsed from database:", genre);
-  console.log("Artist rating:", album);
+  // console.log("Genre parsed from database:", genre);
+  // console.log("Artist rating:", album);
 
   // Optimize background image URL for performance
   const getOptimizedImageUrl = (url) => {
@@ -501,7 +501,7 @@ function ArtistOverview() {
           }
         );
         setIsFollowing(false);
-        console.log('Unfollowed artist');
+        // console.log('Unfollowed artist');
       } else {
         // Follow
         await axios.post(
@@ -512,7 +512,7 @@ function ArtistOverview() {
           }
         );
         setIsFollowing(true);
-        console.log('Followed artist');
+        // console.log('Followed artist');
       }
     } catch (error) {
       console.error('Error toggling follow:', error);

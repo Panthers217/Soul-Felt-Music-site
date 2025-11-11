@@ -90,13 +90,13 @@ export function useArtistFormValidation(
       switch (actionType) {
         case "upload":
           handleUploadNewRecord(e, valuesToCheck,mode);
-          console.log("Uploading new record with values:", valuesToCheck);
-          console.log("Mode:", mode);
+          // console.log("Uploading new record with values:", valuesToCheck);
+          // console.log("Mode:", mode);
           break;
         case "update":
           handleUpdateRecord(e, valuesToCheck, mode);
-          console.log("Mode:", mode);
-          console.log("Updating record with values:", valuesToCheck, mode);
+          // console.log("Mode:", mode);
+          // console.log("Updating record with values:", valuesToCheck, mode);
           break;
         default:
           // Optionally handle unknown action

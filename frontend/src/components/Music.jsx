@@ -136,8 +136,8 @@ const Music = () => {
   };
 
   // Debug logging
-  console.log("Albums:", albums);
-  console.log("Promotional Tracks:", tracks);
+  // console.log("Albums:", albums);
+  // console.log("Promotional Tracks:", tracks);
 
   // Toggle tab selection
   const handleTabClick = (key) => {

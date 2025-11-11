@@ -14,7 +14,7 @@ function AlbumCard({ album, purchaseLink }) {
   const isMerchandiseEnabled = isEnabled('enable_merchandise');
   
   // Debug log
-  console.log('AlbumCard - Stripe enabled:', isStripeEnabled);
+  // console.log('AlbumCard - Stripe enabled:', isStripeEnabled);
 
   // Format price from cents to dollars
   const formatPrice = (cents) => {

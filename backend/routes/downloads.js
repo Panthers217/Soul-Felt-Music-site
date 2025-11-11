@@ -92,7 +92,7 @@ router.get('/file/:token', async (req, res) => {
       return res.status(400).json({ error: 'Invalid download parameters' });
     }
 
-    console.log(`📥 Streaming download: ${fileName} for ${userEmail}`);
+    // console.log(`📥 Streaming download: ${fileName} for ${userEmail}`);
 
     // Stream the file from Cloudinary through our server
     const response = await axios({
@@ -221,7 +221,7 @@ router.post('/generate-url', async (req, res) => {
       const [users] = await db.query('SELECT id FROM user WHERE email = ?', [userEmail]);
       if (users.length > 0) userId = users[0].id;
     } catch (err) {
-      console.log('Could not find user_id (guest checkout)');
+      // console.log('Could not find user_id (guest checkout)');
     }
 
     if (userId) {
@@ -231,10 +231,10 @@ router.post('/generate-url', async (req, res) => {
            VALUES (?, ?, ?, NOW())`,
           [userId, itemType, itemId]
         ).catch(() => {
-          console.log('Download logging skipped (table may not exist)');
+          // console.log('Download logging skipped (table may not exist)');
         });
       } catch (logError) {
-        console.log('Download logging failed:', logError.message);
+        // console.log('Download logging failed:', logError.message);
       }
     }
 
@@ -303,7 +303,7 @@ router.post('/generate-album-zip', async (req, res) => {
       return res.status(404).json({ error: 'No tracks found for this album' });
     }
 
-    console.log(`📦 Creating ZIP for album "${albumTitle}" with ${tracks.length} tracks`);
+    // console.log(`📦 Creating ZIP for album "${albumTitle}" with ${tracks.length} tracks`);
 
     // Step 3: Create temporary directory for ZIP
     const tempDir = path.join(__dirname, '..', 'temp');
@@ -331,7 +331,7 @@ router.post('/generate-album-zip', async (req, res) => {
     // Step 5: Download each track and add to ZIP
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];
-      console.log(`⬇️  Downloading track ${i + 1}/${tracks.length}: ${track.title}`);
+      // console.log(`⬇️  Downloading track ${i + 1}/${tracks.length}: ${track.title}`);
 
       try {
         // Download track from Cloudinary
@@ -360,10 +360,10 @@ router.post('/generate-album-zip', async (req, res) => {
       output.on('error', reject);
     });
 
-    console.log(`✅ ZIP created: ${zipFilePath} (${archive.pointer()} bytes)`);
+    // console.log(`✅ ZIP created: ${zipFilePath} (${archive.pointer()} bytes)`);
 
     // Step 6: Upload ZIP to Cloudinary
-    console.log('☁️  Uploading ZIP to Cloudinary...');
+    // console.log('☁️  Uploading ZIP to Cloudinary...');
     
     const cloudinaryResult = await cloudinary.uploader.upload(zipFilePath, {
       resource_type: 'raw',
@@ -372,7 +372,7 @@ router.post('/generate-album-zip', async (req, res) => {
       type: 'authenticated', // Requires signed URL to download
     });
 
-    console.log('✅ ZIP uploaded to Cloudinary:', cloudinaryResult.secure_url);
+    // console.log('✅ ZIP uploaded to Cloudinary:', cloudinaryResult.secure_url);
 
     // Step 7: Generate signed URL that expires in 2 hours
     const signedUrl = cloudinary.url(cloudinaryResult.public_id, {
@@ -386,14 +386,13 @@ router.post('/generate-album-zip', async (req, res) => {
     // Step 8: Clean up local ZIP file
     fs.unlink(zipFilePath, (err) => {
       if (err) console.error('Error deleting temp ZIP:', err);
-      else console.log('🗑️  Temp ZIP deleted');
-    });
+KU    });
 
     // Step 9: Schedule Cloudinary ZIP deletion after 3 hours
     setTimeout(async () => {
       try {
         await cloudinary.uploader.destroy(cloudinaryResult.public_id, { resource_type: 'raw' });
-        console.log('🗑️  Cloudinary ZIP deleted:', cloudinaryResult.public_id);
+        // console.log('🗑️  Cloudinary ZIP deleted:', cloudinaryResult.public_id);
       } catch (err) {
         console.error('Error deleting Cloudinary ZIP:', err);
       }

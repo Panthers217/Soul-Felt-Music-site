@@ -29,7 +29,7 @@ function TrackCard({ track, albumCoverUrl, purchaseLink, artistName }) {
   const isMerchandiseEnabled = isEnabled('enable_merchandise');
   
   // Debug log
-  console.log('TrackCard - Stripe enabled:', isStripeEnabled);
+  // console.log('TrackCard - Stripe enabled:', isStripeEnabled);
 
   const handlePlay = () => {
     audioRef.current.play();
