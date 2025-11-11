@@ -9,8 +9,8 @@ import {
   trackcardImage,
   topTrackcardImage,
   trackHeaderPic,
-} from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/artist_mockup_pics /artistImages.js";
-import bannerImage from "/workspaces/Soul-Felt-Music-site/frontend/src/assets/artist_mockup_pics /artist_banner_pic/Image+Overlay.png";
+} from "../assets/artist_mockup_pics /artistImages.js";
+import bannerImage from "../assets/artist_mockup_pics /artist_banner_pic/Image+Overlay.png";
 
 // --- DUMMY DATA (will be replaced by database) ---
 // topTracks will be loaded from database in component
