@@ -58,6 +58,7 @@ const allowedOrigins = [
   'http://localhost:4173',       // Local Vite preview
   'http://localhost:3000',       // Alternative local
   process.env.FRONTEND_URL,      // From env variable
+  'https://soulfeltmusicdemo.netlify.app',  // Production Netlify URL
   // Add your production URLs here when deploying:
   // 'https://your-site.netlify.app',
   // 'https://soulfeltmusic.com',
