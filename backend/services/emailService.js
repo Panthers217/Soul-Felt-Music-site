@@ -69,6 +69,9 @@ async function createTransporter() {
         user: config.smtp_user,
         pass: config.smtp_password,
       },
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
     });
   }
 
@@ -82,6 +85,9 @@ async function createTransporter() {
         user: "resend",
         pass: config.email_api_key,
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
@@ -95,6 +101,9 @@ async function createTransporter() {
         user: "apikey",
         pass: config.email_api_key,
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
@@ -108,6 +117,9 @@ async function createTransporter() {
         user: config.smtp_user || "postmaster@your-domain.com",
         pass: config.email_api_key,
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
@@ -121,6 +133,9 @@ async function createTransporter() {
         user: config.email_api_key,
         pass: config.email_api_key,
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
@@ -134,6 +149,9 @@ async function createTransporter() {
         user: config.smtp_user,
         pass: config.smtp_password,
       },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
   }
 
@@ -981,6 +999,8 @@ export async function sendPurchaseConfirmationEmail(purchaseData) {
         const secureDownloadUrl = `${baseUrl}/download?type=${encodeURIComponent(
           item.item_type
         )}&id=${item.item_id}&email=${encodeURIComponent(customer_email)}`;
+
+        console.log(`🔗 Generated download URL for ${item.item_title}: ${secureDownloadUrl}`);
 
         return {
           ...item,
