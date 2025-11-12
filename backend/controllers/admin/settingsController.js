@@ -217,6 +217,10 @@ export async function updateSettings(req, res) {
       office_hours_saturday,
       office_hours_sunday,
       office_hours_timezone,
+      email_provider,
+      email_api_key,
+      email_from_name,
+      email_reply_to,
       smtp_host,
       smtp_port,
       smtp_secure,
@@ -306,6 +310,10 @@ export async function updateSettings(req, res) {
     if (office_hours_saturday !== undefined) { updates.push('office_hours_saturday = ?'); values.push(office_hours_saturday); }
     if (office_hours_sunday !== undefined) { updates.push('office_hours_sunday = ?'); values.push(office_hours_sunday); }
     if (office_hours_timezone !== undefined) { updates.push('office_hours_timezone = ?'); values.push(office_hours_timezone); }
+    if (email_provider !== undefined) { updates.push('email_provider = ?'); values.push(email_provider); }
+    if (email_api_key !== undefined) { updates.push('email_api_key = ?'); values.push(email_api_key); }
+    if (email_from_name !== undefined) { updates.push('email_from_name = ?'); values.push(email_from_name); }
+    if (email_reply_to !== undefined) { updates.push('email_reply_to = ?'); values.push(email_reply_to); }
     if (smtp_host !== undefined) { updates.push('smtp_host = ?'); values.push(smtp_host); }
     if (smtp_port !== undefined) { updates.push('smtp_port = ?'); values.push(smtp_port); }
     if (smtp_secure !== undefined) { updates.push('smtp_secure = ?'); values.push(smtp_secure); }
