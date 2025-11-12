@@ -250,32 +250,51 @@ router.post('/campaigns/:id/send', requireAdmin, async (req, res) => {
       campaign.artist_ids = JSON.parse(campaign.artist_ids);
     }
 
-    // Insert recipients and send emails
+    // Insert recipients and send emails with rate limiting
     let successCount = 0;
     let failedCount = 0;
     const failedEmails = [];
+    
+    // Rate limiting: Send max 2 emails per second (Resend free tier limit)
+    const BATCH_SIZE = 2;
+    const DELAY_MS = 1000; // 1 second between batches
+    
+    // Helper function to delay execution
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // Process emails in batches
+    for (let i = 0; i < emails.length; i += BATCH_SIZE) {
+      const batch = emails.slice(i, i + BATCH_SIZE);
+      
+      // Send batch concurrently
+      await Promise.all(batch.map(async ({ email }) => {
+        try {
+          // Insert recipient record
+          await connection.query(
+            'INSERT INTO newsletter_campaign_recipients (campaign_id, email) VALUES (?, ?)',
+            [campaignId, email]
+          );
 
-    for (const { email } of emails) {
-      try {
-        // Insert recipient record
-        await connection.query(
-          'INSERT INTO newsletter_campaign_recipients (campaign_id, email) VALUES (?, ?)',
-          [campaignId, email]
-        );
-
-        // Send email using SMTP service
-        await sendNewsletterEmail(email, campaign, fromEmail);
-        successCount++;
-        
-        // Update sent timestamp for this recipient
-        await connection.query(
-          'UPDATE newsletter_campaign_recipients SET sent_at = NOW() WHERE campaign_id = ? AND email = ?',
-          [campaignId, email]
-        );
-      } catch (emailError) {
-        console.error(`Failed to send to ${email}:`, emailError.message);
-        failedCount++;
-        failedEmails.push({ email, error: emailError.message });
+          // Send email using SMTP service
+          await sendNewsletterEmail(email, campaign, fromEmail);
+          successCount++;
+          
+          // Update sent timestamp for this recipient
+          await connection.query(
+            'UPDATE newsletter_campaign_recipients SET sent_at = NOW() WHERE campaign_id = ? AND email = ?',
+            [campaignId, email]
+          );
+        } catch (emailError) {
+          console.error(`Failed to send to ${email}:`, emailError.message);
+          failedCount++;
+          failedEmails.push({ email, error: emailError.message });
+        }
+      }));
+      
+      // Wait before next batch (except for last batch)
+      if (i + BATCH_SIZE < emails.length) {
+        console.log(`📧 Sent batch ${Math.floor(i / BATCH_SIZE) + 1}, waiting ${DELAY_MS}ms...`);
+        await delay(DELAY_MS);
       }
     }
 
