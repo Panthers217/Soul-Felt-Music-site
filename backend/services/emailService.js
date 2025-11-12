@@ -83,9 +83,31 @@ async function createTransporter() {
     return {
       sendMail: async (mailOptions) => {
         try {
-          // Extract email from "Name <email@domain.com>" format
-          const fromEmail = mailOptions.from.match(/<(.+?)>/)?.[1] || mailOptions.from;
-          const toEmail = mailOptions.to.match(/<(.+?)>/)?.[1] || mailOptions.to;
+          console.log('📧 Raw mailOptions.from:', mailOptions.from);
+          console.log('📧 Raw mailOptions.to:', mailOptions.to);
+          
+          // Extract email from "Name <email@domain.com>" format or use as-is
+          let fromEmail = mailOptions.from;
+          if (fromEmail.includes('<')) {
+            fromEmail = fromEmail.match(/<(.+?)>/)?.[1] || fromEmail;
+          }
+          
+          let toEmail = mailOptions.to;
+          if (toEmail.includes('<')) {
+            toEmail = toEmail.match(/<(.+?)>/)?.[1] || toEmail;
+          }
+          
+          console.log('📧 Parsed fromEmail:', fromEmail);
+          console.log('📧 Parsed toEmail:', toEmail);
+          
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(fromEmail)) {
+            throw new Error(`Invalid from email format: ${fromEmail}`);
+          }
+          if (!emailRegex.test(toEmail)) {
+            throw new Error(`Invalid to email format: ${toEmail}`);
+          }
           
           const result = await resend.emails.send({
             from: fromEmail,
