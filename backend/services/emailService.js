@@ -77,22 +77,40 @@ async function createTransporter() {
     });
   }
 
-  // In createTransporter(), for Resend provider:
-if (provider === "resend") {
-  const resend = new Resend(config.email_api_key);
-  return {
-    sendMail: async (mailOptions) => {
-      return await resend.emails.send({
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        html: mailOptions.html,
-        text: mailOptions.text,
-        reply_to: mailOptions.replyTo
-      });
-    }
-  };
-}
+  // Resend SDK - https://resend.com
+  if (provider === "resend") {
+    const resend = new Resend(config.email_api_key);
+    return {
+      sendMail: async (mailOptions) => {
+        try {
+          // Extract email from "Name <email@domain.com>" format
+          const fromEmail = mailOptions.from.match(/<(.+?)>/)?.[1] || mailOptions.from;
+          const toEmail = mailOptions.to.match(/<(.+?)>/)?.[1] || mailOptions.to;
+          
+          const result = await resend.emails.send({
+            from: fromEmail,
+            to: [toEmail],
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+            text: mailOptions.text,
+            reply_to: mailOptions.replyTo
+          });
+          
+          console.log('✅ Resend email sent:', result);
+          
+          // Return nodemailer-compatible response
+          return {
+            messageId: result.id,
+            accepted: [toEmail],
+            response: 'OK'
+          };
+        } catch (error) {
+          console.error('❌ Resend send error:', error);
+          throw error;
+        }
+      }
+    };
+  }
 
   // SendGrid API via SMTP
   if (provider === "sendgrid") {
