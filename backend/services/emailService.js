@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import pool from "../config/db.js";
+import { Resend } from 'resend';
+
 
 /**
  * Get email configuration from website_settings
@@ -75,21 +77,22 @@ async function createTransporter() {
     });
   }
 
-  // Resend - https://resend.com
-  if (provider === "resend") {
-    return nodemailer.createTransport({
-      host: "smtp.resend.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "resend",
-        pass: config.email_api_key,
-      },
-      connectionTimeout: 60000,
-      greetingTimeout: 30000,
-      socketTimeout: 60000,
-    });
-  }
+  // In createTransporter(), for Resend provider:
+if (provider === "resend") {
+  const resend = new Resend(config.email_api_key);
+  return {
+    sendMail: async (mailOptions) => {
+      return await resend.emails.send({
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        html: mailOptions.html,
+        text: mailOptions.text,
+        reply_to: mailOptions.replyTo
+      });
+    }
+  };
+}
 
   // SendGrid API via SMTP
   if (provider === "sendgrid") {
