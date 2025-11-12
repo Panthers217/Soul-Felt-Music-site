@@ -58,13 +58,13 @@ export default function ResponsiveNavbar() {
   };
 
   const MobileTabletNavbar = () => {
-    const { isNavbarOpen, toggleNavbar } = useNavbar();
+    const { isNavbarOpen, toggleNavbar, closeNavbar } = useNavbar();
   
     return (
       <nav className="bg-[#0c0504] w-full  fixed top-0 left-0 right-0 z-[100]">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center" onClick={closeNavbar}>
             {websiteSettings?.logo_url ? (
               <img 
                 src={websiteSettings.logo_url} 
@@ -79,7 +79,7 @@ export default function ResponsiveNavbar() {
           {/* Right Side - Cart & Hamburger */}
           <div className="flex items-center gap-4">
             {/* Cart Icon */}
-            <Link to="/cart" className="relative">
+            <Link to="/cart" className="relative" onClick={closeNavbar}>
               <svg className="w-7 h-7 text-[#e6cfa7] hover:text-[#f7c900] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -108,20 +108,20 @@ export default function ResponsiveNavbar() {
         {isNavbarOpen && (
           <div className="bg-[#0c0504] border-t border-[#1a1312] w-full">
             <ul className="flex flex-col py-2 px-4 space-y-3 text-[#e6cfa7] text-base">
-              <Link to="/">Home</Link>
-              {isMerchandiseEnabled && <Link to="/store">Store</Link>}
-              <Link to="/music">Music</Link>
-              <Link to="/artists">Artists</Link>
-              {/* <Link to="/news">News</Link> */}
-              {isVideosEnabled && <Link to="/videos">Videos</Link>}
-              <Link to="/community">Community/News</Link>
-              <Link to="/about">About</Link>
-              <Link to="/contact">Contact</Link>
+              <Link to="/" onClick={closeNavbar}>Home</Link>
+              {isMerchandiseEnabled && <Link to="/store" onClick={closeNavbar}>Store</Link>}
+              <Link to="/music" onClick={closeNavbar}>Music</Link>
+              <Link to="/artists" onClick={closeNavbar}>Artists</Link>
+              {/* <Link to="/news" onClick={closeNavbar}>News</Link> */}
+              {isVideosEnabled && <Link to="/videos" onClick={closeNavbar}>Videos</Link>}
+              <Link to="/community" onClick={closeNavbar}>Community/News</Link>
+              <Link to="/about" onClick={closeNavbar}>About</Link>
+              <Link to="/contact" onClick={closeNavbar}>Contact</Link>
               {websiteUser?.isAdmin && (
                 <>
-                  <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold">🔧 Admin Dashboard</Link>
-                  <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold">📧 Newsletter</Link>
-                  <Link to="/admin/faq" className="text-[#f7c900] font-semibold">❓ FAQ Management</Link>
+                  <Link to="/admin/dashboard" className="text-[#f7c900] font-semibold" onClick={closeNavbar}>🔧 Admin Dashboard</Link>
+                  <Link to="/admin/newsletter" className="text-[#f7c900] font-semibold" onClick={closeNavbar}>📧 Newsletter</Link>
+                  <Link to="/admin/faq" className="text-[#f7c900] font-semibold" onClick={closeNavbar}>❓ FAQ Management</Link>
                 </>
               )}
             </ul>
@@ -144,6 +144,7 @@ export default function ResponsiveNavbar() {
                     <Link 
                       to="/purchase-history"
                       className="text-[#e6cfa7] text-base hover:text-[#f7c900] transition-colors flex items-center gap-2"
+                      onClick={closeNavbar}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -151,7 +152,10 @@ export default function ResponsiveNavbar() {
                       My Purchases
                     </Link>
                     <button 
-                      onClick={handleSignOut}
+                      onClick={() => {
+                        handleSignOut();
+                        closeNavbar();
+                      }}
                       className="text-[#c90036] text-base hover:text-[#1976d2] transition-colors"
                     >
                       Sign Out
@@ -161,8 +165,8 @@ export default function ResponsiveNavbar() {
                   <>
                     {(isUserAccountsEnabled || websiteUser?.isAdmin) && (
                       <>
-                        <Link to="/sign-up" className="text-[#1976d2] text-base">Sign Up</Link>
-                        <Link to="/login" className="text-[#1976d2] text-base">Login</Link>
+                        <Link to="/sign-up" className="text-[#1976d2] text-base" onClick={closeNavbar}>Sign Up</Link>
+                        <Link to="/login" className="text-[#1976d2] text-base" onClick={closeNavbar}>Login</Link>
                       </>
                     )}
                   </>

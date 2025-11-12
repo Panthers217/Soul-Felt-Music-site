@@ -756,7 +756,7 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
     if (filteredProducts.length <= 1) {
       return "MerchCardDiv w-full flex flex-wrap justify-center ";
     }
-    return "MerchCardDiv w-full flex flex-wrap justify-center items-stretch gap-8 lg:grid lg:grid-cols-4 xl:grid xl:grid-cols-4 ";
+    return "MerchCardDiv w-full flex flex-wrap justify-center items-stretch gap-8 lg:grid lg:grid-cols-3 xl:grid xl:grid-cols-3 ";
   };
 
   // Optimize background image URL for performance
@@ -800,19 +800,22 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
           </div>
         )}
         
-        {/* Content layer with relative positioning */}
-        <div className="relative z-10 w-full">
-          <ArtistStoreNav
-            storeName={artistId ? `${artistName} Store` : "SoulFelt Music Store"}
-            cartCount={cart.length}
-            tabs={tabs}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        </div>
+        {/* Overlay div to hide scrolling content */}
+        <div className="overlayBlock fixed sm:pt-[20rem] md:pt-[25rem] lg:pt-[27rem] xl:pt-[30rem] left-0 w-full h-[10rem] bg-[#1a1b22] z-[100] pointer-events-none "></div>
         
-        <div className="relative z-10 w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
-          <ArtistStoreHeader
+        {/* Content layer with relative positioning */}
+        <div className="StoreHeader relative z-[100] w-full flex flex-col items-center  sm:fixed sm:scale-50 sm:origin-top sm:h-[50%] md:fixed lg:fixed xl:fixed">
+            <div className="relative z-10 w-full ">
+              <ArtistStoreNav
+                storeName={artistId ? `${artistName} Store` : "SoulFelt Music Store"}
+                cartCount={cart.length}
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            </div>
+           <div className="relative z-10 w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10">
+              <ArtistStoreHeader
             title={
               artistId
                 ? `${artistName} Official Store`
@@ -827,7 +830,9 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
 
           {/* Search Bar */}
           <SearchBar onSearchResults={setSearchResults} viewMode="all" />
-
+            </div>
+          </div>
+        <div className="storeBody-content relative sm:pt-[100%] z-[50] w-full max-w-6xl px-[6%] py-[2.5rem] flex flex-col items-center gap-10 md:pt-[70%] lg:pt-[50%] xl:pt-[25%] ">
           {/* View Mode Toggle - Only show when Music tab is active */}
           {activeTab === "Music" && (
             <div className="flex justify-center mb-6">
