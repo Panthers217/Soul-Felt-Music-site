@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
 	const [form, setForm] = useState({ email: '', password: '' });
@@ -117,9 +117,9 @@ const Login = () => {
 				
 				<div className="text-center text-[#fffced]/70 text-sm">
 					Don't have an account?{' '}
-					<a href="/signup" className="text-[#aa2a46] hover:text-[#fffced] font-semibold">
+					<Link to="/sign-up" className="text-[#aa2a46] hover:text-[#fffced] font-semibold">
 						Sign up here
-					</a>
+					</Link>
 				</div>
 			</div>
 		</section>

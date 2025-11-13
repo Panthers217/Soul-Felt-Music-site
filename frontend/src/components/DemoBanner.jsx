@@ -20,9 +20,9 @@ const DemoBanner = ({
   if (variant === 'compact') {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 px-4 py-2 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
-          <span className="text-blue-900">
+          <span className="text-blue-900 sm:pl-[25%]">
             <strong>Demo Mode:</strong> All content is for demonstration purposes only
           </span>
         </div>

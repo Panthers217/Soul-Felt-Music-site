@@ -388,7 +388,7 @@ const ArtistPageComponent = () => {
     setHovered,
   }) => {
     return (
-      <div className="relative w-full h-[1200px]">
+      <div className="ArtistLinks relative w-full h-[1200px]">
         {artists.map((art, idx) => (
           <Link
             key={art.name}
@@ -649,7 +649,15 @@ const ArtistPageComponent = () => {
           </div>
           <div className="w-full grid grid-cols-3 gap-y-2 gap-x-[1.5rem]">
             {filteredArtists.map((art) => (
-              <div key={art.name} className="flex flex-col items-center p-2">
+              <Link
+                key={art.name}
+                to={`/artist/${encodeURIComponent([art.name])}`}
+                state={{ art, albumImage }}
+                onClick={() => {
+                  sessionStorage.setItem(`album:${art.id}`, JSON.stringify(art));
+                }}
+                className="flex flex-col items-center p-2 cursor-pointer touch-manipulation"
+              >
                 <div className="rounded-[3px] flex flex-col items-center">
                   <div className="h-24 w-24 relative rounded-full overflow-hidden">
                     <img
@@ -667,7 +675,7 @@ const ArtistPageComponent = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
           <TopTracks

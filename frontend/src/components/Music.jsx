@@ -258,7 +258,7 @@ const Music = () => {
         </div>
 
         {/* Content - Normal flow on mobile, with padding on lg/xl for scaled header */}
-        <div className="Music-Content relative z-[50] w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12 lg:pt-[50%] xl:pt-[25%] ">
+        <div className="Music-Content sm:flex relative z-[50] w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12 lg:pt-[50%] xl:pt-[25%] ">
 
           {/* Cart display - only show when Stripe is enabled */}
           {isStripeEnabled && (

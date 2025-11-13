@@ -177,7 +177,7 @@ function FeaturedTracks({ tracks, artistId }) {
             Featured Tracks
           </h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3  md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
           {(tracks && tracks.length > 0
             ? tracks
             : [
@@ -187,7 +187,7 @@ function FeaturedTracks({ tracks, artistId }) {
           ).map((track, idx) => (
             <div
               key={idx}
-              className="group relative bg-[#181818] rounded-lg overflow-hidden ring-1 ring-white/5 hover:bg-[#282828] transition-all duration-300"
+              className="group sm:flex sm:flex-col sm:w-[max-content] relative bg-[#181818] rounded-lg overflow-hidden ring-1 ring-white/5 hover:bg-[#282828] transition-all duration-300"
             >
               {/* Track Image - Square Album Cover */}
               <div className="relative w-full aspect-square overflow-hidden bg-[#282828]">
@@ -270,10 +270,10 @@ function FeaturedTracks({ tracks, artistId }) {
                   isStripeEnabled ? (
                   <button
                     onClick={(e) => handleBuyClick(e, track)}
-                    className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
+                    className="w-full py-2 px-2 bg-white hover:bg-white/90 rounded-md text-black text-[10px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 shadow-md hover:scale-105"
                   >
-                    <span className="i-lucide-shopping-cart text-xs" />
-                    Add to Cart
+                    <span className="i-lucide-shopping-cart text-[10px] sm:text-xs" />
+                    <span className="truncate">Add to Cart</span>
                   </button>
                 ) : (
                   <a 
@@ -281,10 +281,10 @@ function FeaturedTracks({ tracks, artistId }) {
                     target="_blank" 
                     rel="noopener noreferrer"
                     onClick={(e) => handleBuyClick(e, track)}
-                    className="w-full py-2 px-3 bg-white hover:bg-white/90 rounded-full text-black text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 shadow-md hover:scale-105"
+                    className="w-full py-2 px-2 bg-white hover:bg-white/90 rounded-md text-black text-[10px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 shadow-md hover:scale-105"
                   >
-                    <span className="i-lucide-shopping-cart text-xs" />
-                    Buy Now
+                    <span className="i-lucide-shopping-cart text-[10px] sm:text-xs" />
+                    <span className="truncate">Buy Now</span>
                   </a>
                   )
                 )}

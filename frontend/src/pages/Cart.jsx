@@ -25,7 +25,7 @@ function Cart() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="min-h-screen bg-background  items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="w-32 h-32 bg-card-bg rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
             <span className="i-lucide-shopping-cart text-6xl text-primary"></span>
@@ -48,7 +48,7 @@ function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen  bg-background py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -79,7 +79,7 @@ function Cart() {
                 key={item.cartId}
                 className="bg-card-bg rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="flex gap-6">
+                <div className=" CartCardsView flex  sm:block md:block gap-6 ">
                   {/* Item Image */}
                   <div className="flex-shrink-0">
                     <img
@@ -122,7 +122,7 @@ function Cart() {
                     </div>
 
                     {/* Quantity Controls & Remove Button */}
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-background">
+                    <div className="flex sm:block items-center justify-between mt-4 pt-4 border-t border-background">
                       <div className="flex items-center gap-3">
                         <span className="text-text-secondary text-sm font-medium">Quantity:</span>
                         <div className="flex items-center gap-2 bg-background rounded-lg p-1">

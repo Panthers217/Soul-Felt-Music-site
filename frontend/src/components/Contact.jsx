@@ -110,8 +110,8 @@ const Contact = () => {
                     <div className="w-full max-w-[368px] pb-0.5 bg-[#21212b] flex flex-col items-start">
                         <div className="w-full relative">
                             <div className="relative left-0 top-0 w-full max-w-[368px] h-auto flex flex-col justify-center items-start gap-4 pr-4 pb-1">
-                                <div className="text-white text-nowrap text-5xl sm:text-6xl font-bold font-['Roboto'] leading-tight">Contact Us</div>
-                                <div className="w-full max-w-[350px] text-white/80 text-base font-normal font-['Roboto'] leading-6">Get in touch with the Soul Felt Music team. We're here to help with any questions about our artists, music, or community.</div>
+                                <div className="text-white text-nowrap text-5xl sm:text-6xl font-bold font-['Roboto'] leading-tight sm:pl-[5%] ">Contact Us</div>
+                                <div className="w-full max-w-[350px] text-white/80 text-base font-normal font-['Roboto'] leading-6 sm:text-xs sm:pl-[5%]">Get in touch with the Soul Felt Music team. We're here to help with any questions about our artists, music, or community.</div>
                             </div>
                         </div>
                         <div className="relative left-0  w-full flex flex-col gap-12">
