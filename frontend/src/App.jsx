@@ -40,6 +40,7 @@ import { Toaster } from 'react-hot-toast';
 import { useUserLogin } from './hooks/useUserLogin.js';
 import { Navigate, useParams } from 'react-router-dom';
 import { useApiData } from './context/ApiDataContext';
+import ProjectWalkthroughVideo from './components/ProjectWalkthroughVideo';
 
 function ArtistStoreWrapper() {
   const { artistId } = useParams();
@@ -119,6 +120,7 @@ function AppContent() {
         <div className="min-h-screen  flex flex-col">
           <ScrollToTop />
           <Toaster />
+          <ProjectWalkthroughVideo />
           {/* <NavBar /> */}
           <div className="flex w-full">
           <ResponsiveNavbar />

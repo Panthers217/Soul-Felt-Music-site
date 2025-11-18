@@ -1,43 +1,43 @@
 // src/components/About.js
-import React, { useState, useEffect } from 'react';
-import Feature from '../components/Feature';
-import NewArrivals from '../components/NewArrivals';
-import Artist from '../components/Artist';
-import Videos from '../components/Videos';
-import Community from '../components/Community';
-import Footer from '../components/Footer';
-import HomePageLayout from '../components/HomePageLayout'; // Assuming you have a layout component
-import SEO from '../components/SEO';
-import DemoBanner from '../components/DemoBanner';
-import DemoBannerReset from '../components/DemoBannerReset'; // Development helper
+import React, { useState, useEffect } from "react";
+import Feature from "../components/Feature";
+import NewArrivals from "../components/NewArrivals";
+import Artist from "../components/Artist";
+import Videos from "../components/Videos";
+import Community from "../components/Community";
+import Footer from "../components/Footer";
+import HomePageLayout from "../components/HomePageLayout"; // Assuming you have a layout component
+import SEO from "../components/SEO";
+import DemoBanner from "../components/DemoBanner";
+import DemoBannerReset from "../components/DemoBannerReset"; // Development helper
 
 const Home = () => {
   const [showBanner, setShowBanner] = useState(true);
 
   // Check if banner was previously dismissed
   useEffect(() => {
-    const dismissed = localStorage.getItem('demoBannerDismissed');
+    const dismissed = localStorage.getItem("demoBannerDismissed");
     if (dismissed) setShowBanner(false);
   }, []);
 
   const handleDismiss = () => {
     setShowBanner(false);
-    localStorage.setItem('demoBannerDismissed', 'true');
+    localStorage.setItem("demoBannerDismissed", "true");
   };
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Soul Felt Music - Experience the Soul of Music"
         description="Discover and stream soulful music from talented artists. Explore albums, tracks, exclusive content, and shop for merchandise at Soul Felt Music."
         keywords="soul music, music streaming, albums, tracks, artists, music store, soul felt music, new releases"
         url="https://soulfeltmusic.com/"
       />
-      <div className='min-h-screen'>
+      <div className="min-h-screen">
         {showBanner && <DemoBanner onClose={handleDismiss} />}
-        <HomePageLayout/>
+        <HomePageLayout />
         {/* Development helper - Remove before production */}
-        {process.env.NODE_ENV === 'development' && <DemoBannerReset />}
+        {import.meta.env.DEV && <DemoBannerReset />}
       </div>
     </>
     // <section className="bg-gray-100 text-gray-800">
