@@ -117,7 +117,7 @@ function AppContent() {
   return (
     
       <Router>
-        <div className="min-h-screen  flex flex-col lg:scale-[0.8] xl:scale-[0.8] lg:origin-top xl:origin-top">
+        <div className="min-h-screen  flex flex-col">
           <ScrollToTop />
           <Toaster />
           <ProjectWalkthroughVideo />
