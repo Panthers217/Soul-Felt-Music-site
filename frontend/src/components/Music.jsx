@@ -201,7 +201,7 @@ const Music = () => {
         <div className="overlayBlock hidden lg:block fixed xl:absolute lg:top-[27rem] xl:top-[30rem] left-0 w-full h-[10rem] bg-[#1a1b22] z-[200] pointer-events-none"></div>
 
         {/* Header - Normal flow on mobile, fixed/scaled on lg/xl */}
-        <div className="MusicStore-header relative lg:fixed lg:scale-50 lg:origin-top lg:h-[50%] xl:absolute xl:scale-[0.75] xl:origin-top xl:h-[50%] z-[100] w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
+        <div className="MusicStore-header relative lg:fixed lg:scale-50 lg:origin-top lg:h-[none] xl:absolute xl:scale-[0.75] xl:origin-top xl:h-[none] z-[100] w-full max-w-7xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-12">
           <h1 className="text-[#fffced] text-5xl md:text-6xl font-extrabold font-['Roboto'] mb-4 text-center drop-shadow-lg xl:scale-[1] xl:origin-top xl:h-[50%]">
             Stream & Discover Soul Felt Music
           </h1>

@@ -41,6 +41,7 @@ import { useUserLogin } from './hooks/useUserLogin.js';
 import { Navigate, useParams } from 'react-router-dom';
 import { useApiData } from './context/ApiDataContext';
 import ProjectWalkthroughVideo from './components/ProjectWalkthroughVideo';
+import ZoomFit from './components/ZoomFit.jsx';
 
 function ArtistStoreWrapper() {
   const { artistId } = useParams();
@@ -117,7 +118,8 @@ function AppContent() {
   return (
     
       <Router>
-        <div className=" flex flex-col">
+        <ZoomFit>
+        <div className="main-class min-h-screen  flex flex-col ">
           <ScrollToTop />
           <Toaster />
           <ProjectWalkthroughVideo />
@@ -162,6 +164,7 @@ function AppContent() {
         </main>
         <Footer />
       </div>
+       </ZoomFit>
     </Router>
    
   );
