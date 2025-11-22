@@ -6,6 +6,17 @@ import react from '@vitejs/plugin-react-swc'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), ],
+  base: '/', // Ensure assets load correctly on Netlify
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
  //proxy setup to forward API requests to backend server
   server: {
     proxy: {
