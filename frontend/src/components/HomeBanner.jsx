@@ -60,7 +60,7 @@ const DemoBannerTablet = ({ albumImages, fadeOut }) => {
   return (
     <div className="relative w-full max-w-[1440px] mt-[-30%] aspect-[1/1] mx-auto bg-[#101516] flex flex-col items-center justify-center  rounded-[1.4vw]">
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" />
+      {/* <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" /> */}
       {/* Inner dark frame */}
       <div className="absolute inset-0 w-full h-[max-content] bg-[#101516] rounded-[1.4vw] z-0" />
       {/* Welcome SVG */}
@@ -110,7 +110,7 @@ const DemoBannerLaptop = ({albumImages, fadeOut}) => {
   return (
     <div className="relative w-full max-w-[1440px] aspect-[1440/700] mx-auto bg-[#101516] flex flex-col items-center justify-center  rounded-[1.4vw]">
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" />
+      {/* <div className="absolute inset-0 w-full h-[max-content] bg-white rounded-[1.4vw] z-0" /> */}
       {/* Inner dark frame */}
       <div className="absolute inset-0 w-full h-[max-content] bg-[#101516] rounded-[1.4vw] z-0" />
       {/* Welcome SVG */}
@@ -164,7 +164,7 @@ const DemoBannerDesktop = ({albumImages, fadeOut}) => {
       className="HeroSectionDesktop w-full  aspect-[1920/928]  rounded-none flex flex-col justify-center items-center overflow-hidden relative bg-[#101516] mx-auto"
     >
       {/* White background frame */}
-      <div className="absolute inset-0 w-full h-full bg-white rounded-[none] z-0" />
+      {/* <div className="absolute inset-0 w-full h-full bg-white rounded-[none] z-0" /> */}
       {/* Inner dark frame */}
       <div className="absolute inset-0 w-full h-full bg-[#101516] rounded-[none] z-0" />
       {/* Welcome SVG */}
