@@ -42,6 +42,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useApiData } from './context/ApiDataContext';
 import ProjectWalkthroughVideo from './components/ProjectWalkthroughVideo';
 import ZoomFit from './components/ZoomFit.jsx';
+import ProjectStructureViewer from './components/ProjectStructureViewer';
 
 function ArtistStoreWrapper() {
   const { artistId } = useParams();
@@ -118,16 +119,18 @@ function AppContent() {
   return (
     
       <Router>
-        <ZoomFit>
+       
         <div className="main-class min-h-screen  flex flex-col ">
           <ScrollToTop />
           <Toaster />
           <ProjectWalkthroughVideo />
+          <ProjectStructureViewer />
           {/* <NavBar /> */}
-          <div className="flex w-full">
+          <div className="flex w-full ">
           <ResponsiveNavbar />
           </div>
-          <main className={`flex-1 bg-[black] pt-[4rem] lg:pt-[3rem] xl:pt-[3rem] ${isNavbarOpen ? (user ? 'sm:pt-[35rem] md:pt-[30rem]' : 'sm:pt-[28rem] md:pt-[28rem]') : 'sm:pt-[4rem] md:pt-[4rem] ' } transition-all duration-300`}>
+          <ZoomFit>
+          <main className={`flex-1 bg-[black] pt-[4rem] lg:pt-[3rem] xl:pt-[3rem] ${isNavbarOpen ? (user ? 'sm:pt-[35rem] md:pt-[30rem]' : 'sm:pt-[35rem] md:pt-[35rem]') : 'sm:pt-[4rem] md:pt-[4rem] ' } transition-all duration-300`}>
 
           <Routes>
             <Route path="/" element={<Home />} />
@@ -162,9 +165,10 @@ function AppContent() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        </ZoomFit>
         <Footer />
       </div>
-       </ZoomFit>
+       
     </Router>
    
   );
