@@ -18,8 +18,13 @@ export default function UpdateArtistInfoModal({
   handleDeleteRecord,
   table,
 }) {
+  console.log("UpdateArtistInfoModal render - show:", show, "pendingUpdate:", pendingUpdate);
 
   const [demosValue, setDemosValue] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [submitEvent, setSubmitEvent] = useState(null);
+  
   // Debugging: Log the 'demos' field whenever editValues changes
   useEffect(() => {
     if (editValues && typeof editValues === 'object' && 'demos' in editValues) {
@@ -27,19 +32,14 @@ export default function UpdateArtistInfoModal({
     }
   }, [editValues]);
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [submitEvent, setSubmitEvent] = useState(null);
-  if (!show || !pendingUpdate) return null;
   // Get the currently visible fields
-  const visibleFields = Object.keys(editValues);
+  const visibleFields = editValues ? Object.keys(editValues) : [];
   // Create a filtered values object
   const filteredValues = {};
   visibleFields.forEach((field) => {
     filteredValues[field] = editValues[field];
   });
-  const recordId = editValues.id;
-  // Removed duplicate useState declarations
+  const recordId = editValues?.id;
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -54,6 +54,20 @@ export default function UpdateArtistInfoModal({
       setSubmitEvent(null);
     }
   };
+
+  // Early return AFTER all hooks
+  if (!show) return null;
+  
+  // If no pendingUpdate yet, show loading state
+  if (!pendingUpdate || !editValues) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <p className="text-purple-700">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
