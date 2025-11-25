@@ -56,7 +56,7 @@ function AdminSettingsSidebar({ isOpen, onClose }) {
 
       {/* Sidebar Drawer */}
       <div
-        className={`fixed left-0 top-0 h-full w-[600px] bg-[#0f1116] border-r border-white/10 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed pt-[13rem] left-0 top-0 h-full w-[600px] bg-[#0f1116] border-r border-white/10 z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } overflow-hidden flex flex-col`}
       >
@@ -78,7 +78,7 @@ function AdminSettingsSidebar({ isOpen, onClose }) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex w-full sm:w-[50%] sm:flex-col overflow-hidden">
           {/* Navigation Tabs */}
           <div className="w-48 border-r border-white/10 p-4 overflow-y-auto">
             <div className="space-y-1">

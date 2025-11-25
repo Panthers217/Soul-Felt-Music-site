@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useApiData } from "../context/ApiDataContext";
+import { useNavbar } from "../context/NavbarContext";
 import CalendarModal from "./modal/CalendarModal";
 import CalendarIcon from "./modal/CalendarIcon";
 import ArtistSearchForm from "./ArtistSearchForm";
@@ -569,6 +570,7 @@ function AdminDashboard() {
   const [tableOptions, setTableOptions] = useState([]);
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
   const { dbSnapshot, mode, setMode } = useApiData();
+  const { isNavbarOpen } = useNavbar();
 
   useEffect(() => {
     setInputMode("");
@@ -751,7 +753,7 @@ function AdminDashboard() {
         onClose={() => setIsSettingsSidebarOpen(false)}
       />
 
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%]">
+      <div className={`flex flex-col items-center justify-center min-h-screen bg-gray-50 pb-[10%] ${isNavbarOpen ? 'pt-[20rem]' : 'pt-[10rem]'}`}>
         {/* Top Navigation Bar */}
         <div className="w-full flex justify-between items-center pt-6 pb-2 px-8">
           {/* Settings Button */}
