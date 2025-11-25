@@ -221,7 +221,7 @@ const NewsletterCampaigns = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0908] p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pt-[10rem]">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
