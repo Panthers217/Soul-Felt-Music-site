@@ -54,7 +54,7 @@ function ExistingArtist({
         },
       };
       const response = await axios.put(
-        `/api/admin/records/${table}/${values.id}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/records/${table}/${values.id}`,
         formData,
         config
       );
@@ -118,7 +118,7 @@ function ExistingArtist({
     if (table) {
       setLoading(true);
       setError("");
-      fetch(`/api/admin/records/${table}`)
+      fetch(`${import.meta.env.VITE_API_URL}/api/admin/records/${table}`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch table data");
           return res.json();
