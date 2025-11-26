@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import ZoomFit from '../components/ZoomFit.jsx';
 
 const Faq = () => {
   const [faqs, setFaqs] = useState({});
@@ -79,6 +80,7 @@ const Faq = () => {
   }
 
   return (
+    <ZoomFit>
     <div className="min-h-screen bg-[#0a0908] py-12 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
@@ -211,6 +213,7 @@ const Faq = () => {
         </div>
       </div>
     </div>
+    </ZoomFit>
   );
 };
 

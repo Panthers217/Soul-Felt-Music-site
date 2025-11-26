@@ -12,6 +12,7 @@ import { FaSpotify, FaApple, FaTiktok, FaXTwitter } from "react-icons/fa6";
 import { useFeatures } from "../context/FeaturesContext";
 import { useCart } from "../context/CartContext";
 import CartSummary from "./CartSummary";
+import ZoomFit from './ZoomFit.jsx';
 
 /**
  * ArtistOverview.jsx
@@ -523,6 +524,7 @@ function ArtistOverview() {
   };
 
   return (
+    <ZoomFit>
     <div className="relative flex flex-col min-h-screen w-full bg-[#0f1116] text-white overflow-hidden">
       {/* Artist Background Image */}
       {optimizedBackgroundUrl && (
@@ -801,6 +803,7 @@ function ArtistOverview() {
       />
       </div>
     </div>
+    </ZoomFit>
   );
 }
 

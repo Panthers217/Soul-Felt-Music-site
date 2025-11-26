@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ZoomFit from '../components/ZoomFit.jsx';
 
 const Terms = () => {
   const [terms, setTerms] = useState('');
@@ -39,6 +40,7 @@ const Terms = () => {
   }
 
   return (
+    <ZoomFit>
     <div className="min-h-screen bg-[#0a0908] py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-[#1d1e26] rounded-lg p-8 shadow-lg text-[#fffced]">
@@ -59,6 +61,7 @@ const Terms = () => {
         </div>
       </div>
     </div>
+    </ZoomFit>
   );
 };
 

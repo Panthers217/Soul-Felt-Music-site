@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import VideoPlayerComponent from "./VideoPlayerComponent";
 import ArtistPlaylist from "./ArtistPlaylist";
 import axios from "axios";
+import ZoomFit from "./ZoomFit.jsx";
 
 const Videos = () => {
   const { dbSnapshot } = useApiData();
@@ -116,6 +117,7 @@ const Videos = () => {
   };
 
   return (
+    <ZoomFit>
     <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
       <div className="w-full max-w-7xl flex flex-col gap-8">
         {/* Header */}
@@ -165,6 +167,7 @@ const Videos = () => {
         </div>
       </div>
     </section>
+    </ZoomFit>
   );
 };
 

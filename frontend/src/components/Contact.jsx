@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SocialMediaLinks from './SocialMediaLinks';
+import ZoomFit from './ZoomFit.jsx';
 
 // Inquiry tab options
 const inquiryTabs = [
@@ -761,6 +762,7 @@ const Contact = () => {
   };
 
   return (
+    <ZoomFit>
     <section>
         <div className='Mobile block md:hidden lg:hidden xl:hidden'>
             {renderContactMobile()}
@@ -774,8 +776,10 @@ const Contact = () => {
         <div className="Laptop hidden md:hidden lg:hidden xl:hidden">
             {renderContactLaptop()}
         </div>
+    
         
     </section>
+    </ZoomFit>
   );
 };
 

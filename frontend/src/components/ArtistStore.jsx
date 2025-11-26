@@ -9,6 +9,8 @@ import NotAvailableModal from "./modal/NotAvailableModal.jsx";
 import TrackCard from "./TrackCard.jsx";
 import CartSummary from "./CartSummary.jsx";
 import { getArtistDataById } from "../utils/artistDataHelper.js";
+import ZoomFit from "./ZoomFit.jsx";
+import DemoBanner from "./DemoBanner.jsx";
 
 const demoMerchProducts = [
   {
@@ -780,6 +782,7 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
 
   return (
     <>
+    <ZoomFit> 
       <div className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center relative overflow-hidden">
         {/* Artist Background Image - Only visible on individual artist pages */}
         {optimizedBackgroundUrl && (
@@ -917,6 +920,7 @@ const ArtistStore = ({ artistId = null, artistName = "Artist" }) => {
           </div>
         </div>
       </div>
+      </ZoomFit>
     </>
   );
 };

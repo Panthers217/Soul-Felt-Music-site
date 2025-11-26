@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate, Link } from 'react-router-dom';
+import ZoomFit from './ZoomFit.jsx';
 
 const Login = () => {
 	const [form, setForm] = useState({ email: '', password: '' });
@@ -69,6 +70,7 @@ const Login = () => {
 	};
 
 	return (
+		<ZoomFit>
 		<section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center justify-center py-10 px-4">
 			<div className="w-full max-w-md bg-[#21212b] rounded-lg shadow-lg p-8 flex flex-col gap-6">
 				<h2 className="text-[#fffced] text-3xl md:text-4xl font-bold font-['Roboto'] mb-2 text-center">Login</h2>
@@ -123,6 +125,7 @@ const Login = () => {
 				</div>
 			</div>
 		</section>
+		</ZoomFit>
 	);
 };
 

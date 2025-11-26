@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useFeatures } from '../context/FeaturesContext';
+import ZoomFit from './ZoomFit.jsx';
 
 const ThemeDemo = () => {
   const { theme, loading: themeLoading } = useTheme();
@@ -11,6 +12,7 @@ const ThemeDemo = () => {
   }
 
   return (
+    <ZoomFit>
     <div className="p-8 bg-background min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-accent mb-8">
@@ -91,6 +93,7 @@ const ThemeDemo = () => {
         </div>
       </div>
     </div>
+    </ZoomFit>
   );
 };
 

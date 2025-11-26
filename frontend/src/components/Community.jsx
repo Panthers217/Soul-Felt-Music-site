@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ZoomFit from './ZoomFit.jsx';
 
 const Community = () => {
   const [newsEvents, setNewsEvents] = useState([]);
@@ -45,6 +46,7 @@ const Community = () => {
   const closeModal = () => setModalEvent(null);
 
   return (
+    <ZoomFit>
     <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
       <div className="w-full max-w-3xl bg-[#21212b] rounded-lg shadow-lg p-6 md:p-10 flex flex-col gap-8">
         <h2 className="text-[#fffced] text-4xl md:text-5xl font-extrabold font-['Roboto'] mb-2 drop-shadow-lg">Community News & Events</h2>
@@ -131,6 +133,7 @@ const Community = () => {
         </div>
       )}
     </section>
+    </ZoomFit>
   );
 };
 

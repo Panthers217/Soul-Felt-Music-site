@@ -5,6 +5,7 @@ import { FaMusic, FaHeart, FaUsers, FaAward, FaRocket, FaHandshake } from 'react
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import DemoBanner from './DemoBanner';
+import ZoomFit from './ZoomFit.jsx';
 
 const About = () => {
   const { websiteSettings } = useApiData();
@@ -70,6 +71,7 @@ const About = () => {
   ];
 
   return (
+    <ZoomFit>
     <div className="min-h-screen py-16 px-4" style={{ backgroundColor: themeColors?.background || '#0c0504' }}>
       <div className="max-w-7xl mx-auto">
         
@@ -295,6 +297,7 @@ const About = () => {
 
       </div>
     </div>
+    </ZoomFit>
   );
 };
 

@@ -7,6 +7,8 @@ function TableSelector({
   setTable,
   tableOptions,
   searchResult,
+  showUpdateModal,
+  setShowUpdateModal,
   pendingUpdate,
   setPendingUpdate,
   editValues,
@@ -25,7 +27,6 @@ function TableSelector({
 }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteRecordId, setDeleteRecordId] = useState(null);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   // Filter tableData based on searchResult from ArtistSearchForm
   let filteredData = tableData;
@@ -123,7 +124,7 @@ function TableSelector({
                           onClick={() => {
                             setPendingUpdate(row);
                             setEditValues(row);
-                             setShowUpdateModal(true);
+                            setShowUpdateModal(true);
                           }}
                         >
                           Update

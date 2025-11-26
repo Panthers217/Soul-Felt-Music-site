@@ -4,6 +4,7 @@ import { useUserLogin } from '../hooks/useUserLogin.js';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { app } from "../firebase";
+import ZoomFit from './ZoomFit.jsx';
 
 // Admin login component with password reset functionality
 
@@ -70,6 +71,7 @@ export default function AdminLogin({ onLogin }) {
   }
 
   return (
+    <ZoomFit>
     <div
       className="min-h-screen w-full flex items-center justify-center bg-cover bg-center"
       style={{
@@ -111,5 +113,6 @@ export default function AdminLogin({ onLogin }) {
         </div>
       </div>
     </div>
+   </ZoomFit>
   );
 }

@@ -194,7 +194,7 @@ const Music = () => {
           .join(", ")}, tracks, albums, featured music, new releases`}
         url="https://soulfeltmusic.com/music"
       />
-      <DemoBanner variant="compact" />
+     
       <section className="w-full min-h-screen bg-[#1a1b22] flex flex-col items-center py-10 px-4 md:px-12">
         
         {/* Overlay div to hide scrolling content - Only visible on lg/xl screens */}

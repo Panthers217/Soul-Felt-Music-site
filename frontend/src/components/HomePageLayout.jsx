@@ -7,6 +7,8 @@ import VideoPlayerComponent from "./VideoPlayerComponent";
 import { useFeatures } from "../context/FeaturesContext";
 import ImageCarousel from "./ImageCarousel";
 import PopularAlbums from "./PopularAlbums";
+import ZoomFit from "./ZoomFit";
+import DemoBanner from "./DemoBanner";
 
 const DemoBannerMobile = () => {
   return (
@@ -348,6 +350,7 @@ const HomePageLayout = () => {
 
   return (
     <>
+    <ZoomFit>
       <div className="flex flex-col justify-center items-center gap-8 md:gap-12 lg:gap-16 bg-[#101516] py-8">
         <HomeBanner />
         <ArtistGallery />
@@ -355,6 +358,7 @@ const HomePageLayout = () => {
         {/* <ImageCarousel />  */}
         <PopularAlbums />
       </div>
+      </ZoomFit>
     </>
   );
 };

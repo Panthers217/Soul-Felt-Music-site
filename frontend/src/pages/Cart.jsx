@@ -1,6 +1,7 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import ZoomFit from "../components/ZoomFit";
 
 function Cart() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ function Cart() {
   }
 
   return (
+    <ZoomFit>
     <div className="min-h-screen  bg-background py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -219,6 +221,7 @@ function Cart() {
         </div>
       </div>
     </div>
+    </ZoomFit>
   );
 }
 
