@@ -34,10 +34,7 @@ const Home = () => {
         url="https://soulfeltmusic.com/"
       />
       <div className="min-h-screen">
-        {showBanner && <DemoBanner onClose={handleDismiss} />}
-        <HomePageLayout />
-        {/* Development helper - Remove before production */}
-        {import.meta.env.DEV && <DemoBannerReset />}
+         <HomePageLayout />
       </div>
     </>
     // <section className="bg-gray-100 text-gray-800">

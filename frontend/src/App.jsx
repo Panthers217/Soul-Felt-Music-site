@@ -44,6 +44,7 @@ import ProjectWalkthroughVideo from './components/ProjectWalkthroughVideo';
 import ZoomFit from './components/ZoomFit.jsx';
 import ProjectStructureViewer from './components/ProjectStructureViewer';
 import DemoBanner from './components/DemoBanner.jsx';
+import WelcomeToast from './components/WelcomeToast.jsx';
 
 function ArtistStoreWrapper() {
   const { artistId } = useParams();
@@ -125,6 +126,7 @@ function AppContent() {
           <ScrollToTop />
           <Toaster />
           <ProjectWalkthroughVideo />
+          <WelcomeToast />
           <ProjectStructureViewer />
           {/* <NavBar /> */}
           <div className="flex w-full ">
