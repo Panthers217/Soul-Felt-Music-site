@@ -188,7 +188,7 @@ function FeaturedTracks({ tracks, artistId }) {
           ).map((track, idx) => (
             <div
               key={idx}
-              className="group sm:flex sm:flex-col sm:w-[max-content] relative bg-[#181818] rounded-lg overflow-hidden ring-1 ring-white/5 hover:bg-[#282828] transition-all duration-300"
+              className="group sm:flex sm:flex-col sm:w-[200%] relative bg-[#181818] rounded-lg overflow-hidden ring-1 ring-white/5 hover:bg-[#282828] transition-all duration-300"
             >
               {/* Track Image - Square Album Cover */}
               <div className="relative w-full aspect-square overflow-hidden bg-[#282828]">
